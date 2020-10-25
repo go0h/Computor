@@ -2,7 +2,7 @@ package fr.fourtytwo.expression
 
 import fr.fourtytwo.exception.EvaluateException
 
-class Variable(name: String, value: Number = null) extends Expression {
+class Variable(name: String, value: RealNumber = null) extends Expression {
 
   override def evaluate: Double = {
     if (value == null)

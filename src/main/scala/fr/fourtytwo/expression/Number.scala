@@ -1,6 +1,6 @@
 package fr.fourtytwo.expression
 
-class Number(private val num: Double) extends Expression {
+class Number(private val num: Int) extends Expression {
 
   override def evaluate: Double = num
 
@@ -8,5 +8,7 @@ class Number(private val num: Double) extends Expression {
 }
 
 object Number {
-  def apply(num: Double): Number = new Number(num)
+  def apply(num: Int): Number = {
+    new Number(num)
+  }
 }

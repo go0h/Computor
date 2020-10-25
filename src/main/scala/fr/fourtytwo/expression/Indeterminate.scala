@@ -2,13 +2,13 @@ package fr.fourtytwo.expression
 
 import fr.fourtytwo.exception.ParseException
 
-case class Indeterminate(constant: Number,
+case class Indeterminate(constant: Expression,
                          operator: String,
                          variable: Variable,
-                         degree: Number) extends Expression {
+                         degree: Expression) extends Expression {
 
   def this(c: Double, o: String, v: String, d: Double) {
-    this(Number(c), o, Variable(v), Number(d))
+    this(RealNumber(c), o, Variable(v), RealNumber(d))
   }
 
   override def evaluate: Double = {
@@ -33,4 +33,6 @@ object Indeterminate {
       case _ => throw new ParseException(s"Indeterminate $expression is not well formatted")
     }
   }
+
+  def apply(): Indeterminate = new Indeterminate(null, null, null, null)
 }
