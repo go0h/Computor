@@ -9,4 +9,12 @@ class RealNumber(private val num: Double) extends Expression {
 
 object RealNumber {
   def apply(num: Double): RealNumber = new RealNumber(num)
+
+  def unapply(arg: String): Option[Double] = {
+    try {
+      Some(arg.toDouble)
+    } catch {
+      case _ => None
+    }
+  }
 }

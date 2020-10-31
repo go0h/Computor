@@ -18,6 +18,26 @@ case class Indeterminate(constant: Expression,
   override def toString: String = {
     constant.toString + operator + variable.toString + "^" + degree.toString
   }
+
+  override def equals(other: Any): Boolean = {
+
+    other match {
+      case temp: Number => {
+        if (this.degree == 0 && temp.evaluate == 0)
+          return true
+      }
+      case temp: RealNumber => {
+        if (this.degree == 0 && temp.evaluate == 0)
+          return true
+      }
+      case temp: Indeterminate => {
+        if (this.variable == temp.variable && this.degree == temp.degree)
+          return true
+      }
+      case _ =>
+    }
+    false
+  }
 }
 
 object Indeterminate {
@@ -35,4 +55,5 @@ object Indeterminate {
   }
 
   def apply(): Indeterminate = new Indeterminate(null, null, null, null)
+
 }

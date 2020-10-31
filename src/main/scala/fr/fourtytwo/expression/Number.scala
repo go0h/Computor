@@ -8,7 +8,13 @@ class Number(private val num: Int) extends Expression {
 }
 
 object Number {
-  def apply(num: Int): Number = {
-    new Number(num)
+  def apply(num: Int): Number = new Number(num)
+
+  def unapply(arg: String): Option[Int] = {
+    try {
+      Some(arg.toInt)
+    } catch {
+      case _ => None
+    }
   }
 }

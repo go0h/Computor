@@ -8,7 +8,7 @@ class TokenTest extends AnyFunSuite {
   val tokenizer: Tokenizer = Tokenizer()
 
   test("Basic brackets - 1") {
-    val expr = "((5)+4 * X + X^2)= X^2"
+    val expr = "((5)+4*X+X^2)=X^2"
     val tokens = tokenizer.generateTokens(expr)
     val str = tokens.fold("")((x, y) => x.toString + y.toString)
     assert(expr == str)

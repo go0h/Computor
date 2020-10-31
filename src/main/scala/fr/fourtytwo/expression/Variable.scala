@@ -18,7 +18,5 @@ class Variable(name: String, value: RealNumber = null) extends Expression {
 }
 
 object Variable {
-  def apply(name: String): Variable = {
-    new Variable(name)
-  }
+  def apply(name: String): Variable = new Variable(name)
 }

@@ -1,12 +1,27 @@
 package fr.fourtytwo.expression
 
-import fr.fourtytwo.token.Token
+import fr.fourtytwo.exception.EvaluateException
+import fr.fourtytwo.token.{Token, TokenType}
 
 class Polynomial(tokens: Array[Token]) extends Expression {
 
-  override def evaluate: Double = ???
+  if (!tokens.contains(Token("=", TokenType.OPERATION)))
+    throw new EvaluateException(s"No equal sign in expression ${tokens.mkString("")}")
+
+  val tokenStrings: Array[String] = tokens.map(x => x.expr)
+
+
+
+  val degree = null
+
+
+
+  override def evaluate: Double = {
+    0.0
+  }
+
 }
 
 object Polynomial {
-  def apply(): Polynomial = new Polynomial(Array[Token](null))
+  def apply(tokens: Array[Token]): Polynomial = new Polynomial(tokens)
 }

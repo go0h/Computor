@@ -1,21 +1,19 @@
 package fr.fourtytwo.token
 
-import scala.collection.mutable
-import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable.{ArrayBuffer, Stack => ScalaStack}
 import scala.util.matching.Regex
-
 import fr.fourtytwo.exception.ParseException
 
 class Tokenizer {
 
   val matchers: Map[TokenType.Value, Regex] = TokenType.getTypesWithRegex
 
-  def generateTokens(expr: String): ArrayBuffer[Token] = {
+  def generateTokens(expr: String): Array[Token] = {
 
     var i: Int = 0
-    val tokens: mutable.ArrayBuffer[Token] = ArrayBuffer[Token]()
+    val tokens: ArrayBuffer[Token] = ArrayBuffer[Token]()
 
-    basicCheckBrackets(expr)
+    Tokenizer.basicCheckBrackets(expr)
 
     while (i < expr.length) {
 
@@ -24,13 +22,28 @@ class Tokenizer {
         throw new ParseException(s"Can't recognize token: $expr", expr.length - i)
       i += token.expr.length
       tokens.append(token)
-
     }
-    tokens
+    tokens.toArray
   }
 
-  private def basicCheckBrackets(expr: String): Unit = {
-    val stack = mutable.Stack[Char]()
+  private def getToken(expr: String, i: Int): Token = {
+
+    for ((value, matcher) <- matchers) {
+      matcher.findPrefixMatchOf(expr.subSequence(i, expr.length)) match {
+        case Some(matched) => return Token(expr.substring(i, i + matched.`end`), value)
+        case None =>
+      }
+    }
+    null
+  }
+}
+
+object Tokenizer {
+
+  def apply() = new Tokenizer
+
+  def basicCheckBrackets(expr: String): Unit = {
+    val stack = ScalaStack[Char]()
 
     for (i <- 0 until expr.length) {
       if (expr(i) == '(')
@@ -45,22 +58,4 @@ class Tokenizer {
     if (stack.nonEmpty)
       throw new ParseException(s"Brackets error: $expr")
   }
-
-  private def getToken(expr: String, i: Int): Token = {
-
-    for ((value, matcher) <- matchers) {
-
-      matcher.findPrefixMatchOf(expr.subSequence(i, expr.length)) match {
-        case Some(matched) => return Token(expr.substring(i, i + matched.`end`), value)
-        case None =>
-      }
-
-    }
-    null
-  }
-
-}
-
-object Tokenizer {
-  def apply() = new Tokenizer
 }

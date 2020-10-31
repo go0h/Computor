@@ -2,12 +2,6 @@ package fr.fourtytwo.expression
 
 import scala.math.pow
 
-object Priority extends Enumeration {
-  val LOW,
-  MEDIUM,
-  HIGH = Value(1)
-}
-
 class Operator(left: Expression, op: String, right: Expression) extends Expression {
 
   override def evaluate: Double = {
@@ -21,7 +15,12 @@ class Operator(left: Expression, op: String, right: Expression) extends Expressi
     }
   }
 
-  override def toString: String = left.toString + op + right.toString
+  override def toString: String = {
+    if (left != null && right != null)
+     left.toString + op + right.toString
+    else
+      op
+  }
 }
 
 object Operator {
@@ -30,9 +29,10 @@ object Operator {
     new Operator(left, op, right)
   }
 
-  def priority: String => Priority.Value = {
-    case "-" | "+" => Priority.LOW
-    case "/" | "*" | "mod" => Priority.MEDIUM
-    case "^" => Priority.HIGH
+  def priority: String => Int = {
+    case "(" | ")" => 1
+    case "-" | "+" => 2
+    case "/" | "*" | "mod" => 3
+    case "^" => 4
   }
 }
