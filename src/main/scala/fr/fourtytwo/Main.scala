@@ -50,15 +50,17 @@ object Main {
 
     TokenType.values.toArray.map(x => (x, x.toString.r)).toMap
 
-    val expr = "5.0007*X^2+4*X^1-9.3*X^2"
+    val expr = "96-(-30)*(57-76)-43%20"
     val tokenizer = Tokenizer()
-
-    val expr1 = "3 + 4 * 2 / (1 - 5)^2"
+    println(-(-(-3)))
 
     try {
-      val tokens = tokenizer.generateTokens(expr1)
+
+      val tokens = tokenizer.generateTokens(expr)
       val rpn = RPN(tokens)
       println(rpn.getTokens.map(x => x.expr).mkString(" ") + " = " + rpn.solve)
+      println(96-(-30)*(57-76)-43%20)
+
 
     } catch {
       case ex: ParseException => println(ex.getMessage)

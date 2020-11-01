@@ -3,7 +3,7 @@ package fr.fourtytwo
 import fr.fourtytwo.RPN.{convertToRPN, evaluate}
 
 import scala.collection.mutable.{ArrayBuffer, Stack => ScalaStack}
-import fr.fourtytwo.expression.{Operator, RealNumber}
+import fr.fourtytwo.expression.Operator.priority
 import fr.fourtytwo.token.{Token, TokenType}
 
 import scala.math.pow
@@ -23,14 +23,13 @@ class RPN {
     val stack = ScalaStack[Double]()
 
     for (token <- tokens) {
-      token.tokenType match {
+      token.tType match {
         case TokenType.REALNUMBER | TokenType.NUMBER => {
           stack.push(token.expr.toDouble)
         }
         case TokenType.OPERATION => {
           if (stack.length < 2)
             throw new Exception(s"Wrong RPN ${tokens.map(x => x.expr).mkString(" ")}")
-
           stack.push(evaluate(stack.pop(), token.expr, stack.pop()))
         }
       }
@@ -49,14 +48,11 @@ object RPN {
 
     val out = ArrayBuffer[Token]()
     val stack = ScalaStack[Token]()
-    var filteredTokens = tokens.filter(x => x.tokenType != TokenType.SPACE)
+    val filteredTokens = tokens.filter(x => x.tType != TokenType.SPACE)
 
-    while (filteredTokens.nonEmpty) {
+    for (token <- filteredTokens) {
 
-      val token = filteredTokens.head
-      filteredTokens = filteredTokens.tail
-
-      token.tokenType match {
+      token.tType match {
 
         case TokenType.OPERATION => {
           if (stack.isEmpty || token.expr.equals("(")) {
@@ -69,7 +65,7 @@ object RPN {
             stack.pop()
           }
           else {
-            if (Operator.priority(stack.head.expr) >= Operator.priority(token.expr)) {
+            while (stack.nonEmpty && priority(stack.head.expr) >= priority(token.expr)) {
               out.append(stack.pop())
             }
             stack.push(token)
@@ -81,9 +77,7 @@ object RPN {
         case _ => println("Unknown")
       }
     }
-    while (stack.nonEmpty) {
-      out.append(stack.pop())
-    }
+    out.appendAll(stack)
     out.toArray
   }
 
@@ -93,6 +87,7 @@ object RPN {
       case "-" => left - right
       case "*" => left * right
       case "/" => left / right
+      case "%" => left % right
       case "^" => pow(left, right)
     }
   }

@@ -11,7 +11,7 @@ class Operator(left: Expression, op: String, right: Expression) extends Expressi
       case "*" => left.evaluate * right.evaluate
       case "/" => left.evaluate / right.evaluate
       case "^" => pow(left.evaluate, right.evaluate)
-      case "mod" => left.evaluate % right.evaluate
+      case "%" => left.evaluate % right.evaluate
     }
   }
 
@@ -32,7 +32,7 @@ object Operator {
   def priority: String => Int = {
     case "(" | ")" => 1
     case "-" | "+" => 2
-    case "/" | "*" | "mod" => 3
+    case "/" | "*" | "%" => 3
     case "^" => 4
   }
 }

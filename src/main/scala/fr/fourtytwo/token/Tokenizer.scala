@@ -3,34 +3,50 @@ package fr.fourtytwo.token
 import scala.collection.mutable.{ArrayBuffer, Stack => ScalaStack}
 import scala.util.matching.Regex
 import fr.fourtytwo.exception.ParseException
+import fr.fourtytwo.token.TokenType._
 
 class Tokenizer {
 
-  val matchers: Map[TokenType.Value, Regex] = TokenType.getTypesWithRegex
+  val matchers: Map[TokenType.Value, Regex] = getTypesWithRegex
 
   def generateTokens(expr: String): Array[Token] = {
 
     var i: Int = 0
     val tokens: ArrayBuffer[Token] = ArrayBuffer[Token]()
+    val nonSpaceExpr = expr.replaceAll("\\s+", "")
 
-    Tokenizer.basicCheckBrackets(expr)
+    if (nonSpaceExpr.isEmpty)
+      throw new ParseException(s"Empty expression")
 
-    while (i < expr.length) {
+    Tokenizer.basicCheckBrackets(nonSpaceExpr)
 
-      val token = getToken(expr, i)
+    while (i < nonSpaceExpr.length) {
+
+      val token = getToken(nonSpaceExpr, i, tokens)
       if (token == null)
-        throw new ParseException(s"Can't recognize token: $expr", expr.length - i)
+        throw new ParseException(s"Can't recognize token: $nonSpaceExpr", nonSpaceExpr.length - i)
       i += token.expr.length
       tokens.append(token)
     }
     tokens.toArray
   }
 
-  private def getToken(expr: String, i: Int): Token = {
+  private def getToken(expr: String, i: Int, tokens: ArrayBuffer[Token]): Token = {
 
     for ((value, matcher) <- matchers) {
       matcher.findPrefixMatchOf(expr.subSequence(i, expr.length)) match {
-        case Some(matched) => return Token(expr.substring(i, i + matched.`end`), value)
+        case Some(matched) => {
+
+          //TODO NEED WORK
+          // (-30 - 3)
+          if (expr(i) == '-' && value != OPERATION) {
+            if (tokens.isEmpty || (tokens.last.tType == OPERATION) && !tokens.last.expr.equals(")")) {
+              return Token(expr.substring(i, i + matched.end), value)
+            }
+          }
+          else
+            return Token(expr.substring(i, i + matched.end), value)
+        }
         case None =>
       }
     }
