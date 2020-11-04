@@ -22,7 +22,7 @@ class Tokenizer {
     while (i < expr.length) {
 
       val token = getToken(expr, i)
-      if (token == null)
+      if (token.equals(""))
         throw new ParseException(s"Can't recognize token: $expr", expr.length - i)
       i += token.expr.length
       tokens.append(token)
@@ -40,7 +40,7 @@ class Tokenizer {
         case None =>
       }
     }
-    null
+    Token("", NONE)
   }
 }
 

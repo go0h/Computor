@@ -3,7 +3,7 @@ package fr.fourtytwo.token
 import fr.fourtytwo.exception.ParseException
 import org.scalatest.funsuite.AnyFunSuite
 
-class TokenTest extends AnyFunSuite {
+class TokenizerTest extends AnyFunSuite {
 
   val tokenizer: Tokenizer = Tokenizer()
 
@@ -23,6 +23,15 @@ class TokenTest extends AnyFunSuite {
   test("Basic brackets error - 2") {
     assertThrows[ParseException] {
       tokenizer.generateTokens("((5))+4*X+(X^2))= X^2")
+    }
+  }
+
+  test("Unknown tokens") {
+    assertThrows[ParseException] {
+      tokenizer.generateTokens("&+4 * X + X^2= X^2")
+    }
+    assertThrows[ParseException] {
+      tokenizer.generateTokens("4 * С + X^2= X^2")
     }
   }
 

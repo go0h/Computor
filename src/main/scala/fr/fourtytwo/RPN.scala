@@ -55,15 +55,17 @@ object RPN {
     val RPNTokens = ArrayBuffer[Token]()
     val stack = ScalaStack[Token]()
 
-    var prevToken: Token = Token("", UNARY)
+    var prev: Token = Token("", NONE)
+    var prevNonSpace: Token = Token("", NONE)
 
     for (token <- tokens) {
 
       token.tType match {
 
         case OPERATION => {
-          if (token.equals("-") && prevToken.tType >= OPERATION
-            && !prevToken.equals("-") && !prevToken.equals(")")) {
+          if (token.equals("-")                   // UNARY OPERATOR CONDITION
+            && prev.tType >= SPACE && !prev.equals("-")
+            && prevNonSpace.tType >= OPERATION && !prevNonSpace.equals(")")) {
               RPNTokens.append(Token("--", UNARY))
           }
           else if (stack.isEmpty || token.equals("(")) {
@@ -81,12 +83,16 @@ object RPN {
             }
             stack.push(token)
           }
+          prevNonSpace = token
         }
-        case NUMBER | REALNUMBER | VARIABLE => RPNTokens.append(token)
+        case NUMBER | REALNUMBER | VARIABLE => {
+          RPNTokens.append(token)
+          prevNonSpace = token
+        }
         case _ =>
 
       }
-      prevToken = token
+      prev = token
     }
     RPNTokens.appendAll(stack)
     RPNTokens.toArray

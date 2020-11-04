@@ -10,6 +10,7 @@ object TokenType extends Enumeration {
   val SPACE: Value = Value("\\s+")
   val OPERATION: Value = Value("[-\\+\\*/\\(\\)=^%]")
   val UNARY: Value = Value
+  val NONE: Value = Value
 
   def createMatcher: Regex = {
     TokenType.values.toArray.map("(" + _.toString + ")").mkString("|").r

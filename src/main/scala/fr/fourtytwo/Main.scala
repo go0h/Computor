@@ -11,7 +11,7 @@ object Main {
 
     TokenType.values.toArray.map(x => (x, x.toString.r)).toMap
 
-    val expr = "-93 + -3"
+    val expr = "(3.23144 + 32 % 23 * 765.321)^(-3/(0.4)) / (-0.0321) + 16.308"
     val tokenizer = Tokenizer()
 
     try {
@@ -19,7 +19,7 @@ object Main {
       val tokens = tokenizer.generateTokens(expr)
       val rpn = RPN(tokens)
       println(rpn.getTokens.map(x => x.expr).mkString(" ") + " = " + rpn.solve)
-      println("RIGHT = " + (-93 + -3))
+      println("RIGHT = " + (pow(3.23144 + 32 % 23 * 765.321,-3/0.4) / (-0.0321) + 16.308))
     } catch {
       case ex: ParseException => println(ex.getMessage)
       case ex: EvaluateException => println(ex.getMessage)
