@@ -86,7 +86,7 @@ class RPNTest extends AnyFunSuite {
   }
 
   test("EvalExpr - 7") {
-    val expr = "96--30*(57-76)-43%20"
+    val expr = "96-(-30)*(57-76)-43%20"
     val res = getResult(expr)
     assert(res == 96-(-30)*(57-76)-43%20)
   }
@@ -103,14 +103,41 @@ class RPNTest extends AnyFunSuite {
     assert(res == 86-47*(-26-75.0/(47-98.0/23)+17.0/(-86+44*38)))
   }
 
-//  test("Ultra unary minus") {
-//    val expr = "96-(-(-30))*(57-76)-43%20"
-//    val res = getResult(expr)
-//    assert(res == 96-(-(-30))*(57-76)-43%20)
-//  }
+  test("EvalExpr - 10") {
+    val expr = "86    -47   *(-26-75/(-47-98/23)+17/(-         86  +          44*-38))"
+    val res = getResult(expr)
+    assert(res == 86-47*(-26-75.0/(-47-98.0/23)+17.0/(-86+44*(-38))))
+  }
+
+  test("EvalExpr - 11") {
+    val expr = "96- -30*(57-76)-43%20"
+    val res = getResult(expr)
+    assert(res == (96- -30*(57-76)-43%20))
+  }
+
+  test("Ultra unary minus - 1") {
+    val expr = "96-(-(-(-30.3)))*(57-76)-43%20"
+    val res = getResult(expr)
+    assert(res == 96-(-(-(-30.3)))*(57-76)-43%20)
+  }
+
+  test("Ultra unary minus - 2") {
+    val expr = "-96-(-(-(-30.3)))*(-57-76)-43%-20"
+    val res = getResult(expr)
+    assert(res == -96-(-(-(-30.3)))*(-57-76)-43%(-20))
+  }
+
+  test("Ultra unary minus - 3") {
+    val expr = "-(-(-(-(-(-(-731.09))))))"
+    val res = getResult(expr)
+    assert(res == -(-(-(-(-(-(-731.09)))))))
+  }
+
+
 
   /*
   FAIL
+  96--30*(57-76)-43%20
   96---30*(57-76)-43%20
    */
 

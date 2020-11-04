@@ -1,41 +1,47 @@
 package fr.fourtytwo
 
 import fr.fourtytwo.RPN.{convertToRPN, evaluate}
+import fr.fourtytwo.exception.EvaluateException
 
 import scala.collection.mutable.{ArrayBuffer, Stack => ScalaStack}
 import fr.fourtytwo.expression.Operator.priority
 import fr.fourtytwo.token.{Token, TokenType}
+import fr.fourtytwo.token.TokenType._
 
 import scala.math.pow
 
-class RPN {
+class RPN(infixTokens: Array[Token]) {
 
-  private var tokens: Array[Token] = _
+  val tokens: Array[Token] = convertToRPN(infixTokens)
 
-  def this(infixTokens: Array[Token]) {
-    this()
-    tokens = convertToRPN(infixTokens)
-  }
   def getTokens: Array[Token] = tokens
+
+  override def toString: String = tokens.map(x => x.expr).mkString(" ")
+  def infixString: String = infixTokens.map(x => x.expr).mkString("")
 
   def solve: Double = {
 
     val stack = ScalaStack[Double]()
+    var unary = 1
 
     for (token <- tokens) {
+
       token.tType match {
-        case TokenType.REALNUMBER | TokenType.NUMBER => {
-          stack.push(token.expr.toDouble)
+        case REALNUMBER | NUMBER => {
+          stack.push(token.expr.toDouble * unary)
+          unary = 1
         }
-        case TokenType.OPERATION => {
+        case OPERATION => {
           if (stack.length < 2)
-            throw new Exception(s"Wrong RPN ${tokens.map(x => x.expr).mkString(" ")}")
+            throw new EvaluateException(s"Wrong $infixString")
           stack.push(evaluate(stack.pop(), token.expr, stack.pop()))
         }
+        case UNARY => unary *= -1
+        case _ => throw new EvaluateException(s"Can't solve token: ${token.expr}")
       }
     }
     if (stack.length != 1)
-      throw new Exception(s"Wrong RPN ${tokens.map(x => x.expr).mkString(" ")}")
+      throw new EvaluateException(s"Wrong $infixString")
     stack.pop()
   }
 }
@@ -46,39 +52,44 @@ object RPN {
 
   def convertToRPN(tokens: Array[Token]): Array[Token] = {
 
-    val out = ArrayBuffer[Token]()
+    val RPNTokens = ArrayBuffer[Token]()
     val stack = ScalaStack[Token]()
-    val filteredTokens = tokens.filter(x => x.tType != TokenType.SPACE)
 
-    for (token <- filteredTokens) {
+    var prevToken: Token = Token("", UNARY)
+
+    for (token <- tokens) {
 
       token.tType match {
 
-        case TokenType.OPERATION => {
-          if (stack.isEmpty || token.expr.equals("(")) {
+        case OPERATION => {
+          if (token.equals("-") && prevToken.tType >= OPERATION
+            && !prevToken.equals("-") && !prevToken.equals(")")) {
+              RPNTokens.append(Token("--", UNARY))
+          }
+          else if (stack.isEmpty || token.equals("(")) {
             stack.push(token)
           }
-          else if (token.expr.equals(")")) {
-            while (!stack.head.expr.equals("(")) {
-              out.append(stack.pop())
+          else if (token.equals(")")) {
+            while (!stack.head.equals("(")) {
+              RPNTokens.append(stack.pop())
             }
             stack.pop()
           }
           else {
             while (stack.nonEmpty && priority(stack.head.expr) >= priority(token.expr)) {
-              out.append(stack.pop())
+              RPNTokens.append(stack.pop())
             }
             stack.push(token)
           }
         }
-        case TokenType.NUMBER | TokenType.REALNUMBER | TokenType.VARIABLE => {
-          out.append(token)
-        }
-        case _ => println("Unknown")
+        case NUMBER | REALNUMBER | VARIABLE => RPNTokens.append(token)
+        case _ =>
+
       }
+      prevToken = token
     }
-    out.appendAll(stack)
-    out.toArray
+    RPNTokens.appendAll(stack)
+    RPNTokens.toArray
   }
 
   def evaluate(right: Double, op: String, left: Double): Double = {
@@ -86,8 +97,16 @@ object RPN {
       case "+" => left + right
       case "-" => left - right
       case "*" => left * right
-      case "/" => left / right
-      case "%" => left % right
+      case "/" => {
+        if (right == 0)
+          throw new ArithmeticException("Division by zero")
+        left / right
+      }
+      case "%" => {
+        if (right == 0)
+          throw new ArithmeticException("Modulo by zero")
+        left % right
+      }
       case "^" => pow(left, right)
     }
   }

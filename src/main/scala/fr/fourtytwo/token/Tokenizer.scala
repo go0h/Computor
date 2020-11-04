@@ -13,38 +13,28 @@ class Tokenizer {
 
     var i: Int = 0
     val tokens: ArrayBuffer[Token] = ArrayBuffer[Token]()
-    val nonSpaceExpr = expr.replaceAll("\\s+", "")
 
-    if (nonSpaceExpr.isEmpty)
+    if (expr.trim.isEmpty)
       throw new ParseException(s"Empty expression")
 
-    Tokenizer.basicCheckBrackets(nonSpaceExpr)
+    Tokenizer.basicCheckBrackets(expr)
 
-    while (i < nonSpaceExpr.length) {
+    while (i < expr.length) {
 
-      val token = getToken(nonSpaceExpr, i, tokens)
+      val token = getToken(expr, i)
       if (token == null)
-        throw new ParseException(s"Can't recognize token: $nonSpaceExpr", nonSpaceExpr.length - i)
+        throw new ParseException(s"Can't recognize token: $expr", expr.length - i)
       i += token.expr.length
       tokens.append(token)
     }
     tokens.toArray
   }
 
-  private def getToken(expr: String, i: Int, tokens: ArrayBuffer[Token]): Token = {
+  private def getToken(expr: String, i: Int): Token = {
 
     for ((value, matcher) <- matchers) {
       matcher.findPrefixMatchOf(expr.subSequence(i, expr.length)) match {
         case Some(matched) => {
-
-          //TODO NEED WORK
-          // (-30 - 3)
-          if (expr(i) == '-' && value != OPERATION) {
-            if (tokens.isEmpty || (tokens.last.tType == OPERATION) && !tokens.last.expr.equals(")")) {
-              return Token(expr.substring(i, i + matched.end), value)
-            }
-          }
-          else
             return Token(expr.substring(i, i + matched.end), value)
         }
         case None =>

@@ -1,6 +1,7 @@
 package fr.fourtytwo.token
 
 class Token(val expr: String, val tType: TokenType.Value) {
+
   override def toString: String = expr
 
   override def equals(other: Any): Boolean = {
@@ -12,6 +13,8 @@ class Token(val expr: String, val tType: TokenType.Value) {
   }
 
   def ==(other: Token): Boolean = equals(other)
+
+  def equals(other: String): Boolean = this.expr.equals(other)
 
 }
 

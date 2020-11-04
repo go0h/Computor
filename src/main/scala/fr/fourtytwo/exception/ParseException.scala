@@ -10,7 +10,7 @@ class ParseException(message: String, position: Int = 0) extends Exception(messa
 
   def printPoint: String = {
     val sb = new StringBuilder("\n")
-    for (i <- 0 until message.length - position)
+    for (_ <- 0 until message.length - position)
       sb.append("-")
     sb.append("^")
     sb.toString()
