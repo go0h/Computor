@@ -23,11 +23,11 @@ case class Indeterminate(constant: Expression,
 
     other match {
       case temp: Number => {
-        if (this.degree == 0 && temp.evaluate == 0)
+        if (this.degree.evaluate == 0 && temp.evaluate == 0)
           return true
       }
       case temp: RealNumber => {
-        if (this.degree == 0 && temp.evaluate == 0)
+        if (this.degree.evaluate == 0 && temp.evaluate == 0)
           return true
       }
       case temp: Indeterminate => {

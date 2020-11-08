@@ -147,6 +147,12 @@ class RPNTest extends AnyFunSuite {
     assert(res == ((-33+11*3)/234))
   }
 
+  test("Almost polynomial") {
+    val expr = "(42^2 * 4) + ( - 4 * 123^2) - (85^2 * 4) + (3 * 17^3) + 3"
+    val res = getResult(expr)
+    assert(res == (pow(42,2)*4)+(-4*pow(123,2))-(pow(85,2)*4)+(3*pow(17,3))+3)
+  }
+
   test("Two minus in a row") {
     assertThrows[EvaluateException] {
       getResult("96--30")

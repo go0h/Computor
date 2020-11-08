@@ -2,6 +2,7 @@ package fr.fourtytwo
 
 import fr.fourtytwo.RPN.{convertToRPN, evaluate}
 import fr.fourtytwo.exception.EvaluateException
+import fr.fourtytwo.expression._
 
 import scala.collection.mutable.{ArrayBuffer, Stack => ScalaStack}
 import fr.fourtytwo.expression.Operator.priority
@@ -22,21 +23,18 @@ class RPN(infixTokens: Array[Token]) {
   def solve: Double = {
 
     val stack = ScalaStack[Double]()
-    var unary = 1
 
     for (token <- tokens) {
 
       token.tType match {
         case REALNUMBER | NUMBER => {
-          stack.push(token.expr.toDouble * unary)
-          unary = 1
+          stack.push(token.expr.toDouble)
         }
         case OPERATION => {
           if (stack.length < 2)
             throw new EvaluateException(s"Wrong $infixString")
           stack.push(evaluate(stack.pop(), token.expr, stack.pop()))
         }
-        case UNARY => unary *= -1
         case _ => throw new EvaluateException(s"Can't solve token: ${token.expr}")
       }
     }
@@ -95,10 +93,33 @@ object RPN {
       prev = token
     }
     RPNTokens.appendAll(stack)
-    RPNTokens.toArray
+    convertUnary(RPNTokens.toArray)
   }
 
-  def evaluate(right: Double, op: String, left: Double): Double = {
+  private def convertUnary(tokens: Array[Token]): Array[Token] = {
+
+    val out: ArrayBuffer[Token] = new ArrayBuffer[Token]()
+    var unary: Int = 1
+
+    for (token <- tokens) {
+
+      token.tType match {
+        case UNARY => unary *= -1
+        case _ => {
+          if (unary == 1) {
+            out.append(token)
+          }
+          else {
+            out.append(Token("-" + token.expr, token.tType))
+            unary = 1
+          }
+        }
+      }
+    }
+    out.toArray
+  }
+
+  def evaluate(right: Double, op: String, left: Double): Double =  {
     op match {
       case "+" => left + right
       case "-" => left - right
