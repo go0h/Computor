@@ -1,14 +1,16 @@
 package fr.fourtytwo
 
 import scala.math.pow
-
 import fr.fourtytwo.exception._
-import fr.fourtytwo.token.Tokenizer
+import fr.fourtytwo.token.{TokenType, Tokenizer}
 import org.scalatest.funsuite.AnyFunSuite
+
+import scala.util.matching.Regex
 
 class RPNTest extends AnyFunSuite {
 
-  val tokenizer = new Tokenizer
+  val matchers: Map[TokenType.Value, Regex] = TokenType.getSimpleTypesWithRegex
+  val tokenizer = new Tokenizer(matchers)
 
   def getResult(expr: String): Double = {
     val tokens = tokenizer.generateTokens(expr)

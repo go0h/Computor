@@ -4,7 +4,6 @@ import fr.fourtytwo.exception.ParseException
 import fr.fourtytwo.expression.Indeterminate
 import org.scalatest.funsuite.AnyFunSuite
 
-
 class IndeterminateTest extends AnyFunSuite {
 
   test("Basic with Integers") {

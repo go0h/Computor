@@ -1,13 +1,15 @@
 package fr.fourtytwo.expression
 
-import fr.fourtytwo.RPN
-import fr.fourtytwo.token._
+import fr.fourtytwo.exception._
+import fr.fourtytwo.token.{TokenType, _}
 import org.scalatest.funsuite.AnyFunSuite
-import fr.fourtytwo.expression.Indeterminate._
+
+import scala.util.matching.Regex
 
 class PolynomialTest extends AnyFunSuite {
 
-  val tokenizer: Tokenizer = Tokenizer()
+  val matchers: Map[TokenType.Value, Regex] = TokenType.getSimpleTypesWithRegex
+  val tokenizer: Tokenizer = Tokenizer(matchers)
 
   def normalizePolynomial(expression: String): String = {
     val poly = Polynomial(expression)
@@ -43,4 +45,35 @@ class PolynomialTest extends AnyFunSuite {
     val norm = normalizePolynomial(expr)
     assert(norm.equals(expr), norm)
   }
+
+  test("Basic convention - 6") {
+    val expr = "X^7 - X^6 - X^5 - X^4 - X^3 - X^2 - X + 4 = 77"
+    val norm = normalizePolynomial(expr)
+    assert(norm.equals("(1 * X^7) - (1 * X^6) - (1 * X^5) - (1 * X^4) - (1 * X^3) - (1 * X^2) - (1 * X^1) + 4 = 77"), norm)
+  }
+
+  test("No equal sing") {
+    assertThrows[ParseException] {
+      normalizePolynomial("X^2 + 4")
+    }
+  }
+
+  test("Two equal sings") {
+    assertThrows[ParseException] {
+      normalizePolynomial("X^2 + 4 = 0 = 0")
+    }
+  }
+
+  test("No variable") {
+    assertThrows[EvaluateException] {
+      normalizePolynomial("2 + 2 * 2 = 6")
+    }
+  }
+
+  test("Two variables") {
+    assertThrows[EvaluateException] {
+      normalizePolynomial("X^2 + 4 + Y = 3")
+    }
+  }
+
 }

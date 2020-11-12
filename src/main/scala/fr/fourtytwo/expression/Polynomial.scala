@@ -31,7 +31,7 @@ object Polynomial {
 
   def createNormalizePolynomial(expression: String): String = {
 
-    val tokenizer: Tokenizer = Tokenizer()
+    val tokenizer: Tokenizer = Tokenizer(getSimpleTypesWithRegex)
     val tokens: Array[Token] = tokenizer.generateTokens(expression)
 
     if (varNums(tokens) != 1)
@@ -43,8 +43,9 @@ object Polynomial {
     val rightRPN: Array[Token] =
       RPN.convertToRPN(tokens.slice(tokens.indexOf(Token("=", OPERATION)) + 1, tokens.length))
 
-    println(s"Left RPN :  ${leftRPN.mkString("")}")
-    println(s"Right RPN : ${rightRPN.mkString("")}")
+    println(s"""Expression: ${tokens.mkString("")}
+               |Left RPN  : ${leftRPN.mkString("")}
+               |Right RPN : ${rightRPN.mkString("")}""".stripMargin)
     val leftExpr: String = normalize(leftRPN)
     val rightExpr: String = normalize(rightRPN)
 
@@ -57,7 +58,7 @@ object Polynomial {
 
     for (expr <- expressions) {
       expr match {
-        case "+" | "*" | "/" | "-"=> {
+        case "+" | "*" | "/" | "-" => {
           if (stack.length < 2)
             throw new EvaluateException(s"Wrong1 ${expr.mkString(" ")}")
           val first = stack.pop()

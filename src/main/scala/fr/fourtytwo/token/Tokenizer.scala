@@ -5,9 +5,7 @@ import scala.util.matching.Regex
 import fr.fourtytwo.exception.ParseException
 import fr.fourtytwo.token.TokenType._
 
-class Tokenizer {
-
-  val matchers: Map[TokenType.Value, Regex] = getTypesWithRegex
+class Tokenizer(matchers: Map[TokenType.Value, Regex]) {
 
   def generateTokens(expr: String): Array[Token] = {
 
@@ -46,7 +44,9 @@ class Tokenizer {
 
 object Tokenizer {
 
-  def apply() = new Tokenizer
+  def apply() = new Tokenizer(getAllTypesWithRegex)
+
+  def apply(matchers: Map[TokenType.Value, Regex]) = new Tokenizer(matchers)
 
   def basicCheckBrackets(expr: String): Unit = {
     val stack = ScalaStack[Char]()
