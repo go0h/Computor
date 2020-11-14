@@ -1,7 +1,6 @@
-package fr.fourtytwo
+package fr.fourtytwo.expression
 
 import fr.fourtytwo.exception.ParseException
-import fr.fourtytwo.expression.Indeterminate
 import org.scalatest.funsuite.AnyFunSuite
 
 class IndeterminateTest extends AnyFunSuite {
@@ -67,8 +66,8 @@ class IndeterminateTest extends AnyFunSuite {
   }
 
   test("Reverse with Integers") {
-    val indeterminate = Indeterminate("X^2\\4")
-    assert(indeterminate.toString.equals("(4.0 \\ X^2.0)"))
+    val indeterminate = Indeterminate("X^2*4")
+    assert(indeterminate.toString.equals("(4.0 * X^2.0)"))
   }
 
   test("Reverse with minus") {

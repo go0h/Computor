@@ -93,7 +93,9 @@ object Polynomial {
             throw new ParseException(s"Bad indeterminate1 ${rpnTokens.slice(i, i + 5).mkString(" ")}")
 
           // constant, operator, variable, degree
-          val degree = if (rpnTokens(i + 4).equals("/")) rpnTokens(i+2).expr.toDouble * -1 else rpnTokens(i+2)
+          val degree =
+            if (rpnTokens(i + 4).equals("/")) rpnTokens(i+2).expr.toDouble * -1
+            else rpnTokens(i+2)
           expressions.append(s"(${rpnTokens(i)} * ${rpnTokens(i+1)}^$degree)")
           i += 5
         }
@@ -103,25 +105,39 @@ object Polynomial {
           if (!rpnTokens(i + 2).equals("^") || (!rpnTokens(i + 4).equals("*") && !rpnTokens(i + 4).equals("/")))
             throw new ParseException(s"Bad indeterminate2 ${rpnTokens.slice(i, i + 5).mkString(" ")}")
           // constant, operator, variable, degree
-
-          val const = if (rpnTokens(i + 4).equals("/")) 1.0 / rpnTokens(i+3).expr.toDouble else rpnTokens(i+3)
+          val const =
+            if (rpnTokens(i + 4).equals("/")) 1.0 / rpnTokens(i+3).expr.toDouble
+            else rpnTokens(i+3)
           expressions.append(s"($const * ${rpnTokens(i)}^${rpnTokens(i+1)})")
           i += 5
         }
         // (3 X *) => (3 * X^1)
+        // (2 X /) => (0.5 * X^1)
         case Array(RN, V, OP, _*) => {
           if (!rpnTokens(i+2).equals("*") && !rpnTokens(i+2).equals("/"))
             throw new ParseException(s"Bad indeterminate3 ${rpnTokens.slice(i, i + 3).mkString(" ")}")
           // constant, operator, variable, degree
-          expressions.append(s"(${rpnTokens(i)} ${rpnTokens(i+2)} ${rpnTokens(i+1)}^1)")
+          val const =
+            if (rpnTokens(i+2).equals("/")) 1 / rpnTokens(i).expr.toDouble
+            else rpnTokens(i)
+          expressions.append(s"($const * ${rpnTokens(i+1)}^1)")
           i += 3
         }
         // (X 3 ^) => (1 * X^3)
+        // (X 3 *) => (3 * X^1)
+        // (X 3 /) => (0.33 * X^1)
         case Array(V, RN, OP, _*) => {
-          if (!rpnTokens(i+2).equals("^"))
+          if (!rpnTokens(i+2).equals("^") && !rpnTokens(i+2).equals("*") && !rpnTokens(i+2).equals("/"))
             throw new ParseException(s"Bad indeterminate4 ${rpnTokens.slice(i, i + 3).mkString(" ")}")
           // constant, operator, variable, degree
-          expressions.append(s"(1 * ${rpnTokens(i)}^${rpnTokens(i+1)})")
+          if (rpnTokens(i+2).equals("^"))
+            expressions.append(s"(1 * ${rpnTokens(i)}^${rpnTokens(i+1)})")
+          else if (rpnTokens(i+2).equals("*"))
+            expressions.append(s"(${rpnTokens(i+1)} * ${rpnTokens(i)}^1)")
+          else {
+            val const = 1 / rpnTokens(i+1).expr.toDouble
+            expressions.append(s"($const * ${rpnTokens(i)}^1)")
+          }
           i += 3
         }
         // (X) => (1 * X^1)

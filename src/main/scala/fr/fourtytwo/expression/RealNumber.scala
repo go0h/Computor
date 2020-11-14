@@ -10,11 +10,10 @@ class RealNumber(private val num: Double) extends Expression {
 
   def *(other: RealNumber): RealNumber = RealNumber(num * other.evaluate)
 
-  def *(other: Variable): Indeterminate = new Indeterminate(num, "*", other.toString, 1.0)
+  def *(other: Variable): Indeterminate = new Indeterminate(num, other.toString, 1.0)
 
   def *(other: Indeterminate): Indeterminate = {
     new Indeterminate(num.toDouble * other.constant.evaluate,
-      other.operator,
       other.variable.toString,
       other.degree.evaluate)
   }

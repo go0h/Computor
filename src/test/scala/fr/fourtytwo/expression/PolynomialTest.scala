@@ -65,6 +65,18 @@ class PolynomialTest extends AnyFunSuite {
     assert(norm.equals("(1 * X^7) - (1 * X^6) - (1 * X^5) - (1 * X^4) - (1 * X^3) - (1 * X^2) - (1 * X^1) + 4 = 77"), norm)
   }
 
+  test("Basic convention - 7") {
+    val expr = "X ^ 4 = 77"
+    val norm = normalizePolynomial(expr)
+    assert(norm.equals("(1 * X^4) = 77"), norm)
+  }
+
+  test("Basic convention - 8") {
+    val expr = "X * 4 = 77"
+    val norm = normalizePolynomial(expr)
+    assert(norm.equals("(4 * X^1) = 77"), norm)
+  }
+
   test("No equal sing") {
     assertThrows[ParseException] {
       normalizePolynomial("X^2 + 4")
@@ -105,6 +117,12 @@ class PolynomialTest extends AnyFunSuite {
     val expr = "X^14.0 / 4 = 77"
     val norm = normalizePolynomial(expr)
     assert(norm.equals("(0.25 * X^14.0) = 77"), norm)
+  }
+
+  test("Division convention - 4") {
+    val expr = "X / 4 = 77"
+    val norm = normalizePolynomial(expr)
+    assert(norm.equals("(0.25 * X^1) = 77"), norm)
   }
 
 }

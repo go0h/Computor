@@ -1,7 +1,6 @@
-package fr.fourtytwo
+package fr.fourtytwo.expression
 
 import fr.fourtytwo.exception.EvaluateException
-import fr.fourtytwo.expression._
 import org.scalatest.funsuite.AnyFunSuite
 
 class OperationsTest extends AnyFunSuite {
@@ -23,7 +22,7 @@ class OperationsTest extends AnyFunSuite {
   }
 
   test("RealNumber * Indeterminate") {
-    val res = RealNumber(0.5) * Indeterminate(RealNumber(4.0), "*", Variable("X"), RealNumber(132.22))
+    val res = RealNumber(0.5) * Indeterminate(RealNumber(4.0), Variable("X"), RealNumber(132.22))
     assert(res.isInstanceOf[Indeterminate])
     assert(res.toString.equals("(2.0 * X^132.22)"))
   }
@@ -47,40 +46,40 @@ class OperationsTest extends AnyFunSuite {
   }
 
   test("Variable * Indeterminate") {
-    val res = Variable("X") * Indeterminate(RealNumber(4.0), "*", Variable("X"), RealNumber(13))
+    val res = Variable("X") * Indeterminate(RealNumber(4.0), Variable("X"), RealNumber(13))
     assert(res.isInstanceOf[Indeterminate])
     assert(res.toString.equals("(4.0 * X^26.0)"), res.toString)
   }
 
   test("Indeterminate * RealNumber") {
-    val res = Indeterminate(RealNumber(4.0), "*", Variable("X"), RealNumber(13)) * RealNumber(0.5)
+    val res = Indeterminate(RealNumber(4.0), Variable("X"), RealNumber(13)) * RealNumber(0.5)
     assert(res.isInstanceOf[Indeterminate])
     assert(res.toString.equals("(2.0 * X^13.0)"), res.toString)
   }
 
   test("Indeterminate * Variable") {
-    val res = Indeterminate(RealNumber(4.0), "*", Variable("X"), RealNumber(3.5)) * Variable("X")
+    val res = Indeterminate(RealNumber(4.0), Variable("X"), RealNumber(3.5)) * Variable("X")
     assert(res.isInstanceOf[Indeterminate])
     assert(res.toString.equals("(4.0 * X^7.0)"), res.toString)
   }
 
   test("Indeterminate * OtherVariable") {
     assertThrows[EvaluateException] {
-      Indeterminate(RealNumber(4.0), "*", Variable("X"), RealNumber(3.5)) * Variable("Y")
+      Indeterminate(RealNumber(4.0), Variable("X"), RealNumber(3.5)) * Variable("Y")
     }
   }
 
   test("Indeterminate * Indeterminate") {
-    val res = Indeterminate(RealNumber(4.0), "*", Variable("X"), RealNumber(3.5)) *
-      Indeterminate(RealNumber(5), "*", Variable("X"), RealNumber(3.5))
+    val res = Indeterminate(RealNumber(4.0), Variable("X"), RealNumber(3.5)) *
+      Indeterminate(RealNumber(5), Variable("X"), RealNumber(3.5))
     assert(res.isInstanceOf[Indeterminate])
     assert(res.toString.equals("(20.0 * X^7.0)"), res.toString)
   }
 
   test("Indeterminate * OtherIndeterminate") {
     assertThrows[EvaluateException] {
-      Indeterminate(RealNumber(4.0), "*", Variable("X"), RealNumber(3.5)) *
-        Indeterminate(RealNumber(5), "*", Variable("V"), RealNumber(3.5))
+      Indeterminate(RealNumber(4.0), Variable("X"), RealNumber(3.5)) *
+        Indeterminate(RealNumber(5), Variable("V"), RealNumber(3.5))
     }
   }
 
