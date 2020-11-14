@@ -1,5 +1,6 @@
 package fr.fourtytwo.expression
 
+import fr.fourtytwo.RPN
 import fr.fourtytwo.exception._
 import fr.fourtytwo.token.{TokenType, _}
 import org.scalatest.funsuite.AnyFunSuite
@@ -16,10 +17,22 @@ class PolynomialTest extends AnyFunSuite {
     poly.normExp
   }
 
+  def getResult(expr: String): Double = {
+    val tokens = tokenizer.generateTokens(expr)
+    RPN(tokens).solve.evaluate
+  }
+
+  def getResultAlter(expr: String): Double = {
+    val rpnTokens = RPN(tokenizer.generateTokens(expr)).tokens
+    val normalExpression = Polynomial.normalize(rpnTokens)
+    getResult(normalExpression)
+  }
+
+
   test("Basic convention - 1") {
     val expr = "(4 * X^2.0) - (-4 * X^1) + 4 = 0"
     val norm = normalizePolynomial(expr)
-    assert(expr.equals(norm))
+    assert(expr.equals(norm), norm)
   }
 
   test("Basic convention - 2") {
@@ -74,6 +87,24 @@ class PolynomialTest extends AnyFunSuite {
     assertThrows[EvaluateException] {
       normalizePolynomial("X^2 + 4 + Y = 3")
     }
+  }
+
+  test("Division convention - 1") {
+    val expr = "4.0 / X^(-2.0) = 77"
+    val norm = normalizePolynomial(expr)
+    assert(norm.equals("(4.0 * X^2.0) = 77"), norm)
+  }
+
+  test("Division convention - 2") {
+    val expr = "X^(-2.0) / 2 = 77"
+    val norm = normalizePolynomial(expr)
+    assert(norm.equals("(0.5 * X^-2.0) = 77"), norm)
+  }
+
+  test("Division convention - 3") {
+    val expr = "X^14.0 / 4 = 77"
+    val norm = normalizePolynomial(expr)
+    assert(norm.equals("(0.25 * X^14.0) = 77"), norm)
   }
 
 }

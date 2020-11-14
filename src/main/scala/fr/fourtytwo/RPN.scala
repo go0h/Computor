@@ -23,7 +23,6 @@ class RPN(infixTokens: Array[Token]) {
     for (token <- tokens) {
 
       token.tType match {
-        case NUMBER => stack.push(Number(token.expr.toInt))
         case REALNUMBER => stack.push(RealNumber(token.expr.toDouble))
         case VARIABLE => stack.push(Variable(token.expr))
         case INDETERMINATE => stack.push(Indeterminate(token.expr))
@@ -81,7 +80,7 @@ object RPN {
           }
           prevNonSpace = token
         }
-        case NUMBER | REALNUMBER | VARIABLE | INDETERMINATE => {
+        case REALNUMBER | VARIABLE | INDETERMINATE => {
           RPNTokens.append(token)
           prevNonSpace = token
         }

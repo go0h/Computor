@@ -155,6 +155,24 @@ class RPNTest extends AnyFunSuite {
     assert(res == (pow(42,2)*4)+(-4*pow(123,2))-(pow(85,2)*4)+(3*pow(17,3))+3)
   }
 
+  test("Division order - 1") {
+    val expr = "3 + 3 / 4^(-2)"
+    val res = getResult(expr)
+    assert(res == (3 + 3 / pow(4, -2)))
+  }
+
+  test("Division order - 2") {
+    val expr = "3 + 4^(-2) / 4"
+    val res = getResult(expr)
+    assert(res == (3 + pow(4, -2) / 4 ))
+  }
+
+  test("Division order - 3") {
+    val expr = "3 + 3 * 4^(2)"
+    val res = getResult(expr)
+    assert(res == (3 + 3 * pow(4, 2)))
+  }
+
   test("Two minus in a row") {
     assertThrows[EvaluateException] {
       getResult("96--30")

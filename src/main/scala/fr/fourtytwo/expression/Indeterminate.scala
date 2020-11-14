@@ -3,9 +3,9 @@ package fr.fourtytwo.expression
 import fr.fourtytwo.exception.{EvaluateException, ParseException}
 
 case class Indeterminate(constant: RealNumber,
-                    operator: String,
-                    variable: Variable,
-                    degree: RealNumber) extends Expression {
+                         operator: String,
+                         variable: Variable,
+                         degree: RealNumber) extends Expression {
 
   def this(c: Double, o: String, v: String, d: Double) {
     this(RealNumber(c), o, Variable(v), RealNumber(d))
@@ -13,10 +13,6 @@ case class Indeterminate(constant: RealNumber,
 
   override def evaluate: Double = {
     Operator(constant, operator, Operator(variable, "^", degree)).evaluate
-  }
-
-  def *(other: Number): Indeterminate = {
-    new Indeterminate(constant * other, operator = "*", variable, degree)
   }
 
   def *(other: RealNumber): Indeterminate = {
@@ -48,10 +44,6 @@ case class Indeterminate(constant: RealNumber,
   override def equals(other: Any): Boolean = {
 
     other match {
-      case temp: Number => {
-        if (this.degree.evaluate == 0 && temp.evaluate == 0)
-          return true
-      }
       case temp: RealNumber => {
         if (this.degree.evaluate == 0 && temp.evaluate == 0)
           return true

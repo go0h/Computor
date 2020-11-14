@@ -58,7 +58,7 @@ object Polynomial {
 
     for (expr <- expressions) {
       expr match {
-        case "+" | "*" | "/" | "-" => {
+        case "+" | "*" | "/" | "-" | "^" => {
           if (stack.length < 2)
             throw new EvaluateException(s"Wrong1 ${expr.mkString(" ")}")
           val first = stack.pop()
@@ -73,9 +73,8 @@ object Polynomial {
     stack.pop()
   }
 
-  private def normalize(rpnTokens: Array[Token]): String = {
+  def normalize(rpnTokens: Array[Token]): String = {
 
-    val N = NUMBER
     val RN = REALNUMBER
     val V = VARIABLE
     val OP = OPERATION
@@ -88,23 +87,29 @@ object Polynomial {
     while (tempTypes.nonEmpty) {
       tempTypes match {
         // (3 X 2 ^ *) => (3 * X^2)
-        case Array(N | RN, V, N | RN, OP, OP, _*) => {
+        // (3 X 2 ^ /) => (X^2 / 3)
+        case Array(RN, V, RN, OP, OP, _*) => {
           if (!rpnTokens(i + 3).equals("^") || (!rpnTokens(i + 4).equals("*") && !rpnTokens(i + 4).equals("/")))
             throw new ParseException(s"Bad indeterminate1 ${rpnTokens.slice(i, i + 5).mkString(" ")}")
+
           // constant, operator, variable, degree
-          expressions.append(s"(${rpnTokens(i)} ${rpnTokens(i+4)} ${rpnTokens(i+1)}^${rpnTokens(i+2)})")
+          val degree = if (rpnTokens(i + 4).equals("/")) rpnTokens(i+2).expr.toDouble * -1 else rpnTokens(i+2)
+          expressions.append(s"(${rpnTokens(i)} * ${rpnTokens(i+1)}^$degree)")
           i += 5
         }
         // (X 2 ^ 3 *) => (3 * X^2)
-        case Array(V, N | RN, OP, N | RN, OP, _*) => {
+        // (X 2 ^ 3 /) => (3 / X^2)
+        case Array(V, RN, OP, RN, OP, _*) => {
           if (!rpnTokens(i + 2).equals("^") || (!rpnTokens(i + 4).equals("*") && !rpnTokens(i + 4).equals("/")))
             throw new ParseException(s"Bad indeterminate2 ${rpnTokens.slice(i, i + 5).mkString(" ")}")
           // constant, operator, variable, degree
-          expressions.append(s"(${rpnTokens(i+3)} ${rpnTokens(i+4)} ${rpnTokens(i)}^${rpnTokens(i+1)})")
+
+          val const = if (rpnTokens(i + 4).equals("/")) 1.0 / rpnTokens(i+3).expr.toDouble else rpnTokens(i+3)
+          expressions.append(s"($const * ${rpnTokens(i)}^${rpnTokens(i+1)})")
           i += 5
         }
         // (3 X *) => (3 * X^1)
-        case Array(N | RN, V, OP, _*) => {
+        case Array(RN, V, OP, _*) => {
           if (!rpnTokens(i+2).equals("*") && !rpnTokens(i+2).equals("/"))
             throw new ParseException(s"Bad indeterminate3 ${rpnTokens.slice(i, i + 3).mkString(" ")}")
           // constant, operator, variable, degree
@@ -112,7 +117,7 @@ object Polynomial {
           i += 3
         }
         // (X 3 ^) => (1 * X^3)
-        case Array(V, N | RN, OP, _*) => {
+        case Array(V, RN, OP, _*) => {
           if (!rpnTokens(i+2).equals("^"))
             throw new ParseException(s"Bad indeterminate4 ${rpnTokens.slice(i, i + 3).mkString(" ")}")
           // constant, operator, variable, degree
@@ -124,7 +129,7 @@ object Polynomial {
           expressions.append(s"(1 * ${rpnTokens(i)}^1)")
           i += 1
         }
-        case Array(OP, _*) | Array(N | RN, _*) => {
+        case Array(OP, _*) | Array(RN, _*) => {
           expressions.append(rpnTokens(i).expr)
           i += 1
         }

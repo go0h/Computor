@@ -4,7 +4,7 @@ class ParseException(message: String, position: Int = 0) extends Exception(messa
 
   override def getMessage: String = {
     if (position == 0)
-      super.getMessage
+      return super.getMessage
     super.getMessage + printPoint
   }
 

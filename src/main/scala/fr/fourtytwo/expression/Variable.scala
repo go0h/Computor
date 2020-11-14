@@ -10,8 +10,6 @@ class Variable(name: String, value: RealNumber = null) extends Expression {
     value.evaluate
   }
 
-  def *(other: Number): Indeterminate = new Indeterminate(other.evaluate, "*", name, 1.0)
-
   def *(other: RealNumber): Indeterminate = new Indeterminate(other.evaluate, "*", name, 1.0)
 
   def *(other: Variable): Indeterminate = {
