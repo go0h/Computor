@@ -14,7 +14,7 @@ class RPNTest extends AnyFunSuite {
 
   def getResult(expr: String): Double = {
     val tokens = tokenizer.generateTokens(expr)
-    RPN(tokens).solve
+    RPN(tokens).solve.evaluate
   }
 
   test("Empty expression") {

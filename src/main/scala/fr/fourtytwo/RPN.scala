@@ -1,13 +1,11 @@
 package fr.fourtytwo
 
 import scala.collection.mutable.{ArrayBuffer, Stack => ScalaStack}
-
 import fr.fourtytwo.exception.EvaluateException
+import fr.fourtytwo.expression._
 import fr.fourtytwo.expression.Operator.priority
 import fr.fourtytwo.token.Token
 import fr.fourtytwo.token.TokenType._
-
-import scala.math.pow
 
 class RPN(infixTokens: Array[Token]) {
 
@@ -18,18 +16,22 @@ class RPN(infixTokens: Array[Token]) {
   override def toString: String = tokens.map(x => x.expr).mkString(" ")
   def infixString: String = infixTokens.map(x => x.expr).mkString("")
 
-  def solve: Double = {
+  def solve: Expression = {
 
-    val stack = ScalaStack[Double]()
+    val stack = ScalaStack[Expression]()
 
     for (token <- tokens) {
 
       token.tType match {
-        case REALNUMBER | NUMBER => stack.push(token.expr.toDouble)
+        case NUMBER => stack.push(Number(token.expr.toInt))
+        case REALNUMBER => stack.push(RealNumber(token.expr.toDouble))
+        case VARIABLE => stack.push(Variable(token.expr))
+        case INDETERMINATE => stack.push(Indeterminate(token.expr))
         case OPERATION => {
           if (stack.length < 2)
             throw new EvaluateException(s"Wrong $infixString")
-          stack.push(RPN.evaluate(stack.pop(), token.expr, stack.pop()))
+          val first = stack.pop()
+          stack.push(Operator(stack.pop(), token.expr, first))
         }
         case _ => throw new EvaluateException(s"Can't solve token: ${token.expr}")
       }
@@ -79,7 +81,7 @@ object RPN {
           }
           prevNonSpace = token
         }
-        case NUMBER | REALNUMBER | VARIABLE => {
+        case NUMBER | REALNUMBER | VARIABLE | INDETERMINATE => {
           RPNTokens.append(token)
           prevNonSpace = token
         }
@@ -112,24 +114,5 @@ object RPN {
       }
     }
     out.toArray
-  }
-
-  def evaluate(right: Double, op: String, left: Double): Double =  {
-    op match {
-      case "+" => left + right
-      case "-" => left - right
-      case "*" => left * right
-      case "/" => {
-        if (right == 0)
-          throw new ArithmeticException("Division by zero")
-        left / right
-      }
-      case "%" => {
-        if (right == 0)
-          throw new ArithmeticException("Modulo by zero")
-        left % right
-      }
-      case "^" => pow(left, right)
-    }
   }
 }
