@@ -27,14 +27,34 @@ case class Indeterminate(constant: RealNumber,
   }
 
   def *(other: Indeterminate): Indeterminate = {
-
     if (!variable.equals(other.variable))
       throw new EvaluateException(s"Can't multiply different variables ($variable, ${other.variable})")
+    new Indeterminate(constant * other.constant,
+                      variable,
+                      RealNumber(degree.evaluate + other.degree.evaluate))
+  }
 
-    new Indeterminate(
-      this.constant * other.constant,
-      variable,
-      RealNumber(degree.evaluate + other.degree.evaluate))
+  def /(other: RealNumber): Indeterminate = {
+    new Indeterminate(constant / other, variable, degree)
+  }
+
+  def /(other: Variable): Expression = {
+    if (!variable.equals(other))
+      throw new EvaluateException(s"Can't division different variables ($variable, $other)")
+    if (degree.evaluate == 1)
+      return constant
+    new Indeterminate(constant, variable, RealNumber(degree.evaluate - 1.0))
+  }
+
+  def /(other: Indeterminate): Expression = {
+    if (!variable.equals(other.variable))
+      throw new EvaluateException(s"Can't division different variables ($variable, ${other.variable})")
+
+    if (equals(other))
+      return RealNumber(1.0)
+    new Indeterminate(constant / other.constant,
+                      variable,
+                      RealNumber(degree.evaluate - other.degree.evaluate))
   }
 
   override def toString: String = s"($constant * $variable^$degree)"
@@ -46,8 +66,12 @@ case class Indeterminate(constant: RealNumber,
         if (this.degree.evaluate == 0 && temp.evaluate == 0)
           return true
       }
+      case temp: Variable => {
+        if (variable.equals(temp) && degree.evaluate == 1.0 && constant.evaluate == 1.0)
+          return true
+      }
       case temp: Indeterminate => {
-        if (this.variable == temp.variable && this.degree == temp.degree)
+        if (variable.equals(temp.variable) && degree.equals(temp.degree) && constant.equals(temp.constant))
           return true
       }
       case _ =>

@@ -214,4 +214,16 @@ class RPNTest extends AnyFunSuite {
     }
   }
 
+  test("Extra test - 1") {
+    val expr = "1.0 / (4.0 * 4.0^0.112)"
+    val res = getResult(expr)
+    assert(res == (1.0 / (4.0 * pow(4, 0.112))))
+  }
+
+  test("Extra test - 2") {
+    val expr = "0.25 * 4.0 * 4.0^0.112"
+    val res = getResult(expr)
+    assert(res == (0.25 * 4.0 * pow(4, 0.112)))
+  }
+
 }

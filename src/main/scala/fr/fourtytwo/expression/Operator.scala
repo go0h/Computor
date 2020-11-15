@@ -28,7 +28,7 @@ class Operator(left: Expression, op: String, right: Expression) extends Expressi
 
   override def toString: String = {
     if (left != null && right != null)
-     s"$left $op $right"
+     s"($left $op $right)"
     else
       op
   }
