@@ -9,11 +9,9 @@ import scala.util.matching.Regex
 object Main {
 
   def optimizeExpression(expr: Expression): Expression = {
-
     if (expr.isInstanceOf[Operator]) {
 
     }
-
     null
   }
 
@@ -28,19 +26,18 @@ object Main {
     val tokenizer = Tokenizer(matchers)
     val tokens = tokenizer.generateTokens(expr).filter(_.tType != TokenType.SPACE)
 
-    val res = RPN(tokens).solve
-    optimizeExpression(res)
+    val res1 = RPN(tokens).solve
+    val opt = res1.optimize
+    println(res1)
+    println(opt)
   }
 
   def main(args: Array[String]): Unit = {
 
-    val expr = "X^2.0*4-X^1*-4+4=0"
-    val expr1 = "4 * X^2 - 3 * X + 5 - X^2 = 3"
-    val expr2 = "(4 * y^2) + (4 * y^2) / (-4 * y^2) + (3 * y^3) + 3"
+    val expr = "(8 * y^0.12) * (-4 * y^-0.302) / (2 * y^1) + (-4 * y^3)"
 
     try {
-      val res2 = parseNormalize(expr2)
-      println(expr2)
+      parseNormalize(expr)
 //      println(res2)
     } catch {
       case ex: ParseException => println(ex.getMessage)

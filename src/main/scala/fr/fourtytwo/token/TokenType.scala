@@ -4,7 +4,7 @@ import scala.util.matching.Regex
 
 object TokenType extends Enumeration {
 
-  val INDETERMINATE: Value = Value("""^(-?\d+(?:\.\d+)?)([*])(-?[A-Za-z]+)\^(\d+(?:\.\d+)?)""")
+  val INDETERMINATE: Value = Value("""^(-?\d+(?:\.\d+)?)([*])(-?[A-Za-z]+)\^(-?\d+(?:\.\d+)?)""")
   val VARIABLE: Value = Value("[A-Za-z]+(?:[0-9]+)?")
   val REALNUMBER: Value = Value("\\d+(?:\\.\\d+)?")
   val SPACE: Value = Value("\\s+")

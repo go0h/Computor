@@ -1,6 +1,5 @@
-package fr.fourtytwo.expression
+package fr.fourtytwo
 
-import fr.fourtytwo.RPN
 import fr.fourtytwo.exception._
 import fr.fourtytwo.token.{TokenType, _}
 import org.scalatest.funsuite.AnyFunSuite
@@ -125,4 +124,9 @@ class PolynomialTest extends AnyFunSuite {
     assert(norm.equals("(0.25 * X^1) = 77"), norm)
   }
 
+//  test("Optimize - 1") {
+//    val expr = "(8 * y^0.12) * (-4 * y^-0.302) / (2 * y^1) + (-4 * y^3)"
+//    val norm = normalizePolynomial(expr)
+//
+//  }
 }

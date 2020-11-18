@@ -1,14 +1,13 @@
-package fr.fourtytwo.expression
+package fr.fourtytwo
 
-import fr.fourtytwo.RPN
-import fr.fourtytwo.token._
+import fr.fourtytwo.Polynomial.createNormalizePolynomial
 import fr.fourtytwo.exception._
-import fr.fourtytwo.expression.Polynomial.{createNormalizePolynomial, normalize}
 import fr.fourtytwo.token.TokenType._
+import fr.fourtytwo.token._
 
 import scala.collection.mutable.{ArrayBuffer, Stack => ScalaStack}
 
-class Polynomial(expr: String) extends Expression {
+class Polynomial(expr: String) {
 
   if (expr.count(_ == '=') != 1)
     throw new ParseException(s"No equal sign in expression $expr")
@@ -16,10 +15,6 @@ class Polynomial(expr: String) extends Expression {
   val normExp: String = createNormalizePolynomial(expr)
 
   val degree = null
-
-  override def evaluate: Double = {
-    0.0
-  }
 
   override def toString: String = expr
 

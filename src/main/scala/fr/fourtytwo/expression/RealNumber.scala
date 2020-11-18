@@ -1,11 +1,41 @@
 package fr.fourtytwo.expression
 
-class RealNumber(private val num: Double) extends Expression {
+class RealNumber(private val num: Double) extends Operable {
 
-  override def evaluate: Double = num
-
+  def evaluate: Double = num
+  def optimize: Expression = this
   override def toString: String = num.toString
 
+
+  ////////////////////////////////////////
+  ////////////// PLUS METHODS ////////////
+  ////////////////////////////////////////
+  def +(expr: RealNumber): Expression = RealNumber(num + expr.evaluate)
+
+  def +(expr: Variable): Expression = {
+    if (num == 0.0)
+      return expr
+    Operator(this, "+", expr)
+  }
+
+  def +(expr: Indeterminate): Expression = {
+    if (num == 0.0)
+      return expr
+    Operator(this, "+", expr)
+  }
+
+
+  ////////////////////////////////////////
+  ////////// SUBTRACTION METHODS /////////
+  ////////////////////////////////////////
+  def -(other: RealNumber): Expression = RealNumber(num - other.evaluate)
+  def -(other: Variable): Expression = Operator(this, "-", other)
+  def -(other: Indeterminate): Expression = Operator(this, "-", other)
+
+
+  ////////////////////////////////////////
+  //////////// MULTIPLY METHODS //////////
+  ////////////////////////////////////////
   def *(other: RealNumber): RealNumber = RealNumber(num * other.evaluate)
 
   def *(other: Variable): Expression = {
@@ -22,6 +52,10 @@ class RealNumber(private val num: Double) extends Expression {
       other.degree.evaluate)
   }
 
+
+  ////////////////////////////////////////
+  //////////// DIVISION METHODS //////////
+  ////////////////////////////////////////
   def /(other: RealNumber): RealNumber = {
     if (num == 0)
       return RealNumber(0.0)
@@ -32,13 +66,13 @@ class RealNumber(private val num: Double) extends Expression {
     RealNumber(num / denominator)
   }
 
-  def /(other: Variable): Expression = {
+  def /(other: Variable): Operable = {
     if (num == 0)
       return RealNumber(0.0)
     new Indeterminate(RealNumber(num), other, RealNumber(-1.0))
   }
 
-  def /(other: Indeterminate): Expression = {
+  def /(other: Indeterminate): Operable = {
     if (num == 0)
       return RealNumber(0.0)
     new Indeterminate(RealNumber(num / other.constant.evaluate),

@@ -2,14 +2,70 @@ package fr.fourtytwo.expression
 
 import fr.fourtytwo.exception.EvaluateException
 
-class Variable(name: String, value: RealNumber = null) extends Expression {
+class Variable(name: String, value: RealNumber = null) extends Operable {
 
-  override def evaluate: Double = {
+  def evaluate: Double = {
     if (value == null)
       throw new EvaluateException(s"Variable $value has no value")
     value.evaluate
   }
+  def optimize: Expression = this
 
+
+  ////////////////////////////////////////
+  /////////// ADDITION METHODS ///////////
+  ////////////////////////////////////////
+  def +(other: RealNumber): Expression = {
+    if (other.evaluate == 0.0)
+      return this
+    Operator(this, "+", other)
+  }
+
+  def +(other: Variable): Expression = {
+    if (!equals(other))
+      throw new EvaluateException(s"Can't add different variables ($name, $other)")
+    Indeterminate(RealNumber(2.0), this, RealNumber(1.0))
+  }
+
+  def +(other: Indeterminate): Expression = {
+    if (!equals(other.variable))
+      throw new EvaluateException(s"Can't add different variables ($name, ${other.variable})")
+    if (other.degree.evaluate == 1.0)
+      return Indeterminate(RealNumber(other.constant.evaluate + 1.0), this, RealNumber(1.0))
+    Operator(this, "+", other)
+  }
+
+
+  ////////////////////////////////////////
+  ////////// SUBTRACTION METHODS /////////
+  ////////////////////////////////////////
+  def -(other: RealNumber): Expression = {
+    if (other.evaluate == 0)
+      return this
+    Operator(this, "-", other)
+  }
+
+  def -(other: Variable): Expression = {
+    if (!equals(other))
+      throw new EvaluateException(s"Can't sub different variables ($name, $other)")
+    RealNumber(0.0)
+  }
+
+  def -(other: Indeterminate): Expression = {
+    if (!equals(other.variable))
+      throw new EvaluateException(s"Can't sub different variables ($name, ${other.variable})")
+    if (other.degree.evaluate == 1.0) {
+      if (other.constant.evaluate == 1.0)
+        return RealNumber(0.0)
+      return new Indeterminate(1 - other.constant.evaluate, name, other.degree.evaluate)
+    }
+    Operator(this, "-", other)
+  }
+
+
+  ////////////////////////////////////////
+  //////////// MULTIPLY METHODS //////////
+  ////////////////////////////////////////
   def *(other: RealNumber): Indeterminate = new Indeterminate(other.evaluate, name, 1.0)
 
   def *(other: Variable): Indeterminate = {
@@ -21,20 +77,26 @@ class Variable(name: String, value: RealNumber = null) extends Expression {
   def *(other: Indeterminate): Indeterminate = {
     if (!equals(other.variable))
       throw new EvaluateException(s"Can't multiply different variables ($name, ${other.variable})")
-    new Indeterminate(other.constant,
-                      other.variable,
-                      RealNumber(other.degree.evaluate * 2.0))
+    Indeterminate(other.constant,
+                  other.variable,
+                  RealNumber(other.degree.evaluate * 2.0))
   }
 
-  def /(other: RealNumber): Indeterminate = new Indeterminate(1.0 / other.evaluate, name, 1.0)
 
-  def /(other: Variable): Expression = {
+  ////////////////////////////////////////
+  //////////// DIVISION METHODS //////////
+  ////////////////////////////////////////
+  def /(other: RealNumber): Indeterminate = {
+    new Indeterminate(1.0 / other.evaluate, name, 1.0)
+  }
+
+  def /(other: Variable): Operable = {
     if (!name.equals(other.toString))
       throw new EvaluateException(s"Can't division different variables ($name, ${other.toString})")
     new RealNumber(1.0)
   }
 
-  def /(other: Indeterminate): Expression = {
+  def /(other: Indeterminate): Operable = {
     if (!name.equals(other.variable.toString))
       throw new EvaluateException(s"Can't division different variables ($name, ${other.variable})")
     if (other.degree.evaluate == 1.0)
@@ -43,7 +105,6 @@ class Variable(name: String, value: RealNumber = null) extends Expression {
                       Variable(name),
                       RealNumber((other.degree.evaluate - 1.0) * -1.0))
   }
-
 
   override def equals(other: Any): Boolean = {
       other match {
