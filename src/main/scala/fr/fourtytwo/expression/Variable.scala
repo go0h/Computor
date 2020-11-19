@@ -2,15 +2,19 @@ package fr.fourtytwo.expression
 
 import fr.fourtytwo.exception.EvaluateException
 
-class Variable(name: String, value: RealNumber = null) extends Operable {
+class Variable(name: String) extends Operable {
 
-  def evaluate: Double = {
-    if (value == null)
-      throw new EvaluateException(s"Variable $value has no value")
-    value.evaluate
-  }
+  val sign: Int = if (name.startsWith("-")) -1 else 1
+
+  def evaluate: Double = throw new EvaluateException(s"Variable $name has no value")
   def optimize: Expression = this
 
+  def getSing: Int = sign
+  def changeSign: Variable = {
+    if (name.startsWith("-"))
+      return new Variable(name.replaceFirst("-", ""))
+    Variable("-" + name)
+  }
 
   ////////////////////////////////////////
   /////////// ADDITION METHODS ///////////
@@ -113,11 +117,7 @@ class Variable(name: String, value: RealNumber = null) extends Operable {
     }
   }
 
-  override def toString: String = {
-    if (value == null)
-      return name
-    value.toString
-  }
+  override def toString: String = name
 }
 
 object Variable {

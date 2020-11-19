@@ -6,7 +6,11 @@ import scala.math.pow
 
 class Operator(left: Expression, op: String, right: Expression) extends Expression {
 
-  override def evaluate: Double = {
+  def getOp: String = op
+  def getLeft: Expression = left
+  def getRight: Expression = right
+
+  def evaluate: Double = {
     op match {
       case "+" => left.evaluate + right.evaluate
       case "-" => left.evaluate - right.evaluate
@@ -27,7 +31,7 @@ class Operator(left: Expression, op: String, right: Expression) extends Expressi
     }
   }
 
-  override def optimize: Expression = {
+  def optimize: Expression = {
 
     val l = left.optimize
     val r = right.optimize
@@ -48,11 +52,19 @@ class Operator(left: Expression, op: String, right: Expression) extends Expressi
     op match {
       case "*" => optL * optR
       case "/" => optL / optR
-      case "+" => Operator(l, "+", r)
-      case "-" => Operator(l, "-", r)
+      case "+" => optL + optR
+      case "-" => optL - optR
       case _ => throw new EvaluateException(s"Can't optimize expression: $toString")
     }
   }
+
+  def changeSign: Expression = Operator(left.changeSign, op, right.changeSign)
+
+//  def convertToPlus: Array[Expression] = {
+//    val l = if (left.isInstanceOf[Operable]) Array(left) else left.asInstanceOf[Operator].convertToPlus
+//    val r = if (right.isInstanceOf[Operable]) Array(right) else right.asInstanceOf[Operator].convertToPlus
+//    l ++ r
+//  }
 
   override def toString: String = {
     if (left != null && right != null)
@@ -63,9 +75,8 @@ class Operator(left: Expression, op: String, right: Expression) extends Expressi
 
   override def equals(obj: Any): Boolean = {
     obj match {
-      case _: Operator => toString.equals(obj.toString)
-//        left.equals(other.left) && op.equals(other.op) && right.equals(other.right)
-      case _: Throwable => false
+      case operator: Operator => toString.equals(operator.toString)
+      case _ => false
     }
   }
 }

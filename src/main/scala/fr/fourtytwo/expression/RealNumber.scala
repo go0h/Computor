@@ -7,6 +7,8 @@ class RealNumber(private val num: Double) extends Operable {
   override def toString: String = num.toString
 
 
+  def changeSign: RealNumber = RealNumber(-1.0 * num)
+
   ////////////////////////////////////////
   ////////////// PLUS METHODS ////////////
   ////////////////////////////////////////

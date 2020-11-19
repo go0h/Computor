@@ -2,6 +2,7 @@ package fr.fourtytwo
 
 import fr.fourtytwo.Polynomial.createNormalizePolynomial
 import fr.fourtytwo.exception._
+import fr.fourtytwo.expression.{Expression, simplifyExpression}
 import fr.fourtytwo.token.TokenType._
 import fr.fourtytwo.token._
 
@@ -24,6 +25,10 @@ object Polynomial {
 
   def apply(expression: String): Polynomial = new Polynomial(expression)
 
+  /** Transform random polynomial expression to special format
+   * Example: {{{3x^2 + x + 3 = 0 => (3.0 * x^2.0) + (1.0 * X^1) + 3 = 0}}}
+   * @return Polynomial in normalized format
+   */
   def createNormalizePolynomial(expression: String): String = {
 
     val tokenizer: Tokenizer = Tokenizer(getSimpleTypesWithRegex)
@@ -47,27 +52,10 @@ object Polynomial {
     s"$leftExpr = $rightExpr"
   }
 
-  private def convertToInfix(expressions: Array[String]): String = {
-
-    val stack = ScalaStack[String]()
-
-    for (expr <- expressions) {
-      expr match {
-        case "+" | "*" | "/" | "-" | "^" => {
-          if (stack.length < 2)
-            throw new EvaluateException(s"Wrong1 ${expr.mkString(" ")}")
-          val first = stack.pop()
-          val second = stack.pop()
-          stack.push(s"$second $expr $first")
-        }
-        case _ => stack.push(expr)
-      }
-    }
-    if (stack.length != 1)
-      throw new EvaluateException(s"Wrong2 ${expressions.mkString(" ")}")
-    stack.pop()
-  }
-
+  /** Converts tokens in RPN format to polynomial format expression
+   * Example: RPN tokens {{{3 X 2 ^ * => (3.0 * X^2)}}}
+   * @return Expression in normalized format
+   */
   def normalize(rpnTokens: Array[Token]): String = {
 
     val RN = REALNUMBER
@@ -149,6 +137,38 @@ object Polynomial {
       tempTypes = allTypes.slice(i, allTypes.length)
     }
     convertToInfix(expressions.toArray)
+  }
+
+  /** Composite from RPN array expression to normal string */
+  def convertToInfix(expressions: Array[String]): String = {
+
+    val stack = ScalaStack[String]()
+
+    for (expr <- expressions) {
+      expr match {
+        case "+" | "*" | "/" | "-" | "^" => {
+          if (stack.length < 2)
+            throw new EvaluateException(s"Wrong1 ${expr.mkString(" ")}")
+          val first = stack.pop()
+          val second = stack.pop()
+          stack.push(s"$second $expr $first")
+        }
+        case _ => stack.push(expr)
+      }
+    }
+    if (stack.length != 1)
+      throw new EvaluateException(s"Wrong2 ${expressions.mkString(" ")}")
+    stack.pop()
+  }
+
+  def toOptimalExpression(expression: String): Expression = {
+
+    val tokens = SIMPLE_TOKENIZER.generateTokens(expression)
+    val normalExpr = Polynomial.normalize(RPN.convertToRPN(tokens))
+
+    val normalTokens = INDETER_TOKENIZER.generateTokens(normalExpr.replaceAll("[()\\s]", ""))
+    val beforeOptExpr = RPN(normalTokens).solve
+    simplifyExpression(beforeOptExpr)
   }
 
   private def varNums(infixTokens: Array[Token]): Int = {

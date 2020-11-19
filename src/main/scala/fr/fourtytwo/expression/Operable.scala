@@ -1,7 +1,8 @@
 package fr.fourtytwo.expression
 
-trait Operable extends Expression {
+import fr.fourtytwo.expression.Operator._
 
+trait Operable extends Expression {
 
   ////////////////////////////////////////
   //////////// ADDITION METHODS //////////
@@ -36,7 +37,7 @@ trait Operable extends Expression {
   ////////////////////////////////////////
   //////////// MULTIPLY METHODS //////////
   ////////////////////////////////////////
-  def *(other: Operable): Expression = {
+  def *(other: Expression): Expression = {
     other match {
       case rn : RealNumber => this * rn
       case v : Variable => this * v
@@ -51,7 +52,7 @@ trait Operable extends Expression {
   ////////////////////////////////////////
   //////////// DIVISION METHODS //////////
   ////////////////////////////////////////
-  def /(other: Operable): Expression = {
+  def /(other: Expression): Expression = {
     other match {
       case rn : RealNumber => this / rn
       case v : Variable => this / v

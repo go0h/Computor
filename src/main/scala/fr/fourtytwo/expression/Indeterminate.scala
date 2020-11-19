@@ -10,15 +10,18 @@ case class Indeterminate(constant: RealNumber,
     this(RealNumber(c), Variable(v), RealNumber(d))
   }
 
-  override def evaluate: Double = {
+  def evaluate: Double = {
     Operator(constant, "*", Operator(variable, "^", degree)).evaluate
   }
-  override def optimize: Expression = {
+  def optimize: Expression = {
     if (degree.evaluate == 0.0)
       return constant
+    if (variable.getSing == -1)
+      return Indeterminate(constant.changeSign, variable.changeSign, degree)
     this
   }
 
+  def changeSign: Indeterminate = Indeterminate(constant.changeSign, variable, degree)
 
   ////////////////////////////////////////
   //////////// ADDITION METHODS //////////
