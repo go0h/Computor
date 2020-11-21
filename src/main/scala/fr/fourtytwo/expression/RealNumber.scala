@@ -7,7 +7,7 @@ class RealNumber(private val num: Double) extends Operable {
   override def toString: String = num.toString
 
 
-  def changeSign: RealNumber = RealNumber(-1.0 * num)
+  def changeSign: RealNumber = RealNumber(num * -1)
 
   ////////////////////////////////////////
   ////////////// PLUS METHODS ////////////
@@ -15,13 +15,13 @@ class RealNumber(private val num: Double) extends Operable {
   def +(expr: RealNumber): Expression = RealNumber(num + expr.evaluate)
 
   def +(expr: Variable): Expression = {
-    if (num == 0.0)
+    if (num == 0)
       return expr
     Operator(this, "+", expr)
   }
 
   def +(expr: Indeterminate): Expression = {
-    if (num == 0.0)
+    if (num == 0)
       return expr
     Operator(this, "+", expr)
   }
@@ -42,13 +42,13 @@ class RealNumber(private val num: Double) extends Operable {
 
   def *(other: Variable): Expression = {
     if (num == 0)
-      return RealNumber(0.0)
-    new Indeterminate(num, other.toString, 1.0)
+      return RealNumber(0)
+    new Indeterminate(num, other.toString, 1)
   }
 
   def *(other: Indeterminate): Expression = {
     if (num == 0)
-      return RealNumber(0.0)
+      return RealNumber(0)
     new Indeterminate(num.toDouble * other.constant.evaluate,
       other.variable.toString,
       other.degree.evaluate)
@@ -60,7 +60,7 @@ class RealNumber(private val num: Double) extends Operable {
   ////////////////////////////////////////
   def /(other: RealNumber): RealNumber = {
     if (num == 0)
-      return RealNumber(0.0)
+      return RealNumber(0)
 
     val denominator = other.evaluate
     if (denominator == 0)
@@ -70,16 +70,16 @@ class RealNumber(private val num: Double) extends Operable {
 
   def /(other: Variable): Operable = {
     if (num == 0)
-      return RealNumber(0.0)
-    new Indeterminate(RealNumber(num), other, RealNumber(-1.0))
+      return RealNumber(0)
+    new Indeterminate(RealNumber(num), other, RealNumber(-1))
   }
 
   def /(other: Indeterminate): Operable = {
     if (num == 0)
-      return RealNumber(0.0)
+      return RealNumber(0)
     new Indeterminate(RealNumber(num / other.constant.evaluate),
                       other.variable,
-                      RealNumber(other.degree.evaluate * -1.0))
+                      RealNumber(other.degree.evaluate * -1))
   }
 
   override def equals(obj: Any): Boolean = {
@@ -87,7 +87,7 @@ class RealNumber(private val num: Double) extends Operable {
       case i: Int => num == i
       case d: Double => num == d
       case r: RealNumber => num == r.num
-      case _: Throwable => false
+      case _ => false
     }
   }
 }

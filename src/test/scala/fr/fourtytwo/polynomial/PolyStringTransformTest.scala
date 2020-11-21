@@ -1,32 +1,31 @@
-package fr.fourtytwo
+package fr.fourtytwo.polynomial
 
-import fr.fourtytwo.exception._
-import fr.fourtytwo.token.{TokenType, _}
+import fr.fourtytwo.RPN
+import fr.fourtytwo.expression.SIMPLE_TOKENIZER
+import fr.fourtytwo.polynomial.Polynomial.normalizeRPNTokens
+import fr.fourtytwo.token.TokenType.OPERATION
+import fr.fourtytwo.token.Token
 import org.scalatest.funsuite.AnyFunSuite
 
-import scala.util.matching.Regex
-
-class PolynomialTest extends AnyFunSuite {
-
-  val matchers: Map[TokenType.Value, Regex] = TokenType.getSimpleTypesWithRegex
-  val tokenizer: Tokenizer = Tokenizer(matchers)
+/** TEST transform random polynomial expression to special format
+ * Example: {{{3x^2 + x + 3 = 0 => (3.0 * x^2.0) + (1.0 * X^1) + 3 = 0}}}
+ */
+class PolyStringTransformTest extends AnyFunSuite {
 
   def normalizePolynomial(expression: String): String = {
-    val poly = Polynomial(expression)
-    poly.normExp
-  }
 
-  def getResult(expr: String): Double = {
-    val tokens = tokenizer.generateTokens(expr)
-    RPN(tokens).solve.evaluate
-  }
+    val tokens: Array[Token] = SIMPLE_TOKENIZER.generateTokens(expression)
 
-  def getResultAlter(expr: String): Double = {
-    val rpnTokens = RPN(tokenizer.generateTokens(expr)).tokens
-    val normalExpression = Polynomial.normalize(rpnTokens)
-    getResult(normalExpression)
-  }
+    val leftRPN: Array[Token] =
+      RPN.convertToRPN(tokens.slice(0, tokens.indexOf(Token("=", OPERATION))))
+    val rightRPN: Array[Token] =
+      RPN.convertToRPN(tokens.slice(tokens.indexOf(Token("=", OPERATION)) + 1, tokens.length))
 
+    val leftExpr: String = normalizeRPNTokens(leftRPN)
+    val rightExpr: String = normalizeRPNTokens(rightRPN)
+
+    s"$leftExpr = $rightExpr"
+  }
 
   test("Basic convention - 1") {
     val expr = "(4 * X^2.0) - (-4 * X^1) + 4 = 0"
@@ -76,30 +75,6 @@ class PolynomialTest extends AnyFunSuite {
     assert(norm.equals("(4 * X^1) = 77"), norm)
   }
 
-  test("No equal sing") {
-    assertThrows[ParseException] {
-      normalizePolynomial("X^2 + 4")
-    }
-  }
-
-  test("Two equal sings") {
-    assertThrows[ParseException] {
-      normalizePolynomial("X^2 + 4 = 0 = 0")
-    }
-  }
-
-  test("No variable") {
-    assertThrows[EvaluateException] {
-      normalizePolynomial("2 + 2 * 2 = 6")
-    }
-  }
-
-  test("Two variables") {
-    assertThrows[EvaluateException] {
-      normalizePolynomial("X^2 + 4 + Y = 3")
-    }
-  }
-
   test("Division convention - 1") {
     val expr = "4.0 / X^(-2.0) = 77"
     val norm = normalizePolynomial(expr)
@@ -124,9 +99,4 @@ class PolynomialTest extends AnyFunSuite {
     assert(norm.equals("(0.25 * X^1) = 77"), norm)
   }
 
-//  test("Optimize - 1") {
-//    val expr = "(8 * y^0.12) * (-4 * y^-0.302) / (2 * y^1) + (-4 * y^3)"
-//    val norm = normalizePolynomial(expr)
-//
-//  }
 }

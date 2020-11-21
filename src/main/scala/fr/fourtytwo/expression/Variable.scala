@@ -83,7 +83,7 @@ class Variable(name: String) extends Operable {
       throw new EvaluateException(s"Can't multiply different variables ($name, ${other.variable})")
     Indeterminate(other.constant,
                   other.variable,
-                  RealNumber(other.degree.evaluate * 2.0))
+                  RealNumber(other.degree.evaluate + 1))
   }
 
 
@@ -91,23 +91,23 @@ class Variable(name: String) extends Operable {
   //////////// DIVISION METHODS //////////
   ////////////////////////////////////////
   def /(other: RealNumber): Indeterminate = {
-    new Indeterminate(1.0 / other.evaluate, name, 1.0)
+    new Indeterminate(1 / other.evaluate, name, 1)
   }
 
   def /(other: Variable): Operable = {
     if (!name.equals(other.toString))
       throw new EvaluateException(s"Can't division different variables ($name, ${other.toString})")
-    new RealNumber(1.0)
+    new RealNumber(1)
   }
 
   def /(other: Indeterminate): Operable = {
     if (!name.equals(other.variable.toString))
       throw new EvaluateException(s"Can't division different variables ($name, ${other.variable})")
-    if (other.degree.evaluate == 1.0)
+    if (other.degree.evaluate == 1)
       return other.constant
-    new Indeterminate(RealNumber(1.0 / other.constant.evaluate),
+    new Indeterminate(RealNumber(1 / other.constant.evaluate),
                       Variable(name),
-                      RealNumber((other.degree.evaluate - 1.0) * -1.0))
+                      RealNumber((other.degree.evaluate - 1) * -1))
   }
 
   override def equals(other: Any): Boolean = {

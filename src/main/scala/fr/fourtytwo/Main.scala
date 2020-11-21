@@ -2,26 +2,10 @@ package fr.fourtytwo
 
 import fr.fourtytwo.exception._
 import fr.fourtytwo.expression._
-import fr.fourtytwo.token.{TokenType, _}
-
-import scala.util.matching.Regex
+import fr.fourtytwo.polynomial.Polynomial
+import fr.fourtytwo.polynomial.Polynomial._
 
 object Main {
-
-//  def parseNormalize(expression: String): Expression = {
-//
-//    println(s"Base expr:  $expression")
-//
-//    val tokens = SIMPLE_TOKENIZER.generateTokens(expression)
-//    val normalExpr = Polynomial.normalize(RPN.convertToRPN(tokens))
-//    println(s"Norm expr1: $normalExpr")
-//
-//    val normalTokens = INDETER_TOKENIZER
-//      .generateTokens(normalExpr.replaceAll("[()\\s]", ""))
-//    val beforeOptExpr = RPN(normalTokens).solve
-//    val optimize = simplifyExpression(beforeOptExpr)
-//    optimize
-//  }
 
 
   //"8 * y^0.12 * -4 * y^1 + y^1 + -4 * y^3 + 31"
@@ -29,15 +13,12 @@ object Main {
 
   def main(args: Array[String]): Unit = {
 
-    val exprL = "8 * y^4 * (4 * y^2) / (2 * y^1) * (3 * y^3)"
-    val exprR = "-8 * y^3 + 20 / 4"
-
+    val expr = "X^2 - X^2 + X + 13 * 2 = 0"
 
     try {
-      val left = Polynomial.toOptimalExpression(exprL)
-      val right = Polynomial.toOptimalExpression(exprR)
-      println(s"$left = $right")
-      println(Operator(left, "+", right.changeSign) + " = 0")
+      val polynomial = Polynomial(expr)
+
+      println("Expected:   (1.0 * X^1.0) + 26.0 = 0")
     } catch {
       case ex: ParseException => println(ex.getMessage)
       case ex: EvaluateException => println(ex.getMessage)

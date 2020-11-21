@@ -1,23 +1,48 @@
-package fr.fourtytwo
+package fr.fourtytwo.polynomial
 
-import fr.fourtytwo.Polynomial.createNormalizePolynomial
+import fr.fourtytwo.RPN
 import fr.fourtytwo.exception._
-import fr.fourtytwo.expression.{Expression, simplifyExpression}
+import fr.fourtytwo.expression.Operator.priority
+import fr.fourtytwo.expression._
+import fr.fourtytwo.polynomial.Polynomial._
 import fr.fourtytwo.token.TokenType._
 import fr.fourtytwo.token._
+
 
 import scala.collection.mutable.{ArrayBuffer, Stack => ScalaStack}
 
 class Polynomial(expr: String) {
 
-  if (expr.count(_ == '=') != 1)
-    throw new ParseException(s"No equal sign in expression $expr")
+  equalityAndVariableChecks(expr)
 
-  val normExp: String = createNormalizePolynomial(expr)
+  println(s"Original:   $expr")
+
+  val nonOrderPoly: Expression = simplify(expr)
+
+  println(s"Non order:  $nonOrderPoly = 0")
+
+  def simplify(normExpr: String): Expression = {
+
+    val leftStr = normExpr.substring(0, normExpr.indexOf("="))
+    val rightStr = normExpr.substring(normExpr.indexOf("=") + 1)
+
+    val leftExpr = toOptimalExpression(leftStr)
+    val rightExpr = toOptimalExpression(rightStr)
+
+    println(s"Normalized: $leftExpr = $rightExpr")
+
+
+    val allOnLeft = rightExpr match {
+      case r: RealNumber if r.evaluate == 0 => leftExpr
+      /* change the sign to all expressions before moving to the left */
+      case _ => Operator(leftExpr, "+", rightExpr.changeSign)
+    }
+    removeMinus(allOnLeft.optimize)
+  }
 
   val degree = null
 
-  override def toString: String = expr
+  override def toString: String = s"$nonOrderPoly = 0"
 
 }
 
@@ -25,38 +50,28 @@ object Polynomial {
 
   def apply(expression: String): Polynomial = new Polynomial(expression)
 
-  /** Transform random polynomial expression to special format
-   * Example: {{{3x^2 + x + 3 = 0 => (3.0 * x^2.0) + (1.0 * X^1) + 3 = 0}}}
-   * @return Polynomial in normalized format
-   */
-  def createNormalizePolynomial(expression: String): String = {
+  def toOptimalExpression(expression: String): Expression = {
 
-    val tokenizer: Tokenizer = Tokenizer(getSimpleTypesWithRegex)
-    val tokens: Array[Token] = tokenizer.generateTokens(expression)
+    val space = Token(" ", TokenType.SPACE)
+    val tokens = SIMPLE_TOKENIZER.generateTokens(expression)
+    val rpnTokens = RPN.convertToRPN(tokens)
 
-    if (varNums(tokens) != 1)
-      throw new EvaluateException(s"There is ${varNums(tokens)} " +
-        s"variables: ${getVars(tokens)}. I can't solve")
+    val normalExpr = normalizeRPNTokens(rpnTokens)
+      .replaceAll("[()\\s]", "")
 
-    val leftRPN: Array[Token] =
-      RPN.convertToRPN(tokens.slice(0, tokens.indexOf(Token("=", OPERATION))))
-    val rightRPN: Array[Token] =
-      RPN.convertToRPN(tokens.slice(tokens.indexOf(Token("=", OPERATION)) + 1, tokens.length))
+    /* add spaces after each token to recognize unary minus */
+    val normalTokens = INDETER_TOKENIZER.generateTokens(normalExpr)
+      .flatMap(x => Array(x, space))
 
-    println(s"""Expression: ${tokens.mkString("")}
-               |Left RPN  : ${leftRPN.mkString("")}
-               |Right RPN : ${rightRPN.mkString("")}""".stripMargin)
-    val leftExpr: String = normalize(leftRPN)
-    val rightExpr: String = normalize(rightRPN)
-
-    s"$leftExpr = $rightExpr"
+    val beforeOptExpr = RPN(normalTokens).solve
+    simplifyExpression(beforeOptExpr)
   }
 
   /** Converts tokens in RPN format to polynomial format expression
    * Example: RPN tokens {{{3 X 2 ^ * => (3.0 * X^2)}}}
    * @return Expression in normalized format
    */
-  def normalize(rpnTokens: Array[Token]): String = {
+  def normalizeRPNTokens(rpnTokens: Array[Token]): String = {
 
     val RN = REALNUMBER
     val V = VARIABLE
@@ -161,27 +176,66 @@ object Polynomial {
     stack.pop()
   }
 
-  def toOptimalExpression(expression: String): Expression = {
+  /** Simplification of algebraic expression */
+  def simplifyExpression(expr: Expression): Expression = {
 
-    val tokens = SIMPLE_TOKENIZER.generateTokens(expression)
-    val normalExpr = Polynomial.normalize(RPN.convertToRPN(tokens))
+    var oldExpr = expr
+    var newExpr = expr.optimize
 
-    val normalTokens = INDETER_TOKENIZER.generateTokens(normalExpr.replaceAll("[()\\s]", ""))
-    val beforeOptExpr = RPN(normalTokens).solve
-    simplifyExpression(beforeOptExpr)
+    while (!oldExpr.equals(newExpr)) {
+      oldExpr = newExpr
+      newExpr = newExpr.optimize
+    }
+    newExpr match {
+      case operator: Operator => rotateAndSimplify(operator).optimize
+      case operable: Operable => operable
+    }
   }
 
-  private def varNums(infixTokens: Array[Token]): Int = {
-    infixTokens
-      .filter(_.tType == VARIABLE)
-      .map(_.expr)
-      .distinct.length
+  private def rotateAndSimplify(operator: Operator): Expression = {
+
+    var curOp = operator
+
+    while (!curOp.getRight.isInstanceOf[Operator] && curOp.getLeft.isInstanceOf[Operator]) {
+
+      val left = curOp.getLeft.asInstanceOf[Operator]
+
+      if (priority(left.getOp) == priority(curOp.getOp) && left.getRight.isInstanceOf[Operable]) {
+
+        val newOp = Operator(left.getLeft,
+                             left.getOp,
+                             Operator(left.getRight, curOp.getOp, curOp.getRight)).optimize
+
+        if (!newOp.isInstanceOf[Operator])
+          return newOp
+        curOp = newOp.asInstanceOf[Operator]
+      }
+    }
+    curOp.optimize
   }
 
-  private def getVars(infixTokens: Array[Token]): String = {
-    infixTokens
-      .filter(_.tType == VARIABLE)
-      .map(x => s"'${x.expr}'")
-      .mkString(", ")
+  def removeMinus(expr: Expression, prevSign: Int = 1): Expression = {
+
+    if (expr.isInstanceOf[Operable]) {
+      return if (prevSign == 1) expr else expr.changeSign
+    }
+
+    val op = expr.asInstanceOf[Operator]
+    val nextSign = if (op.getOp.equals("-")) -1 else 1
+
+    Operator(removeMinus(op.getLeft, prevSign), "+", removeMinus(op.getRight, nextSign))
+  }
+
+  def equalityAndVariableChecks(expression: String): Unit = {
+
+    if (expression.count(_ == '=') != 1)
+      throw new ParseException(s"No equal sign in expression $expression")
+
+    val tokens = SIMPLE_TOKENIZER.generateTokens(expression).filter(_.tType == VARIABLE)
+    val variables = tokens.map(_.expr).distinct
+
+    if (variables.length != 1)
+      throw new EvaluateException(s"There is ${variables.length} " +
+        s"variables: ${variables.mkString(", ")}. I can't solve")
   }
 }

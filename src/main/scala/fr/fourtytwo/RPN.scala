@@ -26,17 +26,16 @@ class RPN(infixTokens: Array[Token]) {
         case REALNUMBER => stack.push(RealNumber(token.expr.toDouble))
         case VARIABLE => stack.push(Variable(token.expr))
         case INDETERMINATE => stack.push(Indeterminate(token.expr))
-        case OPERATION => {
+        case OPERATION =>
           if (stack.length < 2)
-            throw new EvaluateException(s"Wrong $infixString")
+            throw new EvaluateException(s"Wrong stack length: $infixString")
           val first = stack.pop()
           stack.push(Operator(stack.pop(), token.expr, first))
-        }
         case _ => throw new EvaluateException(s"Can't solve token: ${token.expr}")
       }
     }
     if (stack.length != 1)
-      throw new EvaluateException(s"Wrong $infixString")
+      throw new EvaluateException(s"Wrong stack length in the end: $infixString")
     stack.pop()
   }
 }
@@ -57,7 +56,7 @@ object RPN {
 
       token.tType match {
 
-        case OPERATION => {
+        case OPERATION =>
           if (token.equals("-")                   // UNARY OPERATOR CONDITION
             && prev.tType >= SPACE && !prev.equals("-")
             && prevNonSpace.tType >= OPERATION && !prevNonSpace.equals(")")) {
@@ -79,11 +78,9 @@ object RPN {
             stack.push(token)
           }
           prevNonSpace = token
-        }
-        case REALNUMBER | VARIABLE | INDETERMINATE => {
+        case REALNUMBER | VARIABLE | INDETERMINATE =>
           RPNTokens.append(token)
           prevNonSpace = token
-        }
         case _ =>
       }
       prev = token
@@ -101,7 +98,7 @@ object RPN {
 
       token.tType match {
         case UNARY => unary *= -1
-        case _ => {
+        case _ =>
           if (unary == 1) {
             out.append(token)
           }
@@ -109,7 +106,6 @@ object RPN {
             out.append(Token("-" + token.expr, token.tType))
             unary = 1
           }
-        }
       }
     }
     out.toArray

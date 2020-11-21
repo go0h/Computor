@@ -14,7 +14,9 @@ case class Indeterminate(constant: RealNumber,
     Operator(constant, "*", Operator(variable, "^", degree)).evaluate
   }
   def optimize: Expression = {
-    if (degree.evaluate == 0.0)
+    if (constant.evaluate == 0)
+      return RealNumber(0)
+    if (degree.evaluate == 0)
       return constant
     if (variable.getSing == -1)
       return Indeterminate(constant.changeSign, variable.changeSign, degree)
@@ -27,7 +29,7 @@ case class Indeterminate(constant: RealNumber,
   //////////// ADDITION METHODS //////////
   ////////////////////////////////////////
   override def +(other: RealNumber): Expression = {
-    if (other.evaluate == 0.0)
+    if (other.evaluate == 0)
       return this
     Operator(this, "+", other)
   }
@@ -35,8 +37,8 @@ case class Indeterminate(constant: RealNumber,
   override def +(other: Variable): Expression = {
     if (!variable.equals(other))
       throw new EvaluateException(s"Can't add different variables ($variable, $other)")
-    if (degree.evaluate == 1.0)
-      return Indeterminate(RealNumber(constant.evaluate + 1.0), other, degree)
+    if (degree.evaluate == 1)
+      return Indeterminate(RealNumber(constant.evaluate + 1), other, degree)
     Operator(this, "+", other)
   }
 
@@ -65,7 +67,7 @@ case class Indeterminate(constant: RealNumber,
       throw new EvaluateException(s"Can't sub different variables ($variable, $other)")
     if (degree.evaluate == 1) {
       if (constant.evaluate == 1)
-        return RealNumber(0.0)
+        return RealNumber(0)
       return Indeterminate(RealNumber(this.constant.evaluate - 1), variable, degree)
     }
     Operator(this, "-", other)
@@ -94,7 +96,7 @@ case class Indeterminate(constant: RealNumber,
     if (!variable.equals(other))
       throw new EvaluateException(s"Can't multiply different variables ($variable, $other)")
 
-    new Indeterminate(this.constant, variable, RealNumber(degree.evaluate * 2))
+    new Indeterminate(this.constant, variable, RealNumber(degree.evaluate + 1))
   }
 
   def *(other: Indeterminate): Expression = {
@@ -119,7 +121,7 @@ case class Indeterminate(constant: RealNumber,
       throw new EvaluateException(s"Can't division different variables ($variable, $other)")
     if (degree.evaluate == 1)
       return constant
-    new Indeterminate(constant, variable, RealNumber(degree.evaluate - 1.0))
+    new Indeterminate(constant, variable, RealNumber(degree.evaluate - 1))
   }
 
   def /(other: Indeterminate): Expression = {
@@ -127,7 +129,7 @@ case class Indeterminate(constant: RealNumber,
       throw new EvaluateException(s"Can't division different variables ($variable, ${other.variable})")
 
     if (equals(other))
-      return RealNumber(1.0)
+      return RealNumber(1)
     val res = new Indeterminate(constant / other.constant,
                                 variable,
                                 RealNumber(degree.evaluate - other.degree.evaluate))
@@ -142,18 +144,15 @@ case class Indeterminate(constant: RealNumber,
   override def equals(other: Any): Boolean = {
 
     other match {
-      case temp: RealNumber => {
+      case temp: RealNumber =>
         if (this.degree.evaluate == 0 && temp.evaluate == 0)
           return true
-      }
-      case temp: Variable => {
-        if (variable.equals(temp) && degree.evaluate == 1.0 && constant.evaluate == 1.0)
+      case temp: Variable =>
+        if (variable.equals(temp) && degree.evaluate == 1 && constant.evaluate == 1)
           return true
-      }
-      case temp: Indeterminate => {
+      case temp: Indeterminate =>
         if (variable.equals(temp.variable) && degree.equals(temp.degree) && constant.equals(temp.constant))
           return true
-      }
       case _ =>
     }
     false

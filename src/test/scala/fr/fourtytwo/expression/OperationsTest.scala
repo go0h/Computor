@@ -16,7 +16,7 @@ class OperationsTest extends AnyFunSuite {
   test("RealNumber + Variable") {
     val res = RealNumber(3.14) + Variable("Y")
     assert(res.isInstanceOf[Operator])
-    assert(res.toString.equals("(3.14 + Y)"), res)
+    assert(res.toString.equals("3.14 + Y"), res)
   }
 
   test("RealNumber = 0 + Variable") {
@@ -28,7 +28,7 @@ class OperationsTest extends AnyFunSuite {
   test("RealNumber + Indeterminate") {
     val res = RealNumber(3.14) + Indeterminate(RealNumber(4.0), Variable("X"), RealNumber(1.0))
     assert(res.isInstanceOf[Operator])
-    assert(res.toString.equals("(3.14 + (4.0 * X^1.0))"), res)
+    assert(res.toString.equals("3.14 + (4.0 * X^1.0)"), res)
   }
 
   test("RealNumber = 0 + Indeterminate") {
@@ -45,13 +45,13 @@ class OperationsTest extends AnyFunSuite {
   test("RealNumber - Variable") {
     val res = RealNumber(3.14) - Variable("X")
     assert(res.isInstanceOf[Operator])
-    assert(res.toString.equals("(3.14 - X)"), res)
+    assert(res.toString.equals("3.14 - X"), res)
   }
 
   test("RealNumber - Indeterminate") {
     val res = RealNumber(3.14) - Indeterminate(RealNumber(4.0), Variable("X"), RealNumber(1.0))
     assert(res.isInstanceOf[Operator])
-    assert(res.toString.equals("(3.14 - (4.0 * X^1.0))"), res)
+    assert(res.toString.equals("3.14 - (4.0 * X^1.0)"), res)
   }
 
   test("RealNumber * RealNumber") {
@@ -105,7 +105,7 @@ class OperationsTest extends AnyFunSuite {
   test("Variable + RealNumber") {
     val res = Variable("X") + RealNumber(0.5)
     assert(res.isInstanceOf[Operator])
-    assert(res.toString.equals("(X + 0.5)"))
+    assert(res.toString.equals("X + 0.5"))
   }
 
   test("Variable + RealNumber = 0") {
@@ -129,7 +129,7 @@ class OperationsTest extends AnyFunSuite {
   test("Variable + Indeterminate") {
     val res = Variable("X") + Indeterminate(RealNumber(4.0), Variable("X"), RealNumber(13))
     assert(res.isInstanceOf[Operator])
-    assert(res.toString.equals("(X + (4.0 * X^13.0))"), res)
+    assert(res.toString.equals("X + (4.0 * X^13.0)"), res)
   }
 
   test("Variable + Indeterminate. Degree == 1") {
@@ -147,7 +147,7 @@ class OperationsTest extends AnyFunSuite {
   test("Variable - RealNumber") {
     val res = Variable("X") - RealNumber(0.5)
     assert(res.isInstanceOf[Operator])
-    assert(res.toString.equals("(X - 0.5)"))
+    assert(res.toString.equals("X - 0.5"))
   }
 
   test("Variable - RealNumber = 0") {
@@ -177,7 +177,7 @@ class OperationsTest extends AnyFunSuite {
   test("Variable - Indeterminate") {
     val res = Variable("X") - Indeterminate(RealNumber(4.0), Variable("X"), RealNumber(13))
     assert(res.isInstanceOf[Operator])
-    assert(res.toString.equals("(X - (4.0 * X^13.0))"))
+    assert(res.toString.equals("X - (4.0 * X^13.0)"))
   }
 
   test("Variable - Indeterminate^1") {
@@ -211,9 +211,9 @@ class OperationsTest extends AnyFunSuite {
   }
 
   test("Variable * Indeterminate") {
-    val res = Variable("X") * Indeterminate(RealNumber(4.0), Variable("X"), RealNumber(13))
+    val res = Variable("X") * Indeterminate(RealNumber(4), Variable("X"), RealNumber(13))
     assert(res.isInstanceOf[Indeterminate])
-    assert(res.toString.equals("(4.0 * X^26.0)"), res.toString)
+    assert(res.toString.equals("(4.0 * X^14.0)"), res.toString)
   }
 
   test("Variable / RealNumber") {
@@ -252,7 +252,7 @@ class OperationsTest extends AnyFunSuite {
   test("Indeterminate + RealNumber") {
     val res = Indeterminate(RealNumber(4.0), Variable("X"), RealNumber(13)) + RealNumber(0.5)
     assert(res.isInstanceOf[Operator])
-    assert(res.toString.equals("((4.0 * X^13.0) + 0.5)"), res.toString)
+    assert(res.toString.equals("(4.0 * X^13.0) + 0.5"), res.toString)
   }
 
   test("Indeterminate + RealNumber = 0") {
@@ -264,7 +264,7 @@ class OperationsTest extends AnyFunSuite {
   test("Indeterminate + Variable") {
     val res = Indeterminate(RealNumber(4.0), Variable("X"), RealNumber(13)) + Variable("X")
     assert(res.isInstanceOf[Operator])
-    assert(res.toString.equals("((4.0 * X^13.0) + X)"), res)
+    assert(res.toString.equals("(4.0 * X^13.0) + X"), res)
   }
 
   test("Indeterminate + OtherVariable") {
@@ -289,7 +289,7 @@ class OperationsTest extends AnyFunSuite {
     val res = Indeterminate(RealNumber(4.31), Variable("X"), RealNumber(3)) +
       Indeterminate(RealNumber(31), Variable("X"), RealNumber(321))
     assert(res.isInstanceOf[Operator])
-    assert(res.toString.equals("((4.31 * X^3.0) + (31.0 * X^321.0))"), res)
+    assert(res.toString.equals("(4.31 * X^3.0) + (31.0 * X^321.0)"), res)
   }
 
   test("Indeterminate^1 + Indeterminate^1") {
@@ -309,7 +309,7 @@ class OperationsTest extends AnyFunSuite {
   test("Indeterminate - RealNumber") {
     val res = Indeterminate(RealNumber(4.0), Variable("X"), RealNumber(13)) - RealNumber(0.5)
     assert(res.isInstanceOf[Operator])
-    assert(res.toString.equals("((4.0 * X^13.0) - 0.5)"), res.toString)
+    assert(res.toString.equals("(4.0 * X^13.0) - 0.5"), res.toString)
   }
 
   test("Indeterminate - RealNumber = 0") {
@@ -321,7 +321,7 @@ class OperationsTest extends AnyFunSuite {
   test("Indeterminate - Variable") {
     val res = Indeterminate(RealNumber(4.0), Variable("X"), RealNumber(13)) - Variable("X")
     assert(res.isInstanceOf[Operator])
-    assert(res.toString.equals("((4.0 * X^13.0) - X)"), res)
+    assert(res.toString.equals("(4.0 * X^13.0) - X"), res)
   }
 
   test("Indeterminate - OtherVariable") {
@@ -340,7 +340,7 @@ class OperationsTest extends AnyFunSuite {
     val res = Indeterminate(RealNumber(4.31), Variable("X"), RealNumber(3)) -
       Indeterminate(RealNumber(31), Variable("X"), RealNumber(321))
     assert(res.isInstanceOf[Operator])
-    assert(res.toString.equals("((4.31 * X^3.0) - (31.0 * X^321.0))"), res)
+    assert(res.toString.equals("(4.31 * X^3.0) - (31.0 * X^321.0)"), res)
   }
 
   test("Indeterminate^1 - Indeterminate^1") {
@@ -366,7 +366,7 @@ class OperationsTest extends AnyFunSuite {
   test("Indeterminate * Variable") {
     val res = Indeterminate(RealNumber(4.0), Variable("X"), RealNumber(3.5)) * Variable("X")
     assert(res.isInstanceOf[Indeterminate])
-    assert(res.toString.equals("(4.0 * X^7.0)"), res)
+    assert(res.toString.equals("(4.0 * X^4.5)"), res)
   }
 
   test("Indeterminate * OtherVariable") {
@@ -426,5 +426,4 @@ class OperationsTest extends AnyFunSuite {
     assert(res.isInstanceOf[Indeterminate])
     assert(res.toString.equals("(2.0 * X^1.0)"), res.toString)
   }
-
 }

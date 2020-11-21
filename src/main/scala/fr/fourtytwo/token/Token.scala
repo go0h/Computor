@@ -5,11 +5,10 @@ class Token(val expr: String, val tType: TokenType.Value) {
   override def toString: String = expr
 
   override def equals(other: Any): Boolean = {
-    if (other.isInstanceOf[Token]) {
-      val temp = other.asInstanceOf[Token]
-      return this.expr.equals(temp.expr) && this.tType == temp.tType
+    other match {
+      case temp: Token => this.expr.equals(temp.expr) && this.tType == temp.tType
+      case _ => false
     }
-    false
   }
 
   def ==(other: Token): Boolean = equals(other)

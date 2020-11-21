@@ -16,18 +16,16 @@ class Operator(left: Expression, op: String, right: Expression) extends Expressi
       case "-" => left.evaluate - right.evaluate
       case "*" => left.evaluate * right.evaluate
       case "^" => pow(left.evaluate, right.evaluate)
-      case "/" => {
+      case "/" =>
         val r = right.evaluate
         if (r == 0)
           throw new ArithmeticException("Division by zero")
-        left.evaluate / right.evaluate
-      }
-      case "%" => {
+        left.evaluate / r
+      case "%" =>
         val r = right.evaluate
         if (r == 0)
           throw new ArithmeticException("Modulo by zero")
-        left.evaluate % right.evaluate
-      }
+        left.evaluate % r
     }
   }
 
@@ -60,15 +58,9 @@ class Operator(left: Expression, op: String, right: Expression) extends Expressi
 
   def changeSign: Expression = Operator(left.changeSign, op, right.changeSign)
 
-//  def convertToPlus: Array[Expression] = {
-//    val l = if (left.isInstanceOf[Operable]) Array(left) else left.asInstanceOf[Operator].convertToPlus
-//    val r = if (right.isInstanceOf[Operable]) Array(right) else right.asInstanceOf[Operator].convertToPlus
-//    l ++ r
-//  }
-
   override def toString: String = {
     if (left != null && right != null)
-     s"($left $op $right)"
+     s"$left $op $right"
     else
       op
   }

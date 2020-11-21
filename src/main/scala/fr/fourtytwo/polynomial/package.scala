@@ -1,8 +1,12 @@
 package fr.fourtytwo
 
+import fr.fourtytwo.expression.Operator.priority
+import fr.fourtytwo.polynomial.Polynomial.normalizeRPNTokens
+import fr.fourtytwo.token.{TokenType, Tokenizer}
+
 import scala.util.matching.Regex
 
-package object token {
+package object expression {
 
   val MATCHERS: Map[TokenType.Value, Regex] = TokenType.getSimpleTypesWithRegex
   val SIMPLE_TOKENIZER: Tokenizer = Tokenizer(MATCHERS)
