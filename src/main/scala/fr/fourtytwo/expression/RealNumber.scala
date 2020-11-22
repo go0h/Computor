@@ -1,5 +1,9 @@
 package fr.fourtytwo.expression
 
+import fr.fourtytwo.exception.EvaluateException
+
+import scala.math.pow
+
 class RealNumber(private val num: Double) extends Operable {
 
   def evaluate: Double = num
@@ -81,6 +85,13 @@ class RealNumber(private val num: Double) extends Operable {
                       other.variable,
                       RealNumber(other.degree.evaluate * -1))
   }
+
+  ////////////////////////////////////////
+  ///////////// POWER METHOD /////////////
+  ////////////////////////////////////////
+  def ^(other: RealNumber): Expression = RealNumber(pow(num, other.evaluate))
+
+
 
   ////////////////////////////////////////
   //////////// COMPARE METHOD ///////////

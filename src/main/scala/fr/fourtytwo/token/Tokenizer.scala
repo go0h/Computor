@@ -44,7 +44,7 @@ class Tokenizer(matchers: Map[TokenType.Value, Regex]) {
 
 object Tokenizer {
 
-  def apply() = new Tokenizer(getAllTypesWithRegex)
+  def apply() = new Tokenizer(getMatchers)
 
   def apply(matchers: Map[TokenType.Value, Regex]) = new Tokenizer(matchers)
 

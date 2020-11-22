@@ -2,9 +2,17 @@ package fr.fourtytwo.expression
 
 import fr.fourtytwo.exception.EvaluateException
 
+import scala.math.pow
+
 class Variable(name: String) extends Operable {
 
   val sign: Int = if (name.startsWith("-")) -1 else 1
+
+//  def this(name: String) {
+//    val sign = if (name.startsWith("-")) -1 else 1
+//    val newName = if (name.startsWith("-")) name.substring(1) else name
+//    this(newName, sign)
+//  }
 
   def evaluate: Double = throw new EvaluateException(s"Variable $name has no value")
   def simplify: Expression = this
@@ -110,8 +118,19 @@ class Variable(name: String) extends Operable {
                       RealNumber((other.degree.evaluate - 1) * -1))
   }
 
+
   ////////////////////////////////////////
-  //////////// COMPARE METHODS ///////////
+  ///////////// POWER METHOD /////////////
+  ////////////////////////////////////////
+  override def ^(other: RealNumber): Expression = {
+    if (other.evaluate == 0)
+      return RealNumber(1.0)
+    Indeterminate(RealNumber(1), this, RealNumber(other.evaluate))
+  }
+
+
+  ////////////////////////////////////////
+  //////////// COMPARE METHOD ////////////
   ////////////////////////////////////////
   override def compare(other: Operable): Int = {
     other match {

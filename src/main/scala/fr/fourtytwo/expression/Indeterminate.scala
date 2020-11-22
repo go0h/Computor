@@ -2,6 +2,8 @@ package fr.fourtytwo.expression
 
 import fr.fourtytwo.exception.{EvaluateException, ParseException}
 
+import scala.math.pow
+
 // TODO add case with negate variable
 case class Indeterminate(constant: RealNumber,
                          variable: Variable,
@@ -140,6 +142,23 @@ case class Indeterminate(constant: RealNumber,
     res
   }
 
+  ////////////////////////////////////////
+  ///////////// POWER METHOD /////////////
+  ////////////////////////////////////////
+  override def ^(other: RealNumber): Expression = {
+    if (other.evaluate == 0)
+      return constant
+    if (other.evaluate == 1)
+      return this
+    Indeterminate(RealNumber(pow(constant.evaluate, other.evaluate)),
+                  variable,
+                  RealNumber(degree.evaluate * other.evaluate))
+  }
+
+
+  ////////////////////////////////////////
+  //////////// COMPARE METHOD ////////////
+  ////////////////////////////////////////
   override def compare(other: Operable): Int = {
     other match {
       case _ : RealNumber => -1

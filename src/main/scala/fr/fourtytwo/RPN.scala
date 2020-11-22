@@ -25,7 +25,6 @@ class RPN(infixTokens: Array[Token]) {
       token.tType match {
         case REALNUMBER => stack.push(RealNumber(token.expr.toDouble))
         case VARIABLE => stack.push(Variable(token.expr))
-        case INDETERMINATE => stack.push(Indeterminate(token.expr))
         case OPERATION =>
           if (stack.length < 2)
             throw new EvaluateException(s"Wrong stack length: $infixString")
@@ -57,7 +56,7 @@ object RPN {
       token.tType match {
 
         case OPERATION =>
-          if (token.equals("-")                   // UNARY OPERATOR CONDITION
+          if (token.equals("-")                           // UNARY OPERATOR CONDITION
             && prev.tType >= SPACE && !prev.equals("-")
             && prevNonSpace.tType >= OPERATION && !prevNonSpace.equals(")")) {
               RPNTokens.append(Token("--", UNARY))
@@ -78,7 +77,7 @@ object RPN {
             stack.push(token)
           }
           prevNonSpace = token
-        case REALNUMBER | VARIABLE | INDETERMINATE =>
+        case REALNUMBER | VARIABLE =>
           RPNTokens.append(token)
           prevNonSpace = token
         case _ =>

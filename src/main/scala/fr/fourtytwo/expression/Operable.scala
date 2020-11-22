@@ -1,5 +1,6 @@
 package fr.fourtytwo.expression
 
+import fr.fourtytwo.exception.EvaluateException
 import fr.fourtytwo.expression.Operator._
 
 trait Operable extends Expression with Ordered[Operable] {
@@ -62,6 +63,19 @@ trait Operable extends Expression with Ordered[Operable] {
   def /(other: RealNumber): Expression
   def /(other: Variable): Expression
   def /(other: Indeterminate): Expression
+
+  ////////////////////////////////////////
+  ///////////// POWER METHODS ////////////
+  ////////////////////////////////////////
+  def ^(other: Expression): Expression = {
+    other match {
+      case rn : RealNumber => this ^ rn
+      case v : Variable => throw new EvaluateException(s"Can't raise '$toString' to the power '$v'")
+      case i : Indeterminate => throw new EvaluateException(s"Can't raise '$toString' to the power '$i'")
+    }
+  }
+  def ^(other: RealNumber): Expression
+
 
   override def compare(other: Operable): Int
 }

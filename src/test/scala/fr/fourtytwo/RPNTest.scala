@@ -9,7 +9,7 @@ import scala.util.matching.Regex
 
 class RPNTest extends AnyFunSuite {
 
-  val matchers: Map[TokenType.Value, Regex] = TokenType.getSimpleTypesWithRegex
+  val matchers: Map[TokenType.Value, Regex] = TokenType.getMatchers
   val tokenizer = new Tokenizer(matchers)
 
   def getResult(expr: String): Double = {

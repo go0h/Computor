@@ -52,6 +52,7 @@ class Operator(left: Expression, op: String, right: Expression) extends Expressi
       case "/" => optL / optR
       case "+" => optL + optR
       case "-" => optL - optR
+      case "^" => optL ^ optR
       case _ => throw new EvaluateException(s"Can't optimize expression: $toString")
     }
   }

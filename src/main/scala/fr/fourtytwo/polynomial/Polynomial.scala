@@ -6,10 +6,7 @@ import fr.fourtytwo.expression.Operator.priority
 import fr.fourtytwo.expression._
 import fr.fourtytwo.polynomial.Polynomial._
 import fr.fourtytwo.token.TokenType._
-import fr.fourtytwo.token._
 
-
-import scala.collection.mutable.{ArrayBuffer, Stack => ScalaStack}
 
 class Polynomial(expr: String) {
 
@@ -67,128 +64,10 @@ object Polynomial {
    */
   def toOptimalExpression(expression: String): Expression = {
 
-    val space = Token(" ", TokenType.SPACE)
     val tokens = SIMPLE_TOKENIZER.generateTokens(expression)
-    val rpnTokens = RPN.convertToRPN(tokens)
 
-    val normalExpr = normalizeRPNTokens(rpnTokens)
-      .replaceAll("[()\\s]", "")
-
-    /* add spaces after each token to recognize unary minus */
-    val normalTokens = INDETER_TOKENIZER.generateTokens(normalExpr)
-      .flatMap(x => Array(x, space))
-
-    val beforeOptExpr = RPN(normalTokens).solve
+    val beforeOptExpr = RPN(tokens).solve
     simplifyExpression(beforeOptExpr)
-  }
-
-  /** Converts tokens in RPN format to polynomial format expression
-   * Example: RPN tokens {{{3 X 2 ^ * => (3.0 * X^2)}}}
-   * @return Expression in normalized format
-   */
-  def normalizeRPNTokens(rpnTokens: Array[Token]): String = {
-
-    val RN = REALNUMBER
-    val V = VARIABLE
-    val OP = OPERATION
-
-    var i = 0
-    val allTypes = rpnTokens.map(_.tType)
-    var tempTypes = allTypes
-    val expressions: ArrayBuffer[String] = new ArrayBuffer[String]()
-
-    while (tempTypes.nonEmpty) {
-      tempTypes match {
-        // (3 X 2 ^ *) => (3 * X^2)
-        // (3 X 2 ^ /) => (X^2 / 3)
-        case Array(RN, V, RN, OP, OP, _*) => {
-          if (!rpnTokens(i + 3).equals("^") || (!rpnTokens(i + 4).equals("*") && !rpnTokens(i + 4).equals("/")))
-            throw new ParseException(s"Bad indeterminate1 ${rpnTokens.slice(i, i + 5).mkString(" ")}")
-
-          // constant, operator, variable, degree
-          val degree =
-            if (rpnTokens(i + 4).equals("/")) rpnTokens(i+2).expr.toDouble * -1
-            else rpnTokens(i+2)
-          expressions.append(s"(${rpnTokens(i)} * ${rpnTokens(i+1)}^$degree)")
-          i += 5
-        }
-        // (X 2 ^ 3 *) => (3 * X^2)
-        // (X 2 ^ 3 /) => (3 / X^2)
-        case Array(V, RN, OP, RN, OP, _*) => {
-          if (!rpnTokens(i + 2).equals("^") || (!rpnTokens(i + 4).equals("*") && !rpnTokens(i + 4).equals("/")))
-            throw new ParseException(s"Bad indeterminate2 ${rpnTokens.slice(i, i + 5).mkString(" ")}")
-          // constant, operator, variable, degree
-          val const =
-            if (rpnTokens(i + 4).equals("/")) 1.0 / rpnTokens(i+3).expr.toDouble
-            else rpnTokens(i+3)
-          expressions.append(s"($const * ${rpnTokens(i)}^${rpnTokens(i+1)})")
-          i += 5
-        }
-        // (3 X *) => (3 * X^1)
-        // (2 X /) => (0.5 * X^1)
-        case Array(RN, V, OP, _*) => {
-          if (!rpnTokens(i+2).equals("*") && !rpnTokens(i+2).equals("/"))
-            throw new ParseException(s"Bad indeterminate3 ${rpnTokens.slice(i, i + 3).mkString(" ")}")
-          // constant, operator, variable, degree
-          val const =
-            if (rpnTokens(i+2).equals("/")) 1 / rpnTokens(i).expr.toDouble
-            else rpnTokens(i)
-          expressions.append(s"($const * ${rpnTokens(i+1)}^1)")
-          i += 3
-        }
-        // (X 3 ^) => (1 * X^3)
-        // (X 3 *) => (3 * X^1)
-        // (X 3 /) => (0.33 * X^1)
-        case Array(V, RN, OP, _*) => {
-          if (!rpnTokens(i+2).equals("^") && !rpnTokens(i+2).equals("*") && !rpnTokens(i+2).equals("/"))
-            throw new ParseException(s"Bad indeterminate4 ${rpnTokens.slice(i, i + 3).mkString(" ")}")
-          // constant, operator, variable, degree
-          if (rpnTokens(i+2).equals("^"))
-            expressions.append(s"(1 * ${rpnTokens(i)}^${rpnTokens(i+1)})")
-          else if (rpnTokens(i+2).equals("*"))
-            expressions.append(s"(${rpnTokens(i+1)} * ${rpnTokens(i)}^1)")
-          else {
-            val const = 1 / rpnTokens(i+1).expr.toDouble
-            expressions.append(s"($const * ${rpnTokens(i)}^1)")
-          }
-          i += 3
-        }
-        // (X) => (1 * X^1)
-        case Array(V, _*) => {
-          expressions.append(s"(1 * ${rpnTokens(i)}^1)")
-          i += 1
-        }
-        case Array(OP, _*) | Array(RN, _*) => {
-          expressions.append(rpnTokens(i).expr)
-          i += 1
-        }
-        case _ => throw new EvaluateException(s"Can't solve token ${rpnTokens(i)}")
-      }
-      tempTypes = allTypes.slice(i, allTypes.length)
-    }
-    convertToInfix(expressions.toArray)
-  }
-
-  /** Composite from RPN array expression to normal string */
-  def convertToInfix(expressions: Array[String]): String = {
-
-    val stack = ScalaStack[String]()
-
-    for (expr <- expressions) {
-      expr match {
-        case "+" | "*" | "/" | "-" | "^" => {
-          if (stack.length < 2)
-            throw new EvaluateException(s"Wrong stack length ${expr.mkString(" ")}")
-          val first = stack.pop()
-          val second = stack.pop()
-          stack.push(s"$second $expr $first")
-        }
-        case _ => stack.push(expr)
-      }
-    }
-    if (stack.length != 1)
-      throw new EvaluateException(s"Wrong stack length in the end ${expressions.mkString(" ")}")
-    stack.pop()
   }
 
   /** Simplification of algebraic expression */
