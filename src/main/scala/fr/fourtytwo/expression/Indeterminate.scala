@@ -2,6 +2,7 @@ package fr.fourtytwo.expression
 
 import fr.fourtytwo.exception.{EvaluateException, ParseException}
 
+// TODO add case with negate variable
 case class Indeterminate(constant: RealNumber,
                          variable: Variable,
                          degree: RealNumber) extends Operable {
@@ -13,7 +14,7 @@ case class Indeterminate(constant: RealNumber,
   def evaluate: Double = {
     Operator(constant, "*", Operator(variable, "^", degree)).evaluate
   }
-  def optimize: Expression = {
+  def simplify: Expression = {
     if (constant.evaluate == 0)
       return RealNumber(0)
     if (degree.evaluate == 0)
@@ -137,6 +138,30 @@ case class Indeterminate(constant: RealNumber,
     if (res.degree.equals(RealNumber(0)))
       return res.constant
     res
+  }
+
+  override def compare(other: Operable): Int = {
+    other match {
+      case _ : RealNumber => -1
+      case v : Variable => {
+        if (!variable.equals(v))
+          throw new EvaluateException(s"Can't compare different variables ($variable, $v)")
+        if (constant.evaluate == 1 && degree.evaluate == 1)
+          return 0
+        if (degree.evaluate < 1)
+          return 1
+        -1
+      }
+      case i : Indeterminate => {
+        if (!variable.equals(i.variable))
+          throw new EvaluateException(s"Can't compare different variables ($variable, ${i.variable})")
+        if (degree.evaluate < i.degree.evaluate)
+          return 1
+        if (degree.evaluate == i.degree.evaluate)
+          return constant.evaluate.compare(i.constant.evaluate)
+        -1
+      }
+    }
   }
 
   override def toString: String = s"($constant * $variable^$degree)"

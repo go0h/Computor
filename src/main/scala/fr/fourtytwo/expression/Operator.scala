@@ -29,10 +29,10 @@ class Operator(left: Expression, op: String, right: Expression) extends Expressi
     }
   }
 
-  def optimize: Expression = {
+  def simplify: Expression = {
 
-    val l = left.optimize
-    val r = right.optimize
+    val l = left.simplify
+    val r = right.simplify
     if (l.isInstanceOf[Operator] || r.isInstanceOf[Operator])
       return Operator(l, op, r)
 

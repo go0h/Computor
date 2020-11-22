@@ -280,7 +280,7 @@ class OperationsTest extends AnyFunSuite {
   }
 
   test("Indeterminate^0 + Variable") {
-    val res = (Indeterminate(RealNumber(4.31), Variable("X"), RealNumber(0)) + RealNumber(2)).optimize
+    val res = (Indeterminate(RealNumber(4.31), Variable("X"), RealNumber(0)) + RealNumber(2)).simplify
     assert(res.isInstanceOf[RealNumber])
     assert(res.evaluate == 6.31)
   }

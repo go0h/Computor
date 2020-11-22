@@ -17,9 +17,7 @@ class Polynomial(expr: String) {
 
   println(s"Original:   $expr")
 
-  val nonOrderPoly: Expression = simplify(expr)
-
-  println(s"Non order:  $nonOrderPoly = 0")
+  val expression: Expression = simplify(expr)
 
   def simplify(normExpr: String): Expression = {
 
@@ -31,18 +29,32 @@ class Polynomial(expr: String) {
 
     println(s"Normalized: $leftExpr = $rightExpr")
 
-
     val allOnLeft = rightExpr match {
       case r: RealNumber if r.evaluate == 0 => leftExpr
       /* change the sign to all expressions before moving to the left */
       case _ => Operator(leftExpr, "+", rightExpr.changeSign)
     }
-    removeMinus(allOnLeft.optimize)
+
+    /* Subtraction operators are replaced with addition operators,
+     * while changing the sign of the right term. */
+    val removedMinus = removeMinus(allOnLeft.simplify)
+    println(s"Non order:  $removedMinus = 0.0")
+
+    /* Reorder expression */
+    val orderedExpression = exprToArray(removedMinus)
+      .sorted
+      .map(_.asInstanceOf[Expression])
+      .reduce((x, y) => Operator(x, "+", y))
+    println(s"Ordered:    $orderedExpression = 0.0")
+
+    val fullSimplified = simplifyExpression(orderedExpression)
+    println(s"Simplified: $fullSimplified = 0.0")
+    fullSimplified
   }
 
   val degree = null
 
-  override def toString: String = s"$nonOrderPoly = 0"
+  override def toString: String = s"$expression = 0.0"
 
 }
 
@@ -50,6 +62,9 @@ object Polynomial {
 
   def apply(expression: String): Polynomial = new Polynomial(expression)
 
+  /** Convert string expression of polynomial to tree of operations
+   *  and simplify it if possible
+   */
   def toOptimalExpression(expression: String): Expression = {
 
     val space = Token(" ", TokenType.SPACE)
@@ -163,7 +178,7 @@ object Polynomial {
       expr match {
         case "+" | "*" | "/" | "-" | "^" => {
           if (stack.length < 2)
-            throw new EvaluateException(s"Wrong1 ${expr.mkString(" ")}")
+            throw new EvaluateException(s"Wrong stack length ${expr.mkString(" ")}")
           val first = stack.pop()
           val second = stack.pop()
           stack.push(s"$second $expr $first")
@@ -172,7 +187,7 @@ object Polynomial {
       }
     }
     if (stack.length != 1)
-      throw new EvaluateException(s"Wrong2 ${expressions.mkString(" ")}")
+      throw new EvaluateException(s"Wrong stack length in the end ${expressions.mkString(" ")}")
     stack.pop()
   }
 
@@ -180,14 +195,14 @@ object Polynomial {
   def simplifyExpression(expr: Expression): Expression = {
 
     var oldExpr = expr
-    var newExpr = expr.optimize
+    var newExpr = expr.simplify
 
     while (!oldExpr.equals(newExpr)) {
       oldExpr = newExpr
-      newExpr = newExpr.optimize
+      newExpr = newExpr.simplify
     }
     newExpr match {
-      case operator: Operator => rotateAndSimplify(operator).optimize
+      case operator: Operator => rotateAndSimplify(operator)
       case operable: Operable => operable
     }
   }
@@ -204,26 +219,30 @@ object Polynomial {
 
         val newOp = Operator(left.getLeft,
                              left.getOp,
-                             Operator(left.getRight, curOp.getOp, curOp.getRight)).optimize
+                             Operator(left.getRight, curOp.getOp, curOp.getRight)).simplify
 
         if (!newOp.isInstanceOf[Operator])
           return newOp
         curOp = newOp.asInstanceOf[Operator]
       }
     }
-    curOp.optimize
+    curOp.simplify
   }
 
   def removeMinus(expr: Expression, prevSign: Int = 1): Expression = {
-
-    if (expr.isInstanceOf[Operable]) {
-      return if (prevSign == 1) expr else expr.changeSign
+    expr match {
+      case vars: Operable => if (prevSign == 1) vars else vars.changeSign
+      case op: Operator =>
+        val nextSign = if (op.getOp.equals("-")) -1 else 1
+        Operator(removeMinus(op.getLeft, prevSign), "+", removeMinus(op.getRight, nextSign))
     }
+  }
 
-    val op = expr.asInstanceOf[Operator]
-    val nextSign = if (op.getOp.equals("-")) -1 else 1
-
-    Operator(removeMinus(op.getLeft, prevSign), "+", removeMinus(op.getRight, nextSign))
+  def exprToArray(expression: Expression): Array[Operable] = {
+    expression match {
+      case operable: Operable => Array(operable)
+      case op: Operator => exprToArray(op.getLeft) ++ exprToArray(op.getRight)
+    }
   }
 
   def equalityAndVariableChecks(expression: String): Unit = {

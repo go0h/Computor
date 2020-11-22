@@ -2,6 +2,6 @@ package fr.fourtytwo.expression
 
 trait Expression {
   def evaluate: Double
-  def optimize: Expression
+  def simplify: Expression
   def changeSign: Expression
 }

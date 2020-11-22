@@ -3,7 +3,7 @@ package fr.fourtytwo.expression
 class RealNumber(private val num: Double) extends Operable {
 
   def evaluate: Double = num
-  def optimize: Expression = this
+  def simplify: Expression = this
   override def toString: String = num.toString
 
 
@@ -80,6 +80,17 @@ class RealNumber(private val num: Double) extends Operable {
     new Indeterminate(RealNumber(num / other.constant.evaluate),
                       other.variable,
                       RealNumber(other.degree.evaluate * -1))
+  }
+
+  ////////////////////////////////////////
+  //////////// COMPARE METHOD ///////////
+  ////////////////////////////////////////
+  override def compare(other: Operable): Int = {
+    other match {
+      case rn : RealNumber => num.compare(rn.evaluate)
+      case _ : Variable => 1
+      case _ : Indeterminate => 1
+    }
   }
 
   override def equals(obj: Any): Boolean = {

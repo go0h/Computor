@@ -45,50 +45,88 @@ class PolyOptimizeTest extends AnyFunSuite {
   test("Zero on right side") {
     val expr = "y^4 * (4 * y^4) / y^2 = 0"
     val opt = Polynomial(expr).toString
-    assert(opt.equals("(4.0 * y^6.0) = 0"), opt)
+    assert(opt.equals("(4.0 * y^6.0) = 0.0"), opt)
   }
 
   test("Non Zero on right side") {
     val expr = "8 * y^4 * (4 * y^2) / (2 * y^1) * (3 * y^3) = 4"
     val opt = Polynomial(expr).toString
-    assert(opt.equals("(48.0 * y^8.0) + -4.0 = 0"), opt)
+    assert(opt.equals("(48.0 * y^8.0) + -4.0 = 0.0"), opt)
   }
 
 
   test("Optimize - 1") {
     val expr = "4 + 8 * X^4 / (4 * X^2) * (2 * X^1) + X^3.23 = 4 - 10 + X^12"
     val opt = Polynomial(expr).toString
-    assert(opt.equals("4.0 + (4.0 * X^3.0) + (1.0 * X^3.23) + 6.0 + (-1.0 * X^12.0) = 0"), opt)
+    assert(opt.equals("(-1.0 * X^12.0) + (1.0 * X^3.23) + (4.0 * X^3.0) + 10.0 = 0.0"), opt)
   }
 
   test("Optimize - 2") {
     val expr = "4 - 8 * X^4 / (4 * X^2) * (2 * X^1) + X^3.23 = 4 - 10 + X^12"
     val opt = Polynomial(expr).toString
-    assert(opt.equals("4.0 + (-4.0 * X^3.0) + (1.0 * X^3.23) + 6.0 + (-1.0 * X^12.0) = 0"), opt)
+    assert(opt.equals("(-1.0 * X^12.0) + (1.0 * X^3.23) + (-4.0 * X^3.0) + 10.0 = 0.0"), opt)
   }
 
   test("Unary Indeterminate - 1") {
     val expr = "4 - -8 * X^4 / (4 * X^2) * (2 * X^1) + X^3.23 = 4 - 10 + X^12"
     val opt = Polynomial(expr).toString
-    assert(opt.equals("4.0 + (4.0 * X^3.0) + (1.0 * X^3.23) + 6.0 + (-1.0 * X^12.0) = 0"), opt)
+    assert(opt.equals("(-1.0 * X^12.0) + (1.0 * X^3.23) + (4.0 * X^3.0) + 10.0 = 0.0"), opt)
   }
 
   test("Unary Indeterminate - 2") {
     val expr = "4 - -8 * X^4 / (4 * X^2) * (-2 * X^1) + X^3.23 = 4 - 10 + X^12"
     val opt = Polynomial(expr).toString
-    assert(opt.equals("4.0 + (-4.0 * X^3.0) + (1.0 * X^3.23) + 6.0 + (-1.0 * X^12.0) = 0"), opt)
+    assert(opt.equals("(-1.0 * X^12.0) + (1.0 * X^3.23) + (-4.0 * X^3.0) + 10.0 = 0.0"), opt)
   }
 
   test("Unary Realnumber - 1") {
     val expr = "4 - -8 * X^4 / (4 * X^2) * (-2 * X^1) + X^3.23 = -4 - 10 + X^12"
     val opt = Polynomial(expr).toString
-    assert(opt.equals("4.0 + (-4.0 * X^3.0) + (1.0 * X^3.23) + 14.0 + (-1.0 * X^12.0) = 0"), opt)
+    assert(opt.equals("(-1.0 * X^12.0) + (1.0 * X^3.23) + (-4.0 * X^3.0) + 18.0 = 0.0"), opt)
   }
 
   test("Optimize - 3") {
     val expr = "X^2 - X^2 + X + 13 * 2 = 0"
     val opt = Polynomial(expr).toString
-    assert(opt.equals("(1.0 * X^1.0) + 26.0 = 0"), opt)
+    assert(opt.equals("(1.0 * X^1.0) + 26.0 = 0.0"), opt)
   }
+
+  test("Only zero on the left side") {
+    val expr = "0 = X^2 - X^2 + X + 13 * 2"
+    val opt = Polynomial(expr).toString
+    assert(opt.equals("(-1.0 * X^1.0) + -26.0 = 0.0"), opt)
+  }
+
+  test("Optimize - 4") {
+    val expr = "X^2 + X + 13 * 2 = X^2"
+    val opt = Polynomial(expr).toString
+    assert(opt.equals("(1.0 * X^1.0) + 26.0 = 0.0"), opt)
+  }
+
+  test("Optimize - 5") {
+    val expr = "X^2 * 4 + X + 13 * 2 = X^2"
+    val opt = Polynomial(expr).toString
+    assert(opt.equals("(3.0 * X^2.0) + (1.0 * X^1.0) + 26.0 = 0.0"), opt)
+  }
+
+  test("Optimize - 6") {
+    val expr = "X^2 / 4 + X + 13 * 2 = X^2"
+    val opt = Polynomial(expr).toString
+    assert(opt.equals("(-0.75 * X^2.0) + (1.0 * X^1.0) + 26.0 = 0.0"), opt)
+  }
+
+//  test("Optimize - 7") {
+//    val expr = "X^2 ^ 4 + X + 13 * 2 = X^2"
+//    val opt = Polynomial(expr).toString
+//    assert(true)
+////    assert(opt.equals("(-0.75 * X^2.0) + (1.0 * X^1.0) + 26.0 = 0.0"), opt)
+//  }
+
+//  "8 * y^0.12 * -4 * y^1 + y^1 + -4 * y^3 + 31 = 0"
+//  test("Negative variable - 1") {
+//    val expr = "8 * y^0.12 * -4 * y^1 + y^1 + -4 * y^3 + 31 = 0"
+//    val opt = Polynomial(expr).toString
+//    assert(opt.equals((-32.0 * y^1.12) + (1.0 * y^1.0) + (4.0 * y^3.0) + 31.0 = 0), opt)
+//  }
 
 }

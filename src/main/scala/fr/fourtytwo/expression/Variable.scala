@@ -7,7 +7,7 @@ class Variable(name: String) extends Operable {
   val sign: Int = if (name.startsWith("-")) -1 else 1
 
   def evaluate: Double = throw new EvaluateException(s"Variable $name has no value")
-  def optimize: Expression = this
+  def simplify: Expression = this
 
   def getSing: Int = sign
   def changeSign: Variable = {
@@ -109,6 +109,30 @@ class Variable(name: String) extends Operable {
                       Variable(name),
                       RealNumber((other.degree.evaluate - 1) * -1))
   }
+
+  ////////////////////////////////////////
+  //////////// COMPARE METHODS ///////////
+  ////////////////////////////////////////
+  override def compare(other: Operable): Int = {
+    other match {
+      case _ : RealNumber => -1
+      case v : Variable => {
+        if (!equals(v))
+          throw new EvaluateException(s"Can't compare different variables ($name, $v)")
+        0
+      }
+      case i : Indeterminate => {
+        if (!equals(i.variable))
+          throw new EvaluateException(s"Can't compare different variables ($name, ${i.variable})")
+        if (i.constant.evaluate == 1 && i.degree.evaluate == 1)
+          return 0
+        if (i.degree.evaluate < 1)
+          return -1
+        1
+      }
+    }
+  }
+
 
   override def equals(other: Any): Boolean = {
       other match {

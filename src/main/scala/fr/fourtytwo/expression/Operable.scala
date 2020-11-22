@@ -2,7 +2,7 @@ package fr.fourtytwo.expression
 
 import fr.fourtytwo.expression.Operator._
 
-trait Operable extends Expression {
+trait Operable extends Expression with Ordered[Operable] {
 
   ////////////////////////////////////////
   //////////// ADDITION METHODS //////////
@@ -63,4 +63,5 @@ trait Operable extends Expression {
   def /(other: Variable): Expression
   def /(other: Indeterminate): Expression
 
+  override def compare(other: Operable): Int
 }
