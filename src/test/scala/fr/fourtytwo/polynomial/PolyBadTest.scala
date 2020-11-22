@@ -29,4 +29,21 @@ class PolyBadTest extends AnyFunSuite{
     }
   }
 
+  test("Variable ^ Variable - 1") {
+    assertThrows[EvaluateException] {
+      Polynomial("X^2^X + 4 + X = 3")
+    }
+  }
+
+  test("Variable ^ Variable - 2") {
+    assertThrows[EvaluateException] {
+      Polynomial("X ^ X + 4 + X = 3")
+    }
+  }
+
+  test("Variable % Variable - 2") {
+    assertThrows[EvaluateException] {
+      Polynomial("X % X + 4 + X = 3")
+    }
+  }
 }

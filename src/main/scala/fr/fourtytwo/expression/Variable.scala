@@ -4,23 +4,30 @@ import fr.fourtytwo.exception.EvaluateException
 
 import scala.math.pow
 
-class Variable(name: String) extends Operable {
+class Variable extends Operable {
 
-  val sign: Int = if (name.startsWith("-")) -1 else 1
+  private var sign: Int = 1
+  private var name: String = _
 
-//  def this(name: String) {
-//    val sign = if (name.startsWith("-")) -1 else 1
-//    val newName = if (name.startsWith("-")) name.substring(1) else name
-//    this(newName, sign)
-//  }
+  def this(varName: String) {
+    this()
+    if (varName.startsWith("-")) {
+      sign = -1
+      name = varName.substring(1)
+    }
+    else {
+      name = varName
+    }
+  }
 
   def evaluate: Double = throw new EvaluateException(s"Variable $name has no value")
   def simplify: Expression = this
 
-  def getSing: Int = sign
+  def getSign: Int = sign
+  def getName: String = name
   def changeSign: Variable = {
-    if (name.startsWith("-"))
-      return new Variable(name.replaceFirst("-", ""))
+    if (sign == -1)
+      return new Variable(name)
     Variable("-" + name)
   }
 
@@ -34,16 +41,18 @@ class Variable(name: String) extends Operable {
   }
 
   def +(other: Variable): Expression = {
-    if (!equals(other))
-      throw new EvaluateException(s"Can't add different variables ($name, $other)")
-    Indeterminate(RealNumber(2.0), this, RealNumber(1.0))
+    if (!name.equals(other.getName))
+      throw new EvaluateException(s"Can't add different variables ($name, ${other.getName})")
+    if (sign == other.getSign)
+      return new Indeterminate(2 * sign, name, 1)
+    new RealNumber(0)
   }
 
   def +(other: Indeterminate): Expression = {
-    if (!equals(other.variable))
-      throw new EvaluateException(s"Can't add different variables ($name, ${other.variable})")
+    if (!name.equals(other.variable.getName))
+      throw new EvaluateException(s"Can't add different variables ($name, ${other.variable.getName})")
     if (other.degree.evaluate == 1.0)
-      return Indeterminate(RealNumber(other.constant.evaluate + 1.0), this, RealNumber(1.0))
+      return new Indeterminate(other.constant.evaluate + sign, name, 1)
     Operator(this, "+", other)
   }
 
@@ -58,18 +67,20 @@ class Variable(name: String) extends Operable {
   }
 
   def -(other: Variable): Expression = {
-    if (!equals(other))
-      throw new EvaluateException(s"Can't sub different variables ($name, $other)")
-    RealNumber(0.0)
+    if (!name.equals(other.getName))
+      throw new EvaluateException(s"Can't sub different variables ($name, ${other.getName})")
+    if (sign != other.sign)
+      return new Indeterminate(sign * 2, name, 1)
+    RealNumber(0)
   }
 
   def -(other: Indeterminate): Expression = {
-    if (!equals(other.variable))
-      throw new EvaluateException(s"Can't sub different variables ($name, ${other.variable})")
-    if (other.degree.evaluate == 1.0) {
-      if (other.constant.evaluate == 1.0)
-        return RealNumber(0.0)
-      return new Indeterminate(1 - other.constant.evaluate, name, other.degree.evaluate)
+    if (!name.equals(other.variable.getName))
+      throw new EvaluateException(s"Can't sub different variables ($name, ${other.variable.getName})")
+    if (other.degree.evaluate == 1) {
+      if (other.constant.evaluate == 1)
+        return RealNumber(0)
+      return new Indeterminate(sign - other.constant.evaluate, name, other.degree.evaluate)
     }
     Operator(this, "-", other)
   }
@@ -78,20 +89,18 @@ class Variable(name: String) extends Operable {
   ////////////////////////////////////////
   //////////// MULTIPLY METHODS //////////
   ////////////////////////////////////////
-  def *(other: RealNumber): Indeterminate = new Indeterminate(other.evaluate, name, 1.0)
+  def *(other: RealNumber): Indeterminate = new Indeterminate(other.evaluate * sign, name, 1.0)
 
   def *(other: Variable): Indeterminate = {
-    if (!name.equals(other.toString))
-      throw new EvaluateException(s"Can't multiply different variables ($name, ${other.toString})")
-    new Indeterminate(1.0, name, 2.0)
+    if (!name.equals(other.getName))
+      throw new EvaluateException(s"Can't multiply different variables ($name, ${other.getName})")
+    new Indeterminate(sign * other.getSign, name, 2)
   }
 
   def *(other: Indeterminate): Indeterminate = {
-    if (!equals(other.variable))
-      throw new EvaluateException(s"Can't multiply different variables ($name, ${other.variable})")
-    Indeterminate(other.constant,
-                  other.variable,
-                  RealNumber(other.degree.evaluate + 1))
+    if (!name.equals(other.variable.getName))
+      throw new EvaluateException(s"Can't multiply different variables ($name, ${other.variable.getName})")
+    new Indeterminate(other.constant.evaluate * sign, name, other.degree.evaluate + 1)
   }
 
 
@@ -99,23 +108,23 @@ class Variable(name: String) extends Operable {
   //////////// DIVISION METHODS //////////
   ////////////////////////////////////////
   def /(other: RealNumber): Indeterminate = {
-    new Indeterminate(1 / other.evaluate, name, 1)
+    new Indeterminate(1 / other.evaluate * sign, name, 1)
   }
 
   def /(other: Variable): Operable = {
-    if (!name.equals(other.toString))
-      throw new EvaluateException(s"Can't division different variables ($name, ${other.toString})")
-    new RealNumber(1)
+    if (!name.equals(other.getName))
+      throw new EvaluateException(s"Can't division different variables ($name, ${other.getName})")
+    new RealNumber(sign / other.sign)
   }
 
   def /(other: Indeterminate): Operable = {
-    if (!name.equals(other.variable.toString))
+    if (!name.equals(other.variable.getName))
       throw new EvaluateException(s"Can't division different variables ($name, ${other.variable})")
     if (other.degree.evaluate == 1)
       return other.constant
-    new Indeterminate(RealNumber(1 / other.constant.evaluate),
-                      Variable(name),
-                      RealNumber((other.degree.evaluate - 1) * -1))
+    new Indeterminate(1 / other.constant.evaluate * sign,
+                      name,
+                      (other.degree.evaluate - 1) * -1)
   }
 
 
@@ -155,12 +164,12 @@ class Variable(name: String) extends Operable {
 
   override def equals(other: Any): Boolean = {
       other match {
-        case _: Variable => name.equals(other.toString)
+        case _: Variable => toString.equals(other.toString)
         case _: Throwable => false
     }
   }
 
-  override def toString: String = name
+  override def toString: String = if (sign == -1) s"-$name" else name
 }
 
 object Variable {

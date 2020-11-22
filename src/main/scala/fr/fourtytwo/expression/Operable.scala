@@ -1,8 +1,8 @@
 package fr.fourtytwo.expression
 
 import fr.fourtytwo.exception.EvaluateException
-import fr.fourtytwo.expression.Operator._
 
+//TODO maybe add modulo division
 trait Operable extends Expression with Ordered[Operable] {
 
   ////////////////////////////////////////

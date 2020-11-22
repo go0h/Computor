@@ -47,7 +47,7 @@ class RealNumber(private val num: Double) extends Operable {
   def *(other: Variable): Expression = {
     if (num == 0)
       return RealNumber(0)
-    new Indeterminate(num, other.toString, 1)
+    new Indeterminate(num * other.getSign, other.getName, 1)
   }
 
   def *(other: Indeterminate): Expression = {
@@ -75,7 +75,7 @@ class RealNumber(private val num: Double) extends Operable {
   def /(other: Variable): Operable = {
     if (num == 0)
       return RealNumber(0)
-    new Indeterminate(RealNumber(num), other, RealNumber(-1))
+    new Indeterminate(num * other.getSign, other.getName, -1)
   }
 
   def /(other: Indeterminate): Operable = {
