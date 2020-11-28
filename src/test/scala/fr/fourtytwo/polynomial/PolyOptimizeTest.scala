@@ -1,6 +1,6 @@
 package fr.fourtytwo.polynomial
 
-import fr.fourtytwo.polynomial.Polynomial._
+import fr.fourtytwo.polynomial.PolynomialReducer._
 import org.scalatest.funsuite.AnyFunSuite
 
 class PolyOptimizeTest extends AnyFunSuite {
@@ -151,11 +151,36 @@ class PolyOptimizeTest extends AnyFunSuite {
     assert(norm.equals("(4.0 * X^1.0) + 5.0 = 0.0"), norm)
   }
 
-//  "8 * y^0.12 * -4 * y^1 + y^1 + -4 * y^3 + 31 = 0"
-//  test("Negative variable - 1") {
-//    val expr = "8 * y^0.12 * -4 * y^1 + y^1 + -4 * y^3 + 31 = 0"
-//    val opt = Polynomial(expr).toString
-//    assert(opt.equals((-32.0 * y^1.12) + (1.0 * y^1.0) + (4.0 * y^3.0) + 31.0 = 0), opt)
+  test("Negative braces - 1") {
+    val expr =   "5 * X^1 - ((4 * X^1 + 4) + 4) = 0"
+    val norm = Polynomial(expr).toString
+    assert(norm.equals("(1.0 * X^1.0) + -8.0 = 0.0"), norm)
+  }
+
+  test("Negative braces - 2") {
+    val expr =   "5 * X^1 - (4 * X^1 + 4) + 4 = 0"
+    val norm = Polynomial(expr).toString
+    assert(norm.equals("(1.0 * X^1.0) = 0.0"), norm)
+  }
+
+  test("Negative braces - 3") {
+    val expr =   "-(5 * X^1) - (4 * X^1 + 4) + 4 = 0"
+    val norm = Polynomial(expr).toString
+    assert(norm.equals("(-9.0 * X^1.0) = 0.0"), norm)
+  }
+
+//  test("Negative braces - 4") {
+//    val expr =   "-((5 * X^1) - ((4 * X^1 + 4) + 4)) = 0"
+//    val norm = Polynomial(expr).toString
+//    assert(norm.equals("(-1.0 * X^1.0) + -8.0 = 0.0"), norm)
 //  }
+
+  test("Negative variable") {
+    val expr = "8 * y^0.12 * -4 * y^1 + y^1 + 4 * -y^3 + 31 = 0"
+    val opt = Polynomial(expr).toString
+    assert(opt.equals("(-4.0 * y^3.0) + (-32.0 * y^1.12) + (1.0 * y^1.0) + 31.0 = 0.0"), opt)
+  }
+
+
 
 }

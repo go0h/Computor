@@ -1,6 +1,6 @@
 package fr.fourtytwo.polynomial
 
-import fr.fourtytwo.polynomial.Polynomial.toOptimalExpression
+import fr.fourtytwo.polynomial.PolynomialReducer.toOptimalExpression
 import org.scalatest.funsuite.AnyFunSuite
 
 /** TEST transform random polynomial expression to special format
@@ -19,7 +19,7 @@ class PolyStringTransformTest extends AnyFunSuite {
   test("Basic convention - 1") {
     val expr = "(4.0 * X^2.0) - (-4.0 * X^1.0) + 4.0 = 0.0"
     val norm = normalizePolynomial(expr)
-    assert(expr.equals(norm), norm)
+    assert(expr.equals("(4.0 * X^2.0) - (-4.0 * X^1.0) + 4.0 = 0.0"), expr)
   }
 
   test("Basic convention - 2") {
@@ -37,19 +37,19 @@ class PolyStringTransformTest extends AnyFunSuite {
   test("Basic convention - 4") {
     val expr = "X^2 + X - 32.5830001 = X"
     val norm = normalizePolynomial(expr)
-    assert(norm.equals("(1.0 * X^2.0) + X - 32.5830001 = X"), norm)
+    assert(norm.equals("(1.0 * X^2.0) + X + -32.5830001 = X"), norm)
   }
 
   test("Basic convention - 5") {
     val expr = "(4 * X^2.0) - (-4 * X^1) + 4 = 1"
     val norm = normalizePolynomial(expr)
-    assert(norm.equals("(4.0 * X^2.0) - (-4.0 * X^1.0) + 4.0 = 1.0"), norm)
+    assert(norm.equals("(4.0 * X^2.0) + (4.0 * X^1.0) + 4.0 = 1.0"), norm)
   }
 
   test("Basic convention - 6") {
     val expr = "X^7 - X^6 - X^5 - X^4 - X^3 - X^2 - X + 4 = 77"
     val norm = normalizePolynomial(expr)
-    assert(norm.equals("(1.0 * X^7.0) - (1.0 * X^6.0) - (1.0 * X^5.0) - (1.0 * X^4.0) - (1.0 * X^3.0) - (1.0 * X^2.0) - X + 4.0 = 77.0"), norm)
+    assert(norm.equals("(1.0 * X^7.0) + (-1.0 * X^6.0) + (-1.0 * X^5.0) + (-1.0 * X^4.0) + (-1.0 * X^3.0) + (-1.0 * X^2.0) + -X + 4.0 = 77.0"), norm)
   }
 
   test("Basic convention - 7") {
@@ -91,7 +91,7 @@ class PolyStringTransformTest extends AnyFunSuite {
   test("Subject test - 1") {
     val expr = "5 * X^0 + 4 * X^1 - 9.3 * X^2 = 1 * X^0"
     val norm = normalizePolynomial(expr)
-    assert(norm.equals("5.0 + (4.0 * X^1.0) - (9.3 * X^2.0) = 1.0"), norm)
+    assert(norm.equals("5.0 + (4.0 * X^1.0) + (-9.3 * X^2.0) = 1.0"), norm)
   }
 
   test("Subject test - 2") {
@@ -103,7 +103,7 @@ class PolyStringTransformTest extends AnyFunSuite {
   test("Subject test - 3") {
     val expr = "8 * X^0 - 6 * X^1 + 0 * X^2 - 5.6 * X^3 = 3 * X^0"
     val norm = normalizePolynomial(expr)
-    assert(norm.equals("8.0 - (6.0 * X^1.0) + 0.0 - (5.6 * X^3.0) = 3.0"), norm)
+    assert(norm.equals("8.0 + (-6.0 * X^1.0) + (-5.6 * X^3.0) = 3.0"), norm)
   }
 
   test("Subject test - 4") {

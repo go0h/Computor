@@ -1,6 +1,7 @@
 package fr.fourtytwo.expression
 
 import fr.fourtytwo.exception.EvaluateException
+import fr.fourtytwo.expression.Operator.priority
 
 import scala.math.pow
 
@@ -33,8 +34,10 @@ class Operator(left: Expression, op: String, right: Expression) extends Expressi
 
     val l = left.simplify
     val r = right.simplify
-    if (l.isInstanceOf[Operator] || r.isInstanceOf[Operator])
-      return Operator(l, op, r)
+    if (l.isInstanceOf[Operator] || r.isInstanceOf[Operator]) {
+      val res = if (op.equals("-")) Operator(l, "+", r.changeSign) else Operator(l, op, r)
+      return res
+    }
 
     val optR = r match {
       case r: RealNumber => r
@@ -60,10 +63,15 @@ class Operator(left: Expression, op: String, right: Expression) extends Expressi
   def changeSign: Expression = Operator(left.changeSign, op, right.changeSign)
 
   override def toString: String = {
-    if (left != null && right != null)
-     s"$left $op $right"
-    else
-      op
+    val l = left match {
+      case o: Operator => if (priority(o.getOp) < priority(op)) s"($o)" else o.toString
+      case o: Operable => o.toString
+    }
+    val r = right match {
+      case o: Operator => if (priority(o.getOp) < priority(op)) s"($o)" else o.toString
+      case o: Operable => o.toString
+    }
+    s"$l $op $r"
   }
 
   override def equals(obj: Any): Boolean = {
@@ -72,6 +80,7 @@ class Operator(left: Expression, op: String, right: Expression) extends Expressi
       case _ => false
     }
   }
+  def contains(other: String): Boolean = op.equals(other) || left.contains(other) || right.contains(other)
 }
 
 object Operator {

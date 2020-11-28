@@ -46,4 +46,10 @@ class PolyBadTest extends AnyFunSuite{
       Polynomial("X % X + 4 + X = 3")
     }
   }
+
+  test("Can't reduce - 2") {
+    assertThrows[EvaluateException] {
+      Polynomial("5 * X^1 + (4 * X^1 + 4) * 4 + 4 = 0")
+    }
+  }
 }

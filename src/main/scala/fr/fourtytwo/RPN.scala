@@ -56,8 +56,8 @@ object RPN {
       token.tType match {
 
         case OPERATION =>
-          if (token.equals("-")                           // UNARY OPERATOR CONDITION
-            && prev.tType >= SPACE && !prev.equals("-")
+          // UNARY OPERATOR CONDITION
+          if (token.equals("-") && prev.tType >= SPACE && !prev.equals("-")
             && prevNonSpace.tType >= OPERATION && !prevNonSpace.equals(")")) {
               RPNTokens.append(Token("--", UNARY))
           }

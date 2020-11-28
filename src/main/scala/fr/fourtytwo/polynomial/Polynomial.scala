@@ -1,139 +1,78 @@
 package fr.fourtytwo.polynomial
 
-import fr.fourtytwo.RPN
-import fr.fourtytwo.exception._
-import fr.fourtytwo.expression.Operator.priority
+import fr.fourtytwo.exception.EvaluateException
 import fr.fourtytwo.expression._
-import fr.fourtytwo.polynomial.Polynomial._
-import fr.fourtytwo.token.TokenType._
 
+class Polynomial(expr: String, debug: Boolean = false) {
 
-class Polynomial(expr: String) {
-
-  equalityAndVariableChecks(expr)
-
-  println(s"Original:   $expr")
-
-  val expression: Expression = simplify(expr)
-
-  def simplify(normExpr: String): Expression = {
-
-    val leftStr = normExpr.substring(0, normExpr.indexOf("="))
-    val rightStr = normExpr.substring(normExpr.indexOf("=") + 1)
-
-    val leftExpr = toOptimalExpression(leftStr)
-    val rightExpr = toOptimalExpression(rightStr)
-
-    println(s"Normalized: $leftExpr = $rightExpr")
-
-    val allOnLeft = rightExpr match {
-      case r: RealNumber if r.evaluate == 0 => leftExpr
-      /* change the sign to all expressions before moving to the left */
-      case _ => Operator(leftExpr, "+", rightExpr.changeSign)
-    }
-
-    /* Subtraction operators are replaced with addition operators,
-     * while changing the sign of the right term. */
-    val removedMinus = removeMinus(allOnLeft.simplify)
-    println(s"Non order:  $removedMinus = 0.0")
-
-    /* Reorder expression */
-    val orderedExpression = exprToArray(removedMinus)
-      .sorted
-      .map(_.asInstanceOf[Expression])
-      .reduce((x, y) => Operator(x, "+", y))
-    println(s"Ordered:    $orderedExpression = 0.0")
-
-    val fullSimplified = simplifyExpression(orderedExpression)
-    println(s"Simplified: $fullSimplified = 0.0")
-    fullSimplified
+  val expression: Expression = PolynomialReducer(expr)
+  val exprArr: Array[Operable] = PolynomialReducer.exprToArray(expression)
+    .map {
+    case v: Variable => v.toIndeterminate
+    case o: Operable => o
   }
 
-  val degree = null
+  def solve(): (RealNumber, RealNumber) = {
+
+    if (exprArr.length < 1)
+      throw new EvaluateException(s"Can't solve: ${exprArr.mkString(" + ")} = 0")
+    if (minDegree < 0)
+      throw new EvaluateException(s"Can't solve polynomial with negative degree ${exprArr.mkString(" + ")} = 0")
+
+    val maxSolveDegree = 2
+    val degree = maxDegree
+
+    println(s"Polynomial degree: $degree")
+    if (degree == 0) {
+      exprArr.head match {
+        case r: RealNumber =>
+          if (r.evaluate == 0) return (RealNumber(Double.NegativeInfinity), RealNumber(Double.PositiveInfinity))
+          else throw new EvaluateException(s"Can't solve: ${exprArr.mkString(" + ")} = 0")
+        case _ => throw new EvaluateException(s"Can't solve: ${exprArr.mkString(" + ")} = 0")
+      }
+    }
+    if (degree > maxSolveDegree) {
+      println(s"The polynomial degree is strictly greater than $maxSolveDegree ($degree), I can't solve")
+      return null
+    }
+    val varName = getVarName
+
+    val monomialNumbs = exprArr.length
+
+    monomialNumbs match {
+      case 1 => println(s"$varName = 0.0")
+      case 2 =>
+      case 3 =>
+    }
+    null
+  }
+
+  def maxDegree: Double = degree(_ > _)
+  def minDegree: Double = degree(_ < _)
+  def degree(order: (Double, Double) => Boolean): Double = {
+    exprArr.map {
+        case _: RealNumber => 0.0
+        case _: Variable => 1.0
+        case i: Indeterminate => i.degree.evaluate
+      }.sortWith(order).head
+  }
 
   override def toString: String = s"$expression = 0.0"
 
+  def getVarName: String = {
+    for (operable <- exprArr) {
+      operable match {
+        case o: Indeterminate => return o.variable.getName
+        case _ =>
+      }
+    }
+    null
+  }
 }
 
 object Polynomial {
 
   def apply(expression: String): Polynomial = new Polynomial(expression)
 
-  /** Convert string expression of polynomial to tree of operations
-   *  and simplify it if possible
-   */
-  def toOptimalExpression(expression: String): Expression = {
 
-    val tokens = SIMPLE_TOKENIZER.generateTokens(expression)
-
-    val beforeOptExpr = RPN(tokens).solve
-    simplifyExpression(beforeOptExpr)
-  }
-
-  /** Simplification of algebraic expression */
-  def simplifyExpression(expr: Expression): Expression = {
-
-    var oldExpr = expr
-    var newExpr = expr.simplify
-
-    while (!oldExpr.equals(newExpr)) {
-      oldExpr = newExpr
-      newExpr = newExpr.simplify
-    }
-    newExpr match {
-      case operator: Operator => rotateAndSimplify(operator)
-      case operable: Operable => operable
-    }
-  }
-
-  private def rotateAndSimplify(operator: Operator): Expression = {
-
-    var curOp = operator
-
-    while (!curOp.getRight.isInstanceOf[Operator] && curOp.getLeft.isInstanceOf[Operator]) {
-
-      val left = curOp.getLeft.asInstanceOf[Operator]
-
-      if (priority(left.getOp) == priority(curOp.getOp) && left.getRight.isInstanceOf[Operable]) {
-
-        val newOp = Operator(left.getLeft,
-                             left.getOp,
-                             Operator(left.getRight, curOp.getOp, curOp.getRight)).simplify
-
-        if (!newOp.isInstanceOf[Operator])
-          return newOp
-        curOp = newOp.asInstanceOf[Operator]
-      }
-    }
-    curOp.simplify
-  }
-
-  def removeMinus(expr: Expression, prevSign: Int = 1): Expression = {
-    expr match {
-      case vars: Operable => if (prevSign == 1) vars else vars.changeSign
-      case op: Operator =>
-        val nextSign = if (op.getOp.equals("-")) -1 else 1
-        Operator(removeMinus(op.getLeft, prevSign), "+", removeMinus(op.getRight, nextSign))
-    }
-  }
-
-  def exprToArray(expression: Expression): Array[Operable] = {
-    expression match {
-      case operable: Operable => Array(operable)
-      case op: Operator => exprToArray(op.getLeft) ++ exprToArray(op.getRight)
-    }
-  }
-
-  def equalityAndVariableChecks(expression: String): Unit = {
-
-    if (expression.count(_ == '=') != 1)
-      throw new ParseException(s"No equal sign in expression $expression")
-
-    val tokens = SIMPLE_TOKENIZER.generateTokens(expression).filter(_.tType == VARIABLE)
-    val variables = tokens.map(_.expr).distinct
-
-    if (variables.length != 1)
-      throw new EvaluateException(s"There is ${variables.length} " +
-        s"variables: ${variables.mkString(", ")}. I can't solve")
-  }
 }

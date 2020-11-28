@@ -112,6 +112,7 @@ class RealNumber(private val num: Double) extends Operable {
       case _ => false
     }
   }
+  def contains(op: String): Boolean = false
 }
 
 object RealNumber {

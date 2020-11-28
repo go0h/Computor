@@ -30,6 +30,7 @@ class Variable extends Operable {
       return new Variable(name)
     Variable("-" + name)
   }
+  def toIndeterminate: Indeterminate = new Indeterminate(sign, name, 1)
 
   ////////////////////////////////////////
   /////////// ADDITION METHODS ///////////
@@ -170,6 +171,8 @@ class Variable extends Operable {
   }
 
   override def toString: String = if (sign == -1) s"-$name" else name
+  
+  def contains(op: String): Boolean = false
 }
 
 object Variable {

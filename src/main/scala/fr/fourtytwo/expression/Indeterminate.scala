@@ -200,6 +200,7 @@ case class Indeterminate(constant: RealNumber,
     }
     false
   }
+  def contains(op: String): Boolean = false
 }
 
 object Indeterminate {
