@@ -47,9 +47,44 @@ class PolyBadTest extends AnyFunSuite{
     }
   }
 
-  test("Can't reduce - 2") {
+  test("Can't reduce - 1") {
     assertThrows[EvaluateException] {
       Polynomial("5 * X^1 + (4 * X^1 + 4) * 4 + 4 = 0")
+    }
+  }
+
+  test("Can't reduce - 2") {
+    assertThrows[EvaluateException] {
+      Polynomial("(5 * X^1) + 4 / (4 * X^1 + 4) = 0")
+    }
+  }
+
+  test("Can't reduce - 3") {
+    assertThrows[EvaluateException] {
+      Polynomial("(5 * X^1) + 4 ^ (4 * X^1 + 4) = 0")
+    }
+  }
+
+  test("Negative degree - 1") {
+    assertThrows[EvaluateException] {
+      Polynomial("(5 * X^-1) + (4 * X^1 + 4) = 0").solve
+    }
+  }
+  test("Negative degree - 2") {
+    assertThrows[EvaluateException] {
+      Polynomial("(5 * X^-1) + (4 * X^1 + 4) = 0").solve
+    }
+  }
+
+  test("Negative degree - 3") {
+    assertThrows[EvaluateException] {
+      Polynomial("(5 / X^1) + 4 * 25 = 0").solve
+    }
+  }
+
+  test("Big polynomial degree") {
+    assertThrows[EvaluateException] {
+      Polynomial("(5 * X^100) + 4 * 25 = 0").solve
     }
   }
 }

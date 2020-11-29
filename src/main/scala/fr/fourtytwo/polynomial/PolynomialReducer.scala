@@ -9,7 +9,15 @@ import fr.fourtytwo.token.TokenType.VARIABLE
 object PolynomialReducer {
 
   def apply(expression: String): Expression = {
-    equalityAndVariableChecks(expression)
+
+    if (expression.count(_ == '=') != 1)
+      throw new ParseException(s"No equal sign in expression $expression")
+
+    val tokens = SIMPLE_TOKENIZER.generateTokens(expression).filter(_.tType == VARIABLE)
+    val vars = tokens.map(_.expr).distinct
+
+    if (vars.length != 1)
+      throw new EvaluateException(s"There is ${vars.length} variables: ${vars.mkString(", ")}. I can't solve")
 
     println(s"Original:   $expression")
     simplify(expression)
@@ -74,21 +82,24 @@ object PolynomialReducer {
   private def rotateAndSimplify(expr: Operator): Expression = {
 
     if (expr.contains("*") || expr.contains("/") || expr.contains("^"))
-      throw new EvaluateException(s"Can't reduce to normal polynomial form: $expr")
+      throw new EvaluateException(s"Can't reduce to normal polynomial form: $expr = 0.0")
 
     /* Subtraction operators are replaced with addition operators,
- * while changing the sign of the right term. */
-    var curOp = removeMinus(expr).asInstanceOf[Operator]
+     * while changing the sign of the right term. */
+    val preSimple: Expression = removeMinus(expr).simplify
+    if (preSimple.isInstanceOf[Operable])
+      return preSimple
 
-    while (!curOp.getRight.isInstanceOf[Operator] && curOp.getLeft.isInstanceOf[Operator]) {
+    var curOp = preSimple.asInstanceOf[Operator]
+
+    while (curOp.getLeft.isInstanceOf[Operator] && curOp.getRight.isInstanceOf[Operable]) {
 
       val left = curOp.getLeft.asInstanceOf[Operator]
-
-      if (priority(left.getOp) == priority(curOp.getOp) && left.getRight.isInstanceOf[Operable]) {
-
-        val newOp = Operator(left.getLeft,
-          left.getOp,
-          Operator(left.getRight, curOp.getOp, curOp.getRight))
+      if (left.getRight.isInstanceOf[Operable]) {
+        val newOp =
+          Operator(left.getLeft,
+                   left.getOp,
+                   Operator(left.getRight, curOp.getOp, curOp.getRight))
 
         if (newOp.isInstanceOf[Operable])
           return newOp
@@ -115,18 +126,4 @@ object PolynomialReducer {
       case op: Operator => exprToArray(op.getLeft) ++ exprToArray(op.getRight)
     }
   }
-
-  def equalityAndVariableChecks(expression: String): Unit = {
-
-    if (expression.count(_ == '=') != 1)
-      throw new ParseException(s"No equal sign in expression $expression")
-
-    val tokens = SIMPLE_TOKENIZER.generateTokens(expression).filter(_.tType == VARIABLE)
-    val variables = tokens.map(_.expr).distinct
-
-    if (variables.length != 1)
-      throw new EvaluateException(s"There is ${variables.length} " +
-        s"variables: ${variables.mkString(", ")}. I can't solve")
-  }
-
 }

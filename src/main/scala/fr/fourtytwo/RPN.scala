@@ -4,7 +4,7 @@ import scala.collection.mutable.{ArrayBuffer, Stack => ScalaStack}
 import fr.fourtytwo.exception.EvaluateException
 import fr.fourtytwo.expression._
 import fr.fourtytwo.expression.Operator.priority
-import fr.fourtytwo.token.Token
+import fr.fourtytwo.token.{Token, TokenType}
 import fr.fourtytwo.token.TokenType._
 
 class RPN(infixTokens: Array[Token]) {
@@ -26,10 +26,15 @@ class RPN(infixTokens: Array[Token]) {
         case REALNUMBER => stack.push(RealNumber(token.expr.toDouble))
         case VARIABLE => stack.push(Variable(token.expr))
         case OPERATION =>
-          if (stack.length < 2)
-            throw new EvaluateException(s"Wrong stack length: $infixString")
-          val first = stack.pop()
-          stack.push(Operator(stack.pop(), token.expr, first))
+          if (token.equals("--")) {
+            stack.push(Operator(RealNumber(0), "-", stack.pop()))
+          }
+          else {
+            if (stack.length < 2)
+              throw new EvaluateException(s"Wrong stack length: $infixString")
+            val first = stack.pop()
+            stack.push(Operator(stack.pop(), token.expr, first))
+          }
         case _ => throw new EvaluateException(s"Can't solve token: ${token.expr}")
       }
     }
@@ -48,65 +53,44 @@ object RPN {
     val RPNTokens = ArrayBuffer[Token]()
     val stack = ScalaStack[Token]()
 
-    var prev: Token = Token("", NONE)
-    var prevNonSpace: Token = Token("", NONE)
+    var mayUnary: Boolean = true
+    var prevToken: Token = Token("", NONE)
 
     for (token <- tokens) {
 
       token.tType match {
 
         case OPERATION =>
-          // UNARY OPERATOR CONDITION
-          if (token.equals("-") && prev.tType >= SPACE && !prev.equals("-")
-            && prevNonSpace.tType >= OPERATION && !prevNonSpace.equals(")")) {
-              RPNTokens.append(Token("--", UNARY))
-          }
-          else if (stack.isEmpty || token.equals("(")) {
+          if (token.equals("(")) {
             stack.push(token)
+            mayUnary = true
           }
           else if (token.equals(")")) {
             while (!stack.head.equals("(")) {
               RPNTokens.append(stack.pop())
             }
             stack.pop()
+            mayUnary = false
           }
           else {
-            while (stack.nonEmpty && priority(stack.head.expr) >= priority(token.expr)) {
+            val tempToken =
+              if (mayUnary && token.equals("-") && !prevToken.equals("-"))
+                Token("--", token.tType)
+              else token
+
+            while (stack.nonEmpty && priority(stack.head.expr) >= priority(tempToken.expr)) {
               RPNTokens.append(stack.pop())
             }
-            stack.push(token)
+            stack.push(tempToken)
+            mayUnary = if (prevToken.equals("-")) false else true
           }
-          prevNonSpace = token
         case REALNUMBER | VARIABLE =>
           RPNTokens.append(token)
-          prevNonSpace = token
+          mayUnary = false
         case _ =>
       }
-      prev = token
+      prevToken = token
     }
-    RPNTokens.appendAll(stack)
-    convertUnary(RPNTokens.toArray)
-  }
-
-  private def convertUnary(tokens: Array[Token]): Array[Token] = {
-
-    var unary: Int = 1
-    val out: ArrayBuffer[Token] = new ArrayBuffer[Token]()
-
-    for (token <- tokens) {
-
-      token.tType match {
-        case UNARY => unary *= -1
-        case _ =>
-          if (unary == 1) {
-            out.append(token)
-          }
-          else {
-            out.append(Token("-" + token.expr, token.tType))
-            unary = 1
-          }
-      }
-    }
-    out.toArray
+    RPNTokens.appendAll(stack).toArray
   }
 }

@@ -169,11 +169,11 @@ class PolyOptimizeTest extends AnyFunSuite {
     assert(norm.equals("(-9.0 * X^1.0) = 0.0"), norm)
   }
 
-//  test("Negative braces - 4") {
-//    val expr =   "-((5 * X^1) - ((4 * X^1 + 4) + 4)) = 0"
-//    val norm = Polynomial(expr).toString
-//    assert(norm.equals("(-1.0 * X^1.0) + -8.0 = 0.0"), norm)
-//  }
+  test("Negative braces - 4") {
+    val expr =   "-((5 * X^1) - ((4 * X^1 + 4) + 4)) = 0"
+    val norm = Polynomial(expr).toString
+    assert(norm.equals("(-1.0 * X^1.0) + 8.0 = 0.0"), norm)
+  }
 
   test("Negative variable") {
     val expr = "8 * y^0.12 * -4 * y^1 + y^1 + 4 * -y^3 + 31 = 0"

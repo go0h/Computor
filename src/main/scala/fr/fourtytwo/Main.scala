@@ -8,18 +8,13 @@ object Main {
 
   def main(args: Array[String]): Unit = {
 
-    val expr = "-( (5 * X^1) - ( (4 * X^1 + 4) + 4) ) = 0"
-    val rpnTest = "-(7845 + 32 -3 * 323.4)"
-
+    val expr = "23 * X^2 = 0"
 
     try {
-      var res = RPN(SIMPLE_TOKENIZER.generateTokens(rpnTest)).solve
-
-
-
       val polynomial = Polynomial(expr)
-      val solution = polynomial.solve()
-//      println(s"[${solution._1}, ${solution._2}]")
+      val solution = polynomial.solve
+      println(s"""The solutions is:
+                  |$solution""".stripMargin)
 
     } catch {
       case ex: ParseException => println(s"Parse: ${ex.getMessage}")

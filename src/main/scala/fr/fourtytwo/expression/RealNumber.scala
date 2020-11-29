@@ -16,26 +16,16 @@ class RealNumber(private val num: Double) extends Operable {
   ////////////////////////////////////////
   ////////////// PLUS METHODS ////////////
   ////////////////////////////////////////
-  def +(expr: RealNumber): Expression = RealNumber(num + expr.evaluate)
-
-  def +(expr: Variable): Expression = {
-    if (num == 0)
-      return expr
-    Operator(this, "+", expr)
-  }
-
-  def +(expr: Indeterminate): Expression = {
-    if (num == 0)
-      return expr
-    Operator(this, "+", expr)
-  }
+  def +(other: RealNumber): Expression = RealNumber(num + other.evaluate)
+  def +(other: Variable): Expression = if (num == 0) other else Operator(this, "+", other)
+  def +(other: Indeterminate): Expression = if (num == 0) other else Operator(this, "+", other)
 
 
   ////////////////////////////////////////
   ////////// SUBTRACTION METHODS /////////
   ////////////////////////////////////////
   def -(other: RealNumber): Expression = RealNumber(num - other.evaluate)
-  def -(other: Variable): Expression = Operator(this, "-", other)
+  def -(other: Variable): Expression = if (num == 0) other.changeSign else Operator(this, "-", other)
   def -(other: Indeterminate): Expression = Operator(this, "-", other)
 
 

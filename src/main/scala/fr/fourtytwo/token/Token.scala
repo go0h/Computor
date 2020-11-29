@@ -15,6 +15,10 @@ class Token(val expr: String, val tType: TokenType.Value) {
 
   def equals(other: String): Boolean = this.expr.equals(other)
 
+  def withUnary(unary: Int): Token = {
+    if (unary > 0) new Token(s"-$expr", tType) else this
+  }
+
 }
 
 object Token {

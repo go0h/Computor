@@ -162,7 +162,6 @@ class Variable extends Operable {
     }
   }
 
-
   override def equals(other: Any): Boolean = {
       other match {
         case _: Variable => toString.equals(other.toString)
@@ -171,7 +170,7 @@ class Variable extends Operable {
   }
 
   override def toString: String = if (sign == -1) s"-$name" else name
-  
+
   def contains(op: String): Boolean = false
 }
 

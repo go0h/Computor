@@ -131,11 +131,11 @@ class RPNTest extends AnyFunSuite {
     assert(res == -(-(-(-(-(-(-731.09)))))))
   }
 
-//  test("Unary minus - 1") {
-//    val expr = "-(7845 + 32 -3 * 323.4)"
-//    val res = getResult(expr)
-//    assert(res == -(7845 + 32 - 3 * 323.4))
-//  }
+  test("Unary minus - 1") {
+    val expr = "-(7845 + 32 -3 * 323.4)"
+    val res = getResult(expr)
+    assert(res == -(7845 + 32 - 3 * 323.4))
+  }
 
   test("Double expression - 1") {
     val expr = "3.23144 * 765.321 / (-0.000321) + 16.30882"

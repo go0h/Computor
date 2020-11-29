@@ -2,6 +2,7 @@ package fr.fourtytwo.polynomial
 
 import fr.fourtytwo.exception.EvaluateException
 import fr.fourtytwo.expression._
+import scala.math.sqrt
 
 class Polynomial(expr: String, debug: Boolean = false) {
 
@@ -12,67 +13,105 @@ class Polynomial(expr: String, debug: Boolean = false) {
     case o: Operable => o
   }
 
-  def solve(): (RealNumber, RealNumber) = {
+  def solve: String = {
 
-    if (exprArr.length < 1)
-      throw new EvaluateException(s"Can't solve: ${exprArr.mkString(" + ")} = 0")
-    if (minDegree < 0)
-      throw new EvaluateException(s"Can't solve polynomial with negative degree ${exprArr.mkString(" + ")} = 0")
+    val degrees = getDegrees
 
-    val maxSolveDegree = 2
-    val degree = maxDegree
+    println(s"Polynomial degree: ${degrees.max}")
+    checkSolvable(degrees)
 
-    println(s"Polynomial degree: $degree")
-    if (degree == 0) {
-      exprArr.head match {
-        case r: RealNumber =>
-          if (r.evaluate == 0) return (RealNumber(Double.NegativeInfinity), RealNumber(Double.PositiveInfinity))
-          else throw new EvaluateException(s"Can't solve: ${exprArr.mkString(" + ")} = 0")
-        case _ => throw new EvaluateException(s"Can't solve: ${exprArr.mkString(" + ")} = 0")
-      }
+    println(s"Degrees = ${degrees.mkString(", ")}")
+    degrees.max.toInt match {
+      case 2 => binomialSolve
+      case 1 => monomialSolve
+      case 0 => noVars
+      case _ => s"Can't recognize polynomial $toString"
     }
-    if (degree > maxSolveDegree) {
-      println(s"The polynomial degree is strictly greater than $maxSolveDegree ($degree), I can't solve")
-      return null
-    }
-    val varName = getVarName
-
-    val monomialNumbs = exprArr.length
-
-    monomialNumbs match {
-      case 1 => println(s"$varName = 0.0")
-      case 2 =>
-      case 3 =>
-    }
-    null
   }
 
-  def maxDegree: Double = degree(_ > _)
-  def minDegree: Double = degree(_ < _)
-  def degree(order: (Double, Double) => Boolean): Double = {
+  def binomialSolve: String = {
+    val a = exprArr.head.asInstanceOf[Indeterminate].constant.evaluate
+    var b = 0.0
+    var c = 0.0
+
+    exprArr match {
+      case Array(_, b1, c1) => {
+        b = b1.asInstanceOf[Indeterminate].constant.evaluate
+        c = c1.asInstanceOf[RealNumber].evaluate
+      }
+      case Array(_, b1) => {
+        b1 match {
+          case i: Indeterminate => b = i.constant.evaluate
+          case r: RealNumber => c = r.evaluate
+        }
+      }
+      case Array(_) =>
+    }
+
+    val discriminant = (b * b) - 4 * a * c
+    if (discriminant < 0)
+      return ""
+
+    val x1 = ((-b) + sqrt(discriminant)) / (2 * a)
+    val x2 = ((-b) - sqrt(discriminant)) / (2 * a)
+
+    s"""x1 = $x1
+       |x2 = $x2""".stripMargin
+  }
+
+  def monomialSolve: String = {
+    val a = exprArr.head.asInstanceOf[Indeterminate].constant.evaluate
+    var b = 0.0
+
+    exprArr match {
+      case Array(_, b1) => b = b1.asInstanceOf[RealNumber].evaluate
+      case Array(_) =>
+    }
+    ((-b) / a).toString
+  }
+
+  def noVars: String = {
+    val a = exprArr.head.asInstanceOf[RealNumber].evaluate
+    if (a != 0)
+      throw new EvaluateException(s"The polynomial $toString is wrong")
+    "All real numbers"
+  }
+
+  def checkSolvable(degrees: Array[Double]): Unit = {
+
+    val maxSolveDegree = 2
+
+    if (degrees.length < 1)
+      throw new EvaluateException(s"Can't solve empty expression")
+
+    if (degrees.length > 3)
+      throw new EvaluateException(s"Can't solve expression $toString")
+
+    if (degrees.min < 0)
+      throw new EvaluateException(s"Can't solve polynomial with negative degree $toString = 0")
+
+    if (degrees.max > maxSolveDegree)
+      throw new EvaluateException(s"The polynomial degree is strictly greater than $maxSolveDegree" +
+        s"(${degrees.max}), I can't solve")
+
+    for (degree <- degrees) {
+      if (degree - degree.toInt != 0.0)
+        throw new EvaluateException(s"The polynomial degree isn't Integer $degree, I can't solve")
+    }
+  }
+
+  def getDegrees: Array[Double] = {
     exprArr.map {
         case _: RealNumber => 0.0
         case _: Variable => 1.0
         case i: Indeterminate => i.degree.evaluate
-      }.sortWith(order).head
+      }.sortWith(_ > _)
   }
 
   override def toString: String = s"$expression = 0.0"
 
-  def getVarName: String = {
-    for (operable <- exprArr) {
-      operable match {
-        case o: Indeterminate => return o.variable.getName
-        case _ =>
-      }
-    }
-    null
-  }
 }
 
 object Polynomial {
-
   def apply(expression: String): Polynomial = new Polynomial(expression)
-
-
 }
