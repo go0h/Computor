@@ -37,6 +37,18 @@ class OperationsTest extends AnyFunSuite {
     assert(res.toString.equals("(4.0 * X^1.0)"), res)
   }
 
+  test("RealNumber + ComplexNumber") {
+    val res = RealNumber(4) + ComplexNumber(8, 2)
+    assert(res.isInstanceOf[ComplexNumber])
+    assert(res.toString.equals("(12.0 + 2.0i)"), res)
+  }
+
+  test("RealNumber = 0 + ComplexNumber") {
+    val res = RealNumber(0) + ComplexNumber(8, -2)
+    assert(res.isInstanceOf[ComplexNumber])
+    assert(res.toString.equals("(8.0 - 2.0i)"), res)
+  }
+
   test("RealNumber - RealNumber") {
     val res = RealNumber(3.14) - RealNumber(0.86)
     assert(res.evaluate == 3.14 - 0.86)
@@ -58,6 +70,18 @@ class OperationsTest extends AnyFunSuite {
     val res = RealNumber(3.14) - Indeterminate(RealNumber(4.0), Variable("X"), RealNumber(1.0))
     assert(res.isInstanceOf[Operator])
     assert(res.toString.equals("3.14 - (4.0 * X^1.0)"), res)
+  }
+
+  test("RealNumber - ComplexNumber") {
+    val res = RealNumber(4) - ComplexNumber(8, 2)
+    assert(res.isInstanceOf[ComplexNumber])
+    assert(res.toString.equals("(-4.0 - 2.0i)"), res)
+  }
+
+  test("RealNumber = 0 - ComplexNumber") {
+    val res = RealNumber(0) - ComplexNumber(8, 2)
+    assert(res.isInstanceOf[ComplexNumber])
+    assert(res.toString.equals("(-8.0 - 2.0i)"), res)
   }
 
   test("RealNumber * RealNumber") {
@@ -94,6 +118,18 @@ class OperationsTest extends AnyFunSuite {
     assert(res.toString.equals("(1.0 * X^-12.0)"))
   }
 
+  test("RealNumber * ComplexNumber") {
+    val res = RealNumber(4) * ComplexNumber(8, 2)
+    assert(res.isInstanceOf[ComplexNumber])
+    assert(res.toString.equals("(32.0 + 8.0i)"), res)
+  }
+
+  test("RealNumber * -ComplexNumber") {
+    val res = RealNumber(4) * ComplexNumber(-8, 2)
+    assert(res.isInstanceOf[ComplexNumber])
+    assert(res.toString.equals("(-32.0 + 8.0i)"), res)
+  }
+
   test("RealNumber / RealNumber") {
     val res = RealNumber(10.0) / RealNumber(4.0)
     assert(res.evaluate == 10.0 / 4.0)
@@ -115,6 +151,12 @@ class OperationsTest extends AnyFunSuite {
     val res = RealNumber(10.0) / Indeterminate(RealNumber(2.0), Variable("X"), RealNumber(4.0))
     assert(res.isInstanceOf[Indeterminate])
     assert(res.toString.equals("(5.0 * X^-4.0)"))
+  }
+
+  test("RealNumber / ComplexNumber") {
+    val res = RealNumber(4) / ComplexNumber(2, 4)
+    assert(res.isInstanceOf[ComplexNumber])
+    assert(res.toString.equals("(0.4 - 0.8i)"), res)
   }
 
   ////////////////////////////////////////
@@ -202,6 +244,18 @@ class OperationsTest extends AnyFunSuite {
     assertThrows[EvaluateException] {
       Variable("X") + Indeterminate(RealNumber(4.0), Variable("Y"), RealNumber(1))
     }
+  }
+
+  test("Variable + ComplexNumber") {
+    val res = Variable("X") + ComplexNumber(4, 3)
+    assert(res.isInstanceOf[Operator])
+    assert(res.toString.equals("X + (4.0 + 3.0i)"), res)
+  }
+
+  test("Variable + ComplexNumber - 1") {
+    val res = (Variable("X") + ComplexNumber(3, 0)).simplify
+    assert(res.isInstanceOf[Operator])
+    assert(res.toString.equals("X + 3.0"), res)
   }
 
   test("Variable - RealNumber") {
@@ -294,6 +348,18 @@ class OperationsTest extends AnyFunSuite {
     assert(res.toString.equals("(3.0 * X^1.0)"), res)
   }
 
+  test("Variable - ComplexNumber") {
+    val res = Variable("X") - ComplexNumber(4, 3)
+    assert(res.isInstanceOf[Operator])
+    assert(res.toString.equals("X - (4.0 + 3.0i)"), res)
+  }
+
+  test("Variable - ComplexNumber - 1") {
+    val res = (Variable("X") - ComplexNumber(4, 0)).simplify
+    assert(res.isInstanceOf[Operator])
+    assert(res.toString.equals("X - 4.0"), res)
+  }
+
   test("Variable * RealNumber") {
     val res = Variable("X") * RealNumber(0.5)
     assert(res.isInstanceOf[Indeterminate])
@@ -351,7 +417,19 @@ class OperationsTest extends AnyFunSuite {
   test("-Variable * -Indeterminate") {
     val res = Variable("-X") * Indeterminate(RealNumber(-4), Variable("X"), RealNumber(13))
     assert(res.isInstanceOf[Indeterminate])
-    assert(res.toString.equals("(4.0 * X^14.0)"), res.toString)
+    assert(res.toString.equals("(4.0 * X^14.0)"), res)
+  }
+
+  test("Variable * ComplexNumber") {
+    val res = Variable("X") * ComplexNumber(4, 3)
+    assert(res.isInstanceOf[Operator])
+    assert(res.toString.equals("X * (4.0 + 3.0i)"), res)
+  }
+
+  test("Variable * ComplexNumber - 1") {
+    val res = (Variable("X") * ComplexNumber(4, 0)).simplify
+    assert(res.isInstanceOf[Indeterminate])
+    assert(res.toString.equals("(4.0 * X^1.0)"), res)
   }
 
   test("Variable / RealNumber") {
@@ -419,6 +497,12 @@ class OperationsTest extends AnyFunSuite {
     assertThrows[EvaluateException] {
       Variable("X") / Indeterminate(RealNumber(4.0), Variable("Y"), RealNumber(13))
     }
+  }
+
+  test("Variable / ComplexNumber") {
+    val res = Variable("X") / ComplexNumber(4, 23)
+    assert(res.isInstanceOf[Operator])
+    assert(res.toString.equals("X / (4.0 + 23.0i)"), res)
   }
 
   ////////////////////////////////////////
@@ -499,6 +583,18 @@ class OperationsTest extends AnyFunSuite {
     }
   }
 
+  test("Indeterminate + ComplexNumber") {
+    val res = Indeterminate(RealNumber(2), Variable("X"), RealNumber(3)) + ComplexNumber(4, 2)
+    assert(res.isInstanceOf[Operator])
+    assert(res.toString.equals("(2.0 * X^3.0) + (4.0 + 2.0i)"), res)
+  }
+
+  test("Indeterminate + ComplexNumber = 1") {
+    val res = (Indeterminate(RealNumber(2), Variable("X"), RealNumber(3)) + ComplexNumber(4, 0)).simplify
+    assert(res.isInstanceOf[Operator])
+    assert(res.toString.equals("(2.0 * X^3.0) + 4.0"), res)
+  }
+
   test("Indeterminate - RealNumber") {
     val res = Indeterminate(RealNumber(4.0), Variable("X"), RealNumber(13)) - RealNumber(0.5)
     assert(res.isInstanceOf[Operator])
@@ -562,6 +658,18 @@ class OperationsTest extends AnyFunSuite {
     }
   }
 
+  test("Indeterminate - ComplexNumber") {
+    val res = Indeterminate(RealNumber(2), Variable("X"), RealNumber(3)) - ComplexNumber(4, 2)
+    assert(res.isInstanceOf[Operator])
+    assert(res.toString.equals("(2.0 * X^3.0) - (4.0 + 2.0i)"), res)
+  }
+
+  test("Indeterminate - ComplexNumber - 1") {
+    val res = (Indeterminate(RealNumber(2), Variable("X"), RealNumber(3)) - ComplexNumber(4, 0)).simplify
+    assert(res.isInstanceOf[Operator])
+    assert(res.toString.equals("(2.0 * X^3.0) - 4.0"), res)
+  }
+
   test("Indeterminate * RealNumber") {
     val res = Indeterminate(RealNumber(4.0), Variable("X"), RealNumber(13)) * RealNumber(0.5)
     assert(res.isInstanceOf[Indeterminate])
@@ -607,10 +715,22 @@ class OperationsTest extends AnyFunSuite {
     }
   }
 
+  test("Indeterminate * ComplexNumber") {
+    val res = Indeterminate(RealNumber(4.0), Variable("X"), RealNumber(3.5)) * ComplexNumber(4, 3)
+    assert(res.isInstanceOf[Operator])
+    assert(res.toString.equals("(4.0 * X^3.5) * (4.0 + 3.0i)"), res)
+  }
+
+  test("Indeterminate * ComplexNumber - 1") {
+    val res = (Indeterminate(RealNumber(4.0), Variable("X"), RealNumber(3.5)) * ComplexNumber(4, 0)).simplify
+    assert(res.isInstanceOf[Indeterminate])
+    assert(res.toString.equals("(16.0 * X^3.5)"), res)
+  }
+
   test("Indeterminate / RealNumber") {
     val res = Indeterminate(RealNumber(4.0), Variable("X"), RealNumber(13)) / RealNumber(0.5)
     assert(res.isInstanceOf[Indeterminate])
-    assert(res.toString.equals("(8.0 * X^13.0)"), res.toString)
+    assert(res.toString.equals("(8.0 * X^13.0)"), res)
   }
 
   test("Indeterminate / RealNumber = 0") {
@@ -656,4 +776,154 @@ class OperationsTest extends AnyFunSuite {
     assert(res.isInstanceOf[Indeterminate])
     assert(res.toString.equals("(2.0 * X^1.0)"), res.toString)
   }
+
+  test("Indeterminate / ComplexNumber") {
+    val res = Indeterminate(RealNumber(4.0), Variable("X"), RealNumber(2.0)) / ComplexNumber(4, 45)
+    assert(res.isInstanceOf[Operator])
+    assert(res.toString.equals("(4.0 * X^2.0) / (4.0 + 45.0i)"), res)
+  }
+
+  test("Indeterminate / ComplexNumber - 1") {
+    val res = (Indeterminate(RealNumber(16.0), Variable("X"), RealNumber(2.0)) / ComplexNumber(4, 0)).simplify
+    assert(res.isInstanceOf[Indeterminate])
+    assert(res.toString.equals("(4.0 * X^2.0)"), res)
+  }
+
+
+  ////////////////////////////////////////
+  /////////// COMPLEX NUMBER /////////////
+  ////////////////////////////////////////
+
+  test("ComplexNumber + RealNumber") {
+    val res = ComplexNumber(8, 2) + RealNumber(4)
+    assert(res.isInstanceOf[ComplexNumber])
+    assert(res.toString.equals("(12.0 + 2.0i)"), res)
+  }
+
+  test("ComplexNumber + RealNumber = 0") {
+    val res = ComplexNumber(8, -2) + RealNumber(0)
+    assert(res.isInstanceOf[ComplexNumber])
+    assert(res.toString.equals("(8.0 - 2.0i)"), res)
+  }
+
+  test("ComplexNumber - RealNumber") {
+    val res = ComplexNumber(8, 2) - RealNumber(4)
+    assert(res.isInstanceOf[ComplexNumber])
+    assert(res.toString.equals("(4.0 + 2.0i)"), res)
+  }
+
+  test("ComplexNumber - RealNumber = 0") {
+    val res = RealNumber(0) - ComplexNumber(8, 2)
+    assert(res.isInstanceOf[ComplexNumber])
+    assert(res.toString.equals("(-8.0 - 2.0i)"), res)
+  }
+
+  test("ComplexNumber * RealNumber") {
+    val res = ComplexNumber(8, 2) * RealNumber(4)
+    assert(res.isInstanceOf[ComplexNumber])
+    assert(res.toString.equals("(32.0 + 8.0i)"), res)
+  }
+
+  test("-ComplexNumber * RealNumber") {
+    val res = ComplexNumber(-8, 2) * RealNumber(4)
+    assert(res.isInstanceOf[ComplexNumber])
+    assert(res.toString.equals("(-32.0 + 8.0i)"), res)
+  }
+
+  test("ComplexNumber / RealNumber") {
+    val res = ComplexNumber(2, 4) / RealNumber(4)
+    assert(res.isInstanceOf[ComplexNumber])
+    assert(res.toString.equals("(0.5 + 1.0i)"), res)
+  }
+
+  test("ComplexNumber + Variable") {
+    val res = ComplexNumber(4, 3) + Variable("X")
+    assert(res.isInstanceOf[Operator])
+    assert(res.toString.equals("(4.0 + 3.0i) + X"), res)
+  }
+
+  test("ComplexNumber + Variable - 1") {
+    val res = (ComplexNumber(3, 0) + Variable("X")).simplify
+    assert(res.isInstanceOf[Operator])
+    assert(res.toString.equals("3.0 + X"), res)
+  }
+
+  test("ComplexNumber - Variable") {
+    val res = ComplexNumber(4, 3) - Variable("X")
+    assert(res.isInstanceOf[Operator])
+    assert(res.toString.equals("(4.0 + 3.0i) - X"), res)
+  }
+
+  test("ComplexNumber - Variable - 1") {
+    val res = (ComplexNumber(4, 0) - Variable("X")).simplify
+    assert(res.isInstanceOf[Operator])
+    assert(res.toString.equals("4.0 - X"), res)
+  }
+
+  test("ComplexNumber * Variable") {
+    val res = ComplexNumber(4, 3) * Variable("X")
+    assert(res.isInstanceOf[Operator])
+    assert(res.toString.equals("(4.0 + 3.0i) * X"), res)
+  }
+
+  test("ComplexNumber * Variable - 1") {
+    val res = (ComplexNumber(4, 0) * Variable("X")).simplify
+    assert(res.isInstanceOf[Indeterminate])
+    assert(res.toString.equals("(4.0 * X^1.0)"), res)
+  }
+
+  test("ComplexNumber / Variable") {
+    val res = ComplexNumber(4, 23) / Variable("X")
+    assert(res.isInstanceOf[Operator])
+    assert(res.toString.equals("(4.0 + 23.0i) / X"), res)
+  }
+
+  test("ComplexNumber + Indeterminate") {
+    val res = ComplexNumber(4, 2) + Indeterminate(RealNumber(2), Variable("X"), RealNumber(3))
+    assert(res.isInstanceOf[Operator])
+    assert(res.toString.equals("(4.0 + 2.0i) + (2.0 * X^3.0)"), res)
+  }
+
+  test("ComplexNumber + Indeterminate = 1") {
+    val res = (ComplexNumber(4, 0) + Indeterminate(RealNumber(2), Variable("X"), RealNumber(3))).simplify
+    assert(res.isInstanceOf[Operator])
+    assert(res.toString.equals("4.0 + (2.0 * X^3.0)"), res)
+  }
+
+  test("ComplexNumber - Indeterminate") {
+    val res = ComplexNumber(4, 2) - Indeterminate(RealNumber(2), Variable("X"), RealNumber(3))
+    assert(res.isInstanceOf[Operator])
+    assert(res.toString.equals("(4.0 + 2.0i) - (2.0 * X^3.0)"), res)
+  }
+
+  test("ComplexNumber - Indeterminate - 1") {
+    val res = (ComplexNumber(4, 0) - Indeterminate(RealNumber(2), Variable("X"), RealNumber(3))).simplify
+    assert(res.isInstanceOf[Operator])
+    assert(res.toString.equals("4.0 - (2.0 * X^3.0)"), res)
+  }
+
+  test("ComplexNumber * Indeterminate") {
+    val res = ComplexNumber(4, 3) * Indeterminate(RealNumber(4.0), Variable("X"), RealNumber(3.5))
+    assert(res.isInstanceOf[Operator])
+    assert(res.toString.equals("(4.0 + 3.0i) * (4.0 * X^3.5)"), res)
+  }
+
+  test("ComplexNumber * Indeterminate - 1") {
+    val res = (ComplexNumber(4, 0) * Indeterminate(RealNumber(4.0), Variable("X"), RealNumber(3.5))).simplify
+    assert(res.isInstanceOf[Indeterminate])
+    assert(res.toString.equals("(16.0 * X^3.5)"), res)
+  }
+
+  test("ComplexNumber / Indeterminate") {
+    val res = ComplexNumber(4, 45) / Indeterminate(RealNumber(4.0), Variable("X"), RealNumber(2.0))
+    assert(res.isInstanceOf[Operator])
+    assert(res.toString.equals("(4.0 + 45.0i) / (4.0 * X^2.0)"), res)
+  }
+
+  test("ComplexNumber / Indeterminate - 1") {
+    val res = (ComplexNumber(16, 0) / Indeterminate(RealNumber(4.0), Variable("X"), RealNumber(2.0))).simplify
+    assert(res.isInstanceOf[Indeterminate])
+    assert(res.toString.equals("(4.0 * X^-2.0)"), res)
+  }
+
 }

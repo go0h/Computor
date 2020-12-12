@@ -1,7 +1,5 @@
 package fr.fourtytwo.expression
 
-import fr.fourtytwo.exception.EvaluateException
-
 import scala.math.pow
 
 class RealNumber(private val num: Double) extends Operable {
@@ -19,7 +17,7 @@ class RealNumber(private val num: Double) extends Operable {
   def +(other: RealNumber): Expression = RealNumber(num + other.evaluate)
   def +(other: Variable): Expression = if (num == 0) other else Operator(this, "+", other)
   def +(other: Indeterminate): Expression = if (num == 0) other else Operator(this, "+", other)
-
+  def +(other: ComplexNumber): Expression = other + this
 
   ////////////////////////////////////////
   ////////// SUBTRACTION METHODS /////////
@@ -27,6 +25,9 @@ class RealNumber(private val num: Double) extends Operable {
   def -(other: RealNumber): Expression = RealNumber(num - other.evaluate)
   def -(other: Variable): Expression = if (num == 0) other.changeSign else Operator(this, "-", other)
   def -(other: Indeterminate): Expression = Operator(this, "-", other)
+  def -(other: ComplexNumber): Expression = {
+    ComplexNumber(num - other.getRe, 0 - other.getIm).simplify
+  }
 
 
   ////////////////////////////////////////
@@ -47,19 +48,18 @@ class RealNumber(private val num: Double) extends Operable {
       other.variable.toString,
       other.degree.evaluate)
   }
+  def *(other: ComplexNumber): Expression = other * this
 
 
   ////////////////////////////////////////
   //////////// DIVISION METHODS //////////
   ////////////////////////////////////////
   def /(other: RealNumber): RealNumber = {
+    if (other.evaluate == 0)
+      throw new ArithmeticException("Division by zero")
     if (num == 0)
       return RealNumber(0)
-
-    val denominator = other.evaluate
-    if (denominator == 0)
-      throw new ArithmeticException("Division by zero")
-    RealNumber(num / denominator)
+    RealNumber(num / other.evaluate)
   }
 
   def /(other: Variable): Operable = {
@@ -76,6 +76,8 @@ class RealNumber(private val num: Double) extends Operable {
                       RealNumber(other.degree.evaluate * -1))
   }
 
+  def /(other: ComplexNumber): Expression = ComplexNumber(num, 0) / other
+
   ////////////////////////////////////////
   ///////////// POWER METHOD /////////////
   ////////////////////////////////////////
@@ -91,6 +93,7 @@ class RealNumber(private val num: Double) extends Operable {
       case rn : RealNumber => num.compare(rn.evaluate)
       case _ : Variable => 1
       case _ : Indeterminate => 1
+      case _ : ComplexNumber => 1
     }
   }
 

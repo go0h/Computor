@@ -9,17 +9,26 @@ class PolySolverTest extends AnyFunSuite {
   def binomialSolve(a: Double, b: Double, c: Double): String = {
 
     val discriminant = (b * b) - 4 * a * c
-    if (discriminant < 0)
-      return ""
+    if (discriminant < 0) {
+      ""
+    }
+    else if (discriminant == 0) {
+      val res = (-b) / (2 * a)
+      s"x = ${if (res == 0) 0.0 else res}"
+    }
+    else {
+      val x1 = ((-b) + sqrt(discriminant)) / (2 * a)
+      val x2 = ((-b) - sqrt(discriminant)) / (2 * a)
 
-    val x1 = ((-b) + sqrt(discriminant)) / (2 * a)
-    val x2 = ((-b) - sqrt(discriminant)) / (2 * a)
-
-    s"""x1 = $x1
-       |x2 = $x2""".stripMargin
+      s"""x1 = $x1
+         |x2 = $x2""".stripMargin
+    }
   }
 
-  def monomialSolve(a: Double, b: Double): String = ((-b) / a).toString
+  def monomialSolve(a: Double, b: Double): String = {
+    val res = (-b) / a
+    s"x = ${if (res == 0) 0.0 else res}"
+  }
 
   def noVars(a: Double): String = {
     if (a != 0)
@@ -36,7 +45,7 @@ class PolySolverTest extends AnyFunSuite {
   test("Subject test - 2") {
     val expr = "5 * X^0 + 4 * X^1 = 4 * X^0"
     val res = Polynomial(expr).solve
-    assert(res.equals(monomialSolve(4, 1)))
+    assert(res.equals(monomialSolve(4, 1)), monomialSolve(4,1))
   }
 
   test("Subject test - 3") {

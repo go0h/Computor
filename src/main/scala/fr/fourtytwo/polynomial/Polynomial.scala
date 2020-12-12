@@ -49,14 +49,26 @@ class Polynomial(expr: String, debug: Boolean = false) {
     }
 
     val discriminant = (b * b) - 4 * a * c
-    if (discriminant < 0)
-      return ""
 
-    val x1 = ((-b) + sqrt(discriminant)) / (2 * a)
-    val x2 = ((-b) - sqrt(discriminant)) / (2 * a)
+    if (discriminant < 0) {
+      val compDisc = ComplexNumber(0, sqrt(-discriminant))
+      val x1 = (RealNumber(-b) + compDisc).asInstanceOf[Operable] / RealNumber(2 * a)
+      val x2 = (RealNumber(-b) - compDisc).asInstanceOf[Operable] / RealNumber(2 * a)
 
-    s"""x1 = $x1
-       |x2 = $x2""".stripMargin
+      s"""x1 = $x1
+         |x2 = $x2""".stripMargin
+    }
+    else if (discriminant == 0) {
+      val res = (-b) / (2 * a)
+      s"x = ${if (res == 0) 0.0 else res}"
+    }
+    else {
+      val x1 = ((-b) + sqrt(discriminant)) / (2 * a)
+      val x2 = ((-b) - sqrt(discriminant)) / (2 * a)
+
+      s"""x1 = $x1
+         |x2 = $x2""".stripMargin
+    }
   }
 
   def monomialSolve: String = {
@@ -67,7 +79,8 @@ class Polynomial(expr: String, debug: Boolean = false) {
       case Array(_, b1) => b = b1.asInstanceOf[RealNumber].evaluate
       case Array(_) =>
     }
-    ((-b) / a).toString
+    val res = (-b) / a
+    s"x = ${if (res == 0) 0.0 else res}"
   }
 
   def noVars: String = {

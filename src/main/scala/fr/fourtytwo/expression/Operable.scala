@@ -13,11 +13,13 @@ trait Operable extends Expression with Ordered[Operable] {
       case rn : RealNumber => this + rn
       case v : Variable => this + v
       case i : Indeterminate => this + i
+      case cn : ComplexNumber => this + cn
     }
   }
   def +(other: RealNumber): Expression
   def +(other: Variable): Expression
   def +(other: Indeterminate): Expression
+  def +(other: ComplexNumber): Expression
 
 
   ////////////////////////////////////////
@@ -28,11 +30,13 @@ trait Operable extends Expression with Ordered[Operable] {
       case rn : RealNumber => this - rn
       case v : Variable => this - v
       case i : Indeterminate => this - i
+      case cn : ComplexNumber => this - cn
     }
   }
   def -(other: RealNumber): Expression
   def -(other: Variable): Expression
   def -(other: Indeterminate): Expression
+  def -(other: ComplexNumber): Expression
 
 
   ////////////////////////////////////////
@@ -43,11 +47,13 @@ trait Operable extends Expression with Ordered[Operable] {
       case rn : RealNumber => this * rn
       case v : Variable => this * v
       case i : Indeterminate => this * i
+      case cn : ComplexNumber => this * cn
     }
   }
   def *(other: RealNumber): Expression
   def *(other: Variable): Expression
   def *(other: Indeterminate): Expression
+  def *(other: ComplexNumber): Expression
 
 
   ////////////////////////////////////////
@@ -58,11 +64,13 @@ trait Operable extends Expression with Ordered[Operable] {
       case rn : RealNumber => this / rn
       case v : Variable => this / v
       case i : Indeterminate => this / i
+      case cn : ComplexNumber => this / cn
     }
   }
   def /(other: RealNumber): Expression
   def /(other: Variable): Expression
   def /(other: Indeterminate): Expression
+  def /(other: ComplexNumber): Expression
 
   ////////////////////////////////////////
   ///////////// POWER METHODS ////////////
@@ -72,6 +80,7 @@ trait Operable extends Expression with Ordered[Operable] {
       case rn : RealNumber => this ^ rn
       case v : Variable => throw new EvaluateException(s"Can't raise '$toString' to the power '$v'")
       case i : Indeterminate => throw new EvaluateException(s"Can't raise '$toString' to the power '$i'")
+      case cn : ComplexNumber => throw new EvaluateException(s"Can't raise '$toString' to the power '$cn'")
     }
   }
   def ^(other: RealNumber): Expression
