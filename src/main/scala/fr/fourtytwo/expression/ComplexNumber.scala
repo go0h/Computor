@@ -87,6 +87,13 @@ class ComplexNumber(re: Double, im: Double) extends Operable {
   override def toString: String = {
     s"(${if (re == 0) 0.0 else re} ${if (im < 0) "-" else "+"} ${abs(im)}i)"
   }
+
+  override def equals(obj: Any): Boolean = {
+    obj match {
+      case c: ComplexNumber => re == c.getRe && im == c.getIm
+      case _ => obj.equals(this)
+    }
+  }
 }
 
 object ComplexNumber {

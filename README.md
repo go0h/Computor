@@ -1,5 +1,12 @@
 # ComputorV1
 
+####Usage
+```
+Usage: ./ComputorV1 "expression" [-d]
+-h, --help			display this help and exit
+-d, --debug			debug mode
+```
+
 #### Программа решения полиномиальных уравнений
 
 Порядок выполнения решения уравнения.

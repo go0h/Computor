@@ -2,7 +2,6 @@ package fr.fourtytwo.expression
 
 import fr.fourtytwo.exception.EvaluateException
 
-//TODO maybe add modulo division
 trait Operable extends Expression with Ordered[Operable] {
 
   ////////////////////////////////////////
@@ -85,6 +84,20 @@ trait Operable extends Expression with Ordered[Operable] {
   }
   def ^(other: RealNumber): Expression
 
+  def %(other: Expression): Expression = {
+    other match {
+      case rn : RealNumber => {
+        this match {
+          case number: RealNumber => RealNumber(number.evaluate % rn.evaluate)
+          case _ => Operator(this, "%", other)
+        }
+      }
+      case _ => {
+        if (equals(other)) RealNumber(0)
+        else Operator(this, "%", other)
+      }
+    }
+  }
 
   override def compare(other: Operable): Int
 }

@@ -1,10 +1,16 @@
 package fr.fourtytwo.polynomial
 
+import scala.math.sqrt
+import java.util.logging.{Level, Logger}
 import fr.fourtytwo.exception.EvaluateException
 import fr.fourtytwo.expression._
-import scala.math.sqrt
+import fr.fourtytwo.utils.ComputorLogger
+
 
 class Polynomial(expr: String, debug: Boolean = false) {
+
+  val LOGGER: Logger = ComputorLogger.LOGGER
+  LOGGER.setLevel(if (debug) Level.FINE else Level.INFO)
 
   val expression: Expression = PolynomialReducer(expr)
   val exprArr: Array[Operable] = PolynomialReducer.exprToArray(expression)
@@ -17,10 +23,10 @@ class Polynomial(expr: String, debug: Boolean = false) {
 
     val degrees = getDegrees
 
-    println(s"Polynomial degree: ${degrees.max}")
+    LOGGER.info(s"Polynomial degree: ${degrees.max}")
     checkSolvable(degrees)
 
-    println(s"Degrees = ${degrees.mkString(", ")}")
+    LOGGER.fine(s"Degrees = ${degrees.mkString(", ")}")
     degrees.max.toInt match {
       case 2 => binomialSolve
       case 1 => monomialSolve
@@ -49,6 +55,7 @@ class Polynomial(expr: String, debug: Boolean = false) {
     }
 
     val discriminant = (b * b) - 4 * a * c
+    LOGGER.fine(s"Discriminant = $b^2 - 4 * $a * $c = $discriminant")
 
     if (discriminant < 0) {
       val compDisc = ComplexNumber(0, sqrt(-discriminant))
@@ -122,9 +129,10 @@ class Polynomial(expr: String, debug: Boolean = false) {
   }
 
   override def toString: String = s"$expression = 0.0"
-
 }
 
 object Polynomial {
-  def apply(expression: String): Polynomial = new Polynomial(expression)
+  def apply(expression: String, debug: Boolean = false): Polynomial = {
+    new Polynomial(expression, debug)
+  }
 }

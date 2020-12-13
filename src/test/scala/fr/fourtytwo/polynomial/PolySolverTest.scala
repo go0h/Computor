@@ -3,6 +3,7 @@ package fr.fourtytwo.polynomial
 import scala.math.sqrt
 import org.scalatest.funsuite.AnyFunSuite
 import fr.fourtytwo.exception.EvaluateException
+import fr.fourtytwo.expression.{ComplexNumber, Operable, RealNumber}
 
 class PolySolverTest extends AnyFunSuite {
 
@@ -10,7 +11,12 @@ class PolySolverTest extends AnyFunSuite {
 
     val discriminant = (b * b) - 4 * a * c
     if (discriminant < 0) {
-      ""
+      val compDisc = ComplexNumber(0, sqrt(-discriminant))
+      val x1 = (RealNumber(-b) + compDisc).asInstanceOf[Operable] / RealNumber(2 * a)
+      val x2 = (RealNumber(-b) - compDisc).asInstanceOf[Operable] / RealNumber(2 * a)
+
+      s"""x1 = $x1
+         |x2 = $x2""".stripMargin
     }
     else if (discriminant == 0) {
       val res = (-b) / (2 * a)
@@ -89,4 +95,11 @@ class PolySolverTest extends AnyFunSuite {
     val res = Polynomial(expr).solve
     assert(res.equals(binomialSolve(23, 0, 0)), binomialSolve(23, 0, 0))
   }
+
+  test("Binomial test - 13") {
+    val expr = "X % X + 4 + X = 3"
+    val res = Polynomial(expr).solve
+    assert(res.equals(monomialSolve(1, 1)), monomialSolve(1, 1))
+  }
+
 }
