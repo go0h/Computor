@@ -80,4 +80,69 @@ class PolySolverTest extends AnyFunSuite {
     val res = Polynomial(expr).solve
     assert(res.equals(binomialSolve(23, 0, 0)), binomialSolve(23, 0, 0))
   }
+
+  test("Binomial test - 4") {
+    val expr = "x^2 - 8*x + 12 = 0"
+    val res = Polynomial(expr).solve
+    val correct = binomialSolve(1, -8, 12)
+    assert(res.equals(correct), correct)
+  }
+
+  //"5*x^2 + 3*x + 7 = 0"
+  test("Negative discriminant - 1") {
+    val expr = "5*x^2 + 3*x + 7 = 0"
+    val res = Polynomial(expr).solve
+    val correct = binomialSolve(5, 3, 7)
+    assert(res.equals(correct), correct)
+  }
+
+  test("Binomial test - 5") {
+    val expr =  "x^2 - 6*x + 9 = 0"
+    val res = Polynomial(expr).solve
+    val correct = binomialSolve(1, -6, 9)
+    assert(res.equals(correct), correct)
+  }
+
+  test("Binomial test - 6") {
+    val expr =  "15 - 2*x - x^2 = 0"
+    val res = Polynomial(expr).solve
+    val correct = binomialSolve(-1, -2, 15)
+    assert(res.equals(correct), correct)
+  }
+
+  test("Binomial test - 7") {
+    val expr =  "x^2 + 12*x + 36 = 0"
+    val res = Polynomial(expr).solve
+    val correct = binomialSolve(1, 12, 36)
+    assert(res.equals(correct), correct)
+  }
+
+  test("Binomial test - 8") {
+    val expr =  "x^2 + 9*x = 0"
+    val res = Polynomial(expr).solve
+    val correct = binomialSolve(1, 9, 0)
+    assert(res.equals(correct), correct)
+  }
+
+  test("Binomial test - 9") {
+    val expr = "x^2 - 7*x = 0"
+    val res = Polynomial(expr).solve
+    val correct = binomialSolve(1, -7, 0)
+    assert(res.equals(correct), correct)
+  }
+
+  test("Binomial test - 10") {
+    val expr = "5*x^2 + 30 = 0"
+    val res = Polynomial(expr).solve
+    val correct = binomialSolve(5, 0, 30)
+    assert(res.equals(correct), correct)
+  }
+
+  test("Binomial test - 11") {
+    val expr = "4*x^2 - 9 = 0"
+    val res = Polynomial(expr).solve
+    val correct = binomialSolve(4, 0, -9)
+    assert(res.equals(correct), correct)
+  }
+
 }
