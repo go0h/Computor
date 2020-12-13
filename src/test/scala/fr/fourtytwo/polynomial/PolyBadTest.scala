@@ -1,7 +1,8 @@
 package fr.fourtytwo.polynomial
 
-import fr.fourtytwo.exception.{EvaluateException, ParseException}
 import org.scalatest.funsuite.AnyFunSuite
+import fr.fourtytwo.exception.{EvaluateException, ParseException}
+
 
 class PolyBadTest extends AnyFunSuite{
 
@@ -41,11 +42,6 @@ class PolyBadTest extends AnyFunSuite{
     }
   }
 
-  test("Variable % Variable - 2") {
-    assertThrows[EvaluateException] {
-      Polynomial("X % X + 4 + X = 3")
-    }
-  }
 
   test("Can't reduce - 1") {
     assertThrows[EvaluateException] {

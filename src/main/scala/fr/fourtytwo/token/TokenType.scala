@@ -2,6 +2,7 @@ package fr.fourtytwo.token
 
 import scala.util.matching.Regex
 
+
 object TokenType extends Enumeration {
 
   val VARIABLE: Value = Value("[A-Za-z]+(?:[0-9]+)?")

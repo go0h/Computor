@@ -1,8 +1,8 @@
 package fr.fourtytwo
 
+import scala.util.matching.Regex
 import fr.fourtytwo.token.{TokenType, Tokenizer}
 
-import scala.util.matching.Regex
 
 package object expression {
 

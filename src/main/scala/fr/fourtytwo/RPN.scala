@@ -4,8 +4,9 @@ import scala.collection.mutable.{ArrayBuffer, Stack => ScalaStack}
 import fr.fourtytwo.exception.EvaluateException
 import fr.fourtytwo.expression._
 import fr.fourtytwo.expression.Operator.priority
-import fr.fourtytwo.token.{Token, TokenType}
+import fr.fourtytwo.token.Token
 import fr.fourtytwo.token.TokenType._
+
 
 class RPN(infixTokens: Array[Token]) {
 

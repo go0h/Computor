@@ -1,10 +1,10 @@
 package fr.fourtytwo.polynomial
 
-import fr.fourtytwo.polynomial.PolynomialReducer._
 import org.scalatest.funsuite.AnyFunSuite
+import fr.fourtytwo.polynomial.PolynomialReducer._
+
 
 class PolyOptimizeTest extends AnyFunSuite {
-
 
   def optimize(expression: String): String = {
     toOptimalExpression(expression)

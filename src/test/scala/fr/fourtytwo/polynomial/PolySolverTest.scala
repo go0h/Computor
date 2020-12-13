@@ -3,23 +3,38 @@ package fr.fourtytwo.polynomial
 import scala.math.sqrt
 import org.scalatest.funsuite.AnyFunSuite
 import fr.fourtytwo.exception.EvaluateException
+import fr.fourtytwo.expression.{ComplexNumber, Operable, RealNumber}
 
 class PolySolverTest extends AnyFunSuite {
 
   def binomialSolve(a: Double, b: Double, c: Double): String = {
 
     val discriminant = (b * b) - 4 * a * c
-    if (discriminant < 0)
-      return ""
+    if (discriminant < 0) {
+      val compDisc = ComplexNumber(0, sqrt(-discriminant))
+      val x1 = (RealNumber(-b) + compDisc).asInstanceOf[Operable] / RealNumber(2 * a)
+      val x2 = (RealNumber(-b) - compDisc).asInstanceOf[Operable] / RealNumber(2 * a)
 
-    val x1 = ((-b) + sqrt(discriminant)) / (2 * a)
-    val x2 = ((-b) - sqrt(discriminant)) / (2 * a)
+      s"""x1 = $x1
+         |x2 = $x2""".stripMargin
+    }
+    else if (discriminant == 0) {
+      val res = (-b) / (2 * a)
+      s"x = ${if (res == 0) 0.0 else res}"
+    }
+    else {
+      val x1 = ((-b) + sqrt(discriminant)) / (2 * a)
+      val x2 = ((-b) - sqrt(discriminant)) / (2 * a)
 
-    s"""x1 = $x1
-       |x2 = $x2""".stripMargin
+      s"""x1 = $x1
+         |x2 = $x2""".stripMargin
+    }
   }
 
-  def monomialSolve(a: Double, b: Double): String = ((-b) / a).toString
+  def monomialSolve(a: Double, b: Double): String = {
+    val res = (-b) / a
+    s"x = ${if (res == 0) 0.0 else res}"
+  }
 
   def noVars(a: Double): String = {
     if (a != 0)
@@ -36,7 +51,7 @@ class PolySolverTest extends AnyFunSuite {
   test("Subject test - 2") {
     val expr = "5 * X^0 + 4 * X^1 = 4 * X^0"
     val res = Polynomial(expr).solve
-    assert(res.equals(monomialSolve(4, 1)))
+    assert(res.equals(monomialSolve(4, 1)), monomialSolve(4,1))
   }
 
   test("Subject test - 3") {
@@ -145,4 +160,15 @@ class PolySolverTest extends AnyFunSuite {
     assert(res.equals(correct), correct)
   }
 
+  test("Binomial test - 12") {
+    val expr = "X % X + 4 + X = 3"
+    val res = Polynomial(expr).solve
+    assert(res.equals(monomialSolve(1, 1)), monomialSolve(1, 1))
+  }
+
+  test("Binomial test - 13") {
+    val expr = "x^2 - 4 + 32 + 3 * x = 23"
+    val res = Polynomial(expr).solve
+    assert(res.equals(binomialSolve(1, 3, 5)), binomialSolve(1, 3, 5))
+  }
 }

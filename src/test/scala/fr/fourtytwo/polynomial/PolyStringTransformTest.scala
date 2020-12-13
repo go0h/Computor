@@ -1,7 +1,7 @@
 package fr.fourtytwo.polynomial
 
-import fr.fourtytwo.polynomial.PolynomialReducer.toOptimalExpression
 import org.scalatest.funsuite.AnyFunSuite
+import fr.fourtytwo.polynomial.PolynomialReducer.toOptimalExpression
 
 /** TEST transform random polynomial expression to special format
  * Example: {{{3x^2 + x + 3 = 0 => (3.0 * x^2.0) + (1.0 * X^1) + 3 = 0}}}

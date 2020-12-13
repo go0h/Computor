@@ -1,10 +1,16 @@
 package fr.fourtytwo.polynomial
 
+import scala.math.sqrt
+import java.util.logging.{Level, Logger}
 import fr.fourtytwo.exception.EvaluateException
 import fr.fourtytwo.expression._
-import scala.math.sqrt
+import fr.fourtytwo.utils.ComputorLogger
+
 
 class Polynomial(expr: String, debug: Boolean = false) {
+
+  val LOGGER: Logger = ComputorLogger.LOGGER
+  LOGGER.setLevel(if (debug) Level.FINE else Level.INFO)
 
   val expression: Expression = PolynomialReducer(expr)
   val exprArr: Array[Operable] = PolynomialReducer.exprToArray(expression)
@@ -17,10 +23,10 @@ class Polynomial(expr: String, debug: Boolean = false) {
 
     val degrees = getDegrees
 
-    println(s"Polynomial degree: ${degrees.max}")
+    LOGGER.info(s"Polynomial degree: ${degrees.max}")
     checkSolvable(degrees)
 
-    println(s"Degrees = ${degrees.mkString(", ")}")
+    LOGGER.fine(s"Degrees = ${degrees.mkString(", ")}")
     degrees.max.toInt match {
       case 2 => binomialSolve
       case 1 => monomialSolve
@@ -49,14 +55,27 @@ class Polynomial(expr: String, debug: Boolean = false) {
     }
 
     val discriminant = (b * b) - 4 * a * c
-    if (discriminant < 0)
-      return ""
+    LOGGER.fine(s"Discriminant = $b^2 - 4 * $a * $c = $discriminant")
 
-    val x1 = ((-b) + sqrt(discriminant)) / (2 * a)
-    val x2 = ((-b) - sqrt(discriminant)) / (2 * a)
+    if (discriminant < 0) {
+      val compDisc = ComplexNumber(0, sqrt(-discriminant))
+      val x1 = (RealNumber(-b) + compDisc).asInstanceOf[Operable] / RealNumber(2 * a)
+      val x2 = (RealNumber(-b) - compDisc).asInstanceOf[Operable] / RealNumber(2 * a)
 
-    s"""x1 = $x1
-       |x2 = $x2""".stripMargin
+      s"""x1 = $x1
+         |x2 = $x2""".stripMargin
+    }
+    else if (discriminant == 0) {
+      val res = (-b) / (2 * a)
+      s"x = ${if (res == 0) 0.0 else res}"
+    }
+    else {
+      val x1 = ((-b) + sqrt(discriminant)) / (2 * a)
+      val x2 = ((-b) - sqrt(discriminant)) / (2 * a)
+
+      s"""x1 = $x1
+         |x2 = $x2""".stripMargin
+    }
   }
 
   def monomialSolve: String = {
@@ -67,7 +86,8 @@ class Polynomial(expr: String, debug: Boolean = false) {
       case Array(_, b1) => b = b1.asInstanceOf[RealNumber].evaluate
       case Array(_) =>
     }
-    ((-b) / a).toString
+    val res = (-b) / a
+    s"x = ${if (res == 0) 0.0 else res}"
   }
 
   def noVars: String = {
@@ -109,9 +129,10 @@ class Polynomial(expr: String, debug: Boolean = false) {
   }
 
   override def toString: String = s"$expression = 0.0"
-
 }
 
 object Polynomial {
-  def apply(expression: String): Polynomial = new Polynomial(expression)
+  def apply(expression: String, debug: Boolean = false): Polynomial = {
+    new Polynomial(expression, debug)
+  }
 }

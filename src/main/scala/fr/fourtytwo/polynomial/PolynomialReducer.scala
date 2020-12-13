@@ -1,10 +1,11 @@
 package fr.fourtytwo.polynomial
 
 import fr.fourtytwo.RPN
-import fr.fourtytwo.exception.{EvaluateException, ParseException}
-import fr.fourtytwo.expression.Operator.priority
-import fr.fourtytwo.expression.{Expression, Operable, Operator, RealNumber, SIMPLE_TOKENIZER}
+import fr.fourtytwo.exception._
+import fr.fourtytwo.expression._
 import fr.fourtytwo.token.TokenType.VARIABLE
+import fr.fourtytwo.utils.ComputorLogger.LOGGER
+
 
 object PolynomialReducer {
 
@@ -19,7 +20,7 @@ object PolynomialReducer {
     if (vars.length != 1)
       throw new EvaluateException(s"There is ${vars.length} variables: ${vars.mkString(", ")}. I can't solve")
 
-    println(s"Original:   $expression")
+    LOGGER.fine(s"Original:   $expression")
     simplify(expression)
   }
 
@@ -30,14 +31,14 @@ object PolynomialReducer {
 
     val leftExpr = toOptimalExpression(leftStr)
     val rightExpr = toOptimalExpression(rightStr)
-    println(s"Normalized: $leftExpr = $rightExpr")
+    LOGGER.fine(s"Normalized: $leftExpr = $rightExpr")
 
     val allOnLeft = rightExpr match {
       case r: RealNumber if r.evaluate == 0 => leftExpr
       /* change the sign to all expressions before moving to the left */
       case _ => Operator(leftExpr, "+", rightExpr.changeSign)
     }
-    println(s"Non order:  $allOnLeft = 0.0")
+    LOGGER.fine(s"Non order:  $allOnLeft = 0.0")
 
     /* Reorder expression */
     val orderedExpression = exprToArray(allOnLeft)
@@ -45,10 +46,10 @@ object PolynomialReducer {
       .map(_.asInstanceOf[Expression])
       .reduce((x, y) => Operator(x, "+", y))
       .simplify
-    println(s"Ordered:    $orderedExpression = 0.0")
+    LOGGER.fine(s"Ordered:    $orderedExpression = 0.0")
 
     val fullSimplified = simplifyExpression(orderedExpression)
-    println(s"Reduced form: $fullSimplified = 0.0")
+    LOGGER.info(s"Reduced form: $fullSimplified = 0.0")
     fullSimplified
   }
 
@@ -66,22 +67,22 @@ object PolynomialReducer {
   /** Simplification of algebraic expression */
   def simplifyExpression(expr: Expression): Expression = {
 
-    var oldExpr = expr
-    var newExpr = expr.simplify
+    var newExpr: Expression = expr.simplify
+    var oldExpr: Expression = RealNumber(0)
 
     while (!oldExpr.equals(newExpr)) {
       oldExpr = newExpr
-      newExpr = newExpr.simplify
+      newExpr = newExpr.simplify match {
+        case operator: Operator => rotateAndSimplify(operator)
+        case operable: Operable => operable
+      }
     }
-    newExpr match {
-      case operator: Operator => rotateAndSimplify(operator)
-      case operable: Operable => operable
-    }
+    newExpr
   }
 
   private def rotateAndSimplify(expr: Operator): Expression = {
 
-    if (expr.contains("*") || expr.contains("/") || expr.contains("^"))
+    if (expr.contains("*/^%"))
       throw new EvaluateException(s"Can't reduce to normal polynomial form: $expr = 0.0")
 
     /* Subtraction operators are replaced with addition operators,
@@ -106,7 +107,7 @@ object PolynomialReducer {
         curOp = newOp.asInstanceOf[Operator]
       }
       else
-        return curOp
+        return curOp.simplify
     }
     curOp.simplify
   }

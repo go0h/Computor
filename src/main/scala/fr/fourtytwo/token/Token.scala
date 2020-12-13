@@ -1,5 +1,6 @@
 package fr.fourtytwo.token
 
+
 class Token(val expr: String, val tType: TokenType.Value) {
 
   override def toString: String = expr

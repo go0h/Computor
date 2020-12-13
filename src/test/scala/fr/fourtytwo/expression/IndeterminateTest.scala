@@ -1,7 +1,8 @@
 package fr.fourtytwo.expression
 
-import fr.fourtytwo.exception.ParseException
 import org.scalatest.funsuite.AnyFunSuite
+import fr.fourtytwo.exception.ParseException
+
 
 class IndeterminateTest extends AnyFunSuite {
 

@@ -1,9 +1,9 @@
 package fr.fourtytwo.expression
 
+import scala.math.pow
 import fr.fourtytwo.exception.EvaluateException
 import fr.fourtytwo.expression.Operator.priority
 
-import scala.math.pow
 
 class Operator(left: Expression, op: String, right: Expression) extends Expression {
 
@@ -56,6 +56,7 @@ class Operator(left: Expression, op: String, right: Expression) extends Expressi
       case "+" => optL + optR
       case "-" => optL - optR
       case "^" => optL ^ optR
+      case "%" => optL % optR
       case _ => throw new EvaluateException(s"Can't optimize expression: $toString")
     }
   }
@@ -80,7 +81,7 @@ class Operator(left: Expression, op: String, right: Expression) extends Expressi
       case _ => false
     }
   }
-  def contains(other: String): Boolean = op.equals(other) || left.contains(other) || right.contains(other)
+  def contains(other: String): Boolean = other.contains(op) || left.contains(other) || right.contains(other)
 }
 
 object Operator {

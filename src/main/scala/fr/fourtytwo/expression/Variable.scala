@@ -2,7 +2,6 @@ package fr.fourtytwo.expression
 
 import fr.fourtytwo.exception.EvaluateException
 
-import scala.math.pow
 
 class Variable extends Operable {
 
@@ -56,6 +55,7 @@ class Variable extends Operable {
       return new Indeterminate(other.constant.evaluate + sign, name, 1)
     Operator(this, "+", other)
   }
+  def +(other: ComplexNumber): Expression = Operator(this, "+", other)
 
 
   ////////////////////////////////////////
@@ -85,6 +85,7 @@ class Variable extends Operable {
     }
     Operator(this, "-", other)
   }
+  def -(other: ComplexNumber): Expression = Operator(this, "-", other)
 
 
   ////////////////////////////////////////
@@ -103,6 +104,7 @@ class Variable extends Operable {
       throw new EvaluateException(s"Can't multiply different variables ($name, ${other.variable.getName})")
     new Indeterminate(other.constant.evaluate * sign, name, other.degree.evaluate + 1)
   }
+  def *(other: ComplexNumber): Expression = Operator(this, "*", other)
 
 
   ////////////////////////////////////////
@@ -127,6 +129,7 @@ class Variable extends Operable {
                       name,
                       (other.degree.evaluate - 1) * -1)
   }
+  def /(other: ComplexNumber): Expression = Operator(this, "/", other)
 
 
   ////////////////////////////////////////
@@ -159,13 +162,14 @@ class Variable extends Operable {
           return -1
         1
       }
+      case _ : ComplexNumber => 1
     }
   }
 
   override def equals(other: Any): Boolean = {
       other match {
         case _: Variable => toString.equals(other.toString)
-        case _: Throwable => false
+        case _ => false
     }
   }
 

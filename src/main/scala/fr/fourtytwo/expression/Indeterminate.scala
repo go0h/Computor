@@ -1,7 +1,8 @@
 package fr.fourtytwo.expression
 
 import scala.math.pow
-import fr.fourtytwo.exception.{EvaluateException, ParseException}
+import fr.fourtytwo.exception._
+
 
 case class Indeterminate(constant: RealNumber,
                          variable: Variable,
@@ -29,13 +30,13 @@ case class Indeterminate(constant: RealNumber,
   ////////////////////////////////////////
   //////////// ADDITION METHODS //////////
   ////////////////////////////////////////
-  override def +(other: RealNumber): Expression = {
+  def +(other: RealNumber): Expression = {
     if (other.evaluate == 0)
       return this
     Operator(this, "+", other)
   }
 
-  override def +(other: Variable): Expression = {
+  def +(other: Variable): Expression = {
     if (!variable.getName.equals(other.getName))
       throw new EvaluateException(s"Can't add different variables (${variable.getName}, ${other.getName})")
     if (degree.evaluate == 1)
@@ -45,7 +46,7 @@ case class Indeterminate(constant: RealNumber,
     Operator(this, "+", other)
   }
 
-  override def +(other: Indeterminate): Expression = {
+  def +(other: Indeterminate): Expression = {
     if (!variable.equals(other.variable))
       throw new EvaluateException(s"Can't add different variables ($variable, ${other.variable})")
     if (degree.evaluate == other.degree.evaluate)
@@ -54,18 +55,19 @@ case class Indeterminate(constant: RealNumber,
                            degree)
     Operator(this, "+", other)
   }
+  def +(other: ComplexNumber): Expression = Operator(this, "+", other)
 
 
   ////////////////////////////////////////
   ////////// SUBTRACTION METHODS /////////
   ////////////////////////////////////////
-  override def -(other: RealNumber): Expression = {
+  def -(other: RealNumber): Expression = {
     if (other.evaluate == 0)
       return this
     Operator(this, "-", other)
   }
 
-  override def -(other: Variable): Expression = {
+  def -(other: Variable): Expression = {
     if (!variable.getName.equals(other.getName))
       throw new EvaluateException(s"Can't sub different variables (${variable.getName}, ${other.getName})")
     if (degree.evaluate == 1) {
@@ -76,7 +78,7 @@ case class Indeterminate(constant: RealNumber,
     Operator(this, "-", other)
   }
 
-  override def -(other: Indeterminate): Expression = {
+  def -(other: Indeterminate): Expression = {
     if (!variable.equals(other.variable))
       throw new EvaluateException(s"Can't sub different variables ($variable, ${other.variable})")
     if (degree.evaluate == other.degree.evaluate) {
@@ -86,6 +88,7 @@ case class Indeterminate(constant: RealNumber,
     }
     Operator(this, "-", other)
   }
+  def -(other: ComplexNumber): Expression = Operator(this, "-", other)
 
 
   ////////////////////////////////////////
@@ -109,6 +112,7 @@ case class Indeterminate(constant: RealNumber,
                   variable,
                   RealNumber(degree.evaluate + other.degree.evaluate))
   }
+  def *(other: ComplexNumber): Expression = Operator(this, "*", other)
 
 
   ////////////////////////////////////////
@@ -140,11 +144,12 @@ case class Indeterminate(constant: RealNumber,
       return res.constant
     res
   }
+  def /(other: ComplexNumber): Expression = Operator(this, "/", other)
 
   ////////////////////////////////////////
   ///////////// POWER METHOD /////////////
   ////////////////////////////////////////
-  override def ^(other: RealNumber): Expression = {
+  def ^(other: RealNumber): Expression = {
     if (other.evaluate == 0)
       return constant
     if (other.evaluate == 1)
@@ -158,7 +163,7 @@ case class Indeterminate(constant: RealNumber,
   ////////////////////////////////////////
   //////////// COMPARE METHOD ////////////
   ////////////////////////////////////////
-  override def compare(other: Operable): Int = {
+  def compare(other: Operable): Int = {
     other match {
       case _ : RealNumber => -1
       case v : Variable => {
