@@ -3,7 +3,7 @@ package fr.fourtytwo
 import scala.collection.mutable.{ArrayBuffer, Stack => ScalaStack}
 import fr.fourtytwo.exception.EvaluateException
 import fr.fourtytwo.expression._
-import fr.fourtytwo.expression.Operator.priority
+import fr.fourtytwo.expression.Operator.{leftAssoc, priority}
 import fr.fourtytwo.token.Token
 import fr.fourtytwo.token.TokenType._
 
@@ -79,7 +79,9 @@ object RPN {
                 Token("--", token.tType)
               else token
 
-            while (stack.nonEmpty && priority(stack.head.expr) >= priority(tempToken.expr)) {
+            while (stack.nonEmpty
+              && ((leftAssoc(stack.head.expr) && priority(stack.head.expr) >= priority(tempToken.expr))
+              || (!leftAssoc(stack.head.expr) && priority(stack.head.expr) > priority(tempToken.expr)))) {
               RPNTokens.append(stack.pop())
             }
             stack.push(tempToken)
