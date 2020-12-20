@@ -1,9 +1,7 @@
 package fr.fourtytwo.expression
 
-import scala.math.pow
 import fr.fourtytwo.exception.EvaluateException
 import fr.fourtytwo.expression.Operator.priority
-
 
 class Operator(left: Expression, op: String, right: Expression) extends Expression {
 
@@ -11,24 +9,7 @@ class Operator(left: Expression, op: String, right: Expression) extends Expressi
   def getLeft: Expression = left
   def getRight: Expression = right
 
-  def evaluate: Double = {
-    op match {
-      case "+" => left.evaluate + right.evaluate
-      case "-" => left.evaluate - right.evaluate
-      case "*" => left.evaluate * right.evaluate
-      case "^" => pow(left.evaluate, right.evaluate)
-      case "/" =>
-        val r = right.evaluate
-        if (r == 0)
-          throw new ArithmeticException("Division by zero")
-        left.evaluate / r
-      case "%" =>
-        val r = right.evaluate
-        if (r == 0)
-          throw new ArithmeticException("Modulo by zero")
-        left.evaluate % r
-    }
-  }
+  def evaluate: Double = OPERATORS(op)(left.evaluate, right.evaluate)
 
   def simplify: Expression = {
 
@@ -95,6 +76,9 @@ object Operator {
     case "-" | "+" => 2
     case "/" | "*" | "%" => 3
     case "^" => 4
-    case "--" => 5 // UNARY MINUS
+    case "--" => 5 //UNARY MINUS
   }
+
+  def leftAssoc(op: String): Boolean = "()-+/*".contains(op)
+
 }

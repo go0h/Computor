@@ -1,8 +1,6 @@
 package fr.fourtytwo.expression
 
-import scala.math.abs
 import fr.fourtytwo.exception.EvaluateException
-
 
 class ComplexNumber(re: Double, im: Double) extends Operable {
 
@@ -85,7 +83,7 @@ class ComplexNumber(re: Double, im: Double) extends Operable {
   def contains(op: String): Boolean = false
 
   override def toString: String = {
-    s"(${if (re == 0) 0.0 else re} ${if (im < 0) "-" else "+"} ${abs(im)}i)"
+    s"(${if (re == 0) 0.0 else re} ${if (im < 0) "-" else "+"} ${math.abs(im)}i)"
   }
 
   override def equals(obj: Any): Boolean = {

@@ -106,6 +106,8 @@ class RealNumber(private val num: Double) extends Operable {
       case _ => false
     }
   }
+  def ==(obj: Int): Boolean = equals(obj)
+  def ==(obj: Double): Boolean = equals(obj)
   def contains(op: String): Boolean = false
 }
 

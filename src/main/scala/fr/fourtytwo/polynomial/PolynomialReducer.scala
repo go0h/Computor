@@ -1,9 +1,9 @@
 package fr.fourtytwo.polynomial
 
-import fr.fourtytwo.RPN
+import fr.fourtytwo.computor.Computor
 import fr.fourtytwo.exception._
 import fr.fourtytwo.expression._
-import fr.fourtytwo.token.TokenType.VARIABLE
+import fr.fourtytwo.token.TokenType.LITERAL
 import fr.fourtytwo.utils.ComputorLogger.LOGGER
 
 
@@ -14,7 +14,7 @@ object PolynomialReducer {
     if (expression.count(_ == '=') != 1)
       throw new ParseException(s"No equal sign in expression $expression")
 
-    val tokens = SIMPLE_TOKENIZER.generateTokens(expression).filter(_.tType == VARIABLE)
+    val tokens = SIMPLE_TOKENIZER.generateTokens(expression).filter(_.tType == LITERAL)
     val vars = tokens.map(_.expr).distinct
 
     if (vars.length != 1)
@@ -60,7 +60,7 @@ object PolynomialReducer {
 
     val tokens = SIMPLE_TOKENIZER.generateTokens(expression)
 
-    val beforeOptExpr = RPN(tokens).solve
+    val beforeOptExpr = Computor(tokens).solve
     simplifyExpression(beforeOptExpr)
   }
 

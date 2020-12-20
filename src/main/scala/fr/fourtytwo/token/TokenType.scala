@@ -5,9 +5,10 @@ import scala.util.matching.Regex
 
 object TokenType extends Enumeration {
 
-  val VARIABLE: Value = Value("[A-Za-z]+(?:[0-9]+)?")
+  val LITERAL: Value = Value("[A-Za-z]+(?:[0-9]+)?")
   val REALNUMBER: Value = Value("\\d+(?:\\.\\d+)?")
   val SPACE: Value = Value("\\s+")
+  val SEPARATOR: Value = Value(",")
   val OPERATION: Value = Value("[-\\+\\*/\\(\\)=^%]")
   val UNARY: Value = Value
   val NONE: Value = Value

@@ -1,20 +1,21 @@
 package fr.fourtytwo
 
-import scala.math.pow
+import scala.math.{abs, pow}
+import scala.util.matching.Regex
 import fr.fourtytwo.exception._
 import fr.fourtytwo.token.{TokenType, Tokenizer}
 import org.scalatest.funsuite.AnyFunSuite
+import fr.fourtytwo.computor.Computor
 
-import scala.util.matching.Regex
 
-class RPNTest extends AnyFunSuite {
+class ComputorTest extends AnyFunSuite {
 
   val matchers: Map[TokenType.Value, Regex] = TokenType.getMatchers
   val tokenizer = new Tokenizer(matchers)
 
   def getResult(expr: String): Double = {
     val tokens = tokenizer.generateTokens(expr)
-    RPN(tokens).solve.evaluate
+    Computor(tokens).solve.evaluate
   }
 
   test("Empty expression") {
@@ -145,8 +146,8 @@ class RPNTest extends AnyFunSuite {
 
   test("Double expression - 2") {
     val expr = "(3.23144 + 32 % 23 * 765.321)^(-3/(0.4)) / (-0.0321) + 16.308"
-    val res = getResult(expr)
-    assert(res == (pow(3.23144 + 32 % 23 * 765.321,-3/0.4) / (-0.0321) + 16.308))
+    val res = getResult(expr).ceil
+    assert(res == (pow(3.23144 + 32 % 23 * 765.321, -3/0.4) / (-0.0321) + 16.308).ceil)
   }
 
   test("Zero division") {
@@ -231,5 +232,24 @@ class RPNTest extends AnyFunSuite {
     val res = getResult(expr)
     assert(res == (0.25 * 4.0 * pow(4, 0.112)))
   }
+
+  test("Basic function test - 1") {
+    val expr = "3 * pow(-2, 3) + abs(-3)"
+    val res = getResult(expr)
+    assert(res == 3 * pow(-2, 3) + abs(-3))
+  }
+
+  test("Basic function test - 2") {
+    val expr = "3 * pow(2, 3) + abs(3)"
+    val res = getResult(expr)
+    assert(res == 3 * pow(2, 3) + abs(3))
+  }
+
+  test("Basic function test - 3") {
+    val expr = "3 * pow(-2, -3) + abs(-3)"
+    val res = getResult(expr)
+    assert(res == 3 * pow(-2, -3) + abs(-3))
+  }
+
 
 }

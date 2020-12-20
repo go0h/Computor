@@ -118,7 +118,7 @@ class PolyOptimizeTest extends AnyFunSuite {
   test("Optimize - 7") {
     val expr = "X^2^4 + X + 13 * 2 = 4^2"
     val opt = Polynomial(expr).toString
-    assert(opt.equals("(1.0 * X^8.0) + X + 10.0 = 0.0"), opt)
+    assert(opt.equals("(1.0 * X^16.0) + X + 10.0 = 0.0"), opt)
   }
 
   test("Optimize - 8") {
