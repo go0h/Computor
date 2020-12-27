@@ -9,7 +9,7 @@
 
   <groupId>fr.fourtytwo</groupId>
   <artifactId>ComputorV</artifactId>
-  <version>1</version>
+  <version>1.0-SNAPSHOT</version>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -130,4 +130,13 @@
 
       </plugins>
   </build>
+
+  <distributionManagement>
+    <repository>
+      <id>github</id>
+      <name>go0h</name>
+      <url>https://maven.pkg.github.com/go0h/Computor</url>
+    </repository>
+  </distributionManagement>
+
 </project>
