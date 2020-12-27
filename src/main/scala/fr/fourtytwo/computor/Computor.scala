@@ -17,7 +17,7 @@ class Computor(infixTokens: Array[Token]) {
   override def toString: String = tokens.map(x => x.expr).mkString(" ")
   def infixString: String = infixTokens.map(x => x.expr).mkString("")
 
-  val vars: MMap[String, Double] = MMap[String, Double]()
+  val vars: MMap[String, Expression] = MMap[String, Expression]()
   val funcs: MMap[String, Function] = MMap[String, Function]() ++ getPredefFunctions
 
   def solve: Expression = {
@@ -120,7 +120,7 @@ class Computor(infixTokens: Array[Token]) {
           args +:= RealNumber(tokens(k).expr.toDouble)
           j += 1
         case LITERAL if vars.contains(tokens(k).expr) =>
-          args +:= RealNumber(vars(tokens(k).expr))
+          args +:= vars(tokens(k).expr)
           j += 1
         case UNARY if args.nonEmpty =>
           args = Seq(args.head.changeSign) ++ args.tail

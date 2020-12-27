@@ -34,4 +34,5 @@ trait Expression {
     }
   }
 
+  def getType: String = getClass.getSimpleName
 }
