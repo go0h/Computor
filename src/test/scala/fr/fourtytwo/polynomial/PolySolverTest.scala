@@ -1,9 +1,9 @@
 package fr.fourtytwo.polynomial
 
-import scala.math.sqrt
 import org.scalatest.funsuite.AnyFunSuite
 import fr.fourtytwo.exception.EvaluateException
 import fr.fourtytwo.expression.{ComplexNumber, Operable, RealNumber}
+import fr.fourtytwo.math._
 
 class PolySolverTest extends AnyFunSuite {
 
@@ -38,7 +38,7 @@ class PolySolverTest extends AnyFunSuite {
 
   def noVars(a: Double): String = {
     if (a != 0)
-      throw new EvaluateException(s"The polynomial $toString is wrong")
+      throw new EvaluateException(s"The polynomial $toString is wrong. There is no solution")
     "All real numbers"
   }
 
@@ -103,7 +103,6 @@ class PolySolverTest extends AnyFunSuite {
     assert(res.equals(correct), correct)
   }
 
-  //"5*x^2 + 3*x + 7 = 0"
   test("Negative discriminant - 1") {
     val expr = "5*x^2 + 3*x + 7 = 0"
     val res = Polynomial(expr).solve
@@ -171,4 +170,84 @@ class PolySolverTest extends AnyFunSuite {
     val res = Polynomial(expr).solve
     assert(res.equals(binomialSolve(1, 3, 5)), binomialSolve(1, 3, 5))
   }
+
+  test("Binomial test - 14") {
+    val expr = "3 - 6 * X + X^2 - X + 2 * X^2 = 0"
+    val res = Polynomial(expr).solve
+    assert(res.equals(binomialSolve(3, -7, 3)), binomialSolve(3, -7, 3))
+  }
+
+  test("Binomial test - 15") {
+    val expr = "4 + 2 * X - X^2 = 0"
+    val res = Polynomial(expr).solve
+    assert(res.equals(binomialSolve(-1, 2, 4)), binomialSolve(-1, 2, 4))
+  }
+
+  test("Binomial test - 16") {
+    val expr = "1 * X^0 + 0 * X^1 - 4 * X^2 = 0 * X^0 + 0 * X^1 + 0 * X^2"
+    val res = Polynomial(expr).solve
+    assert(res.equals(binomialSolve(-4, 0, 1)), binomialSolve(-4, 0, 1))
+  }
+
+  test("Binomial test - 17") {
+    val expr = "0 * X^1 - 0 * X^2 = 0 + 0 + 0 * X^2"
+    val res = Polynomial(expr).solve
+    assert(res.equals("All real numbers"), "All real numbers")
+  }
+
+  test("Binomial test - 18") {
+    val expr = "3 * X^1 - 4 * X^2 = 0 * X^1 + 0 * X^2"
+    val res = Polynomial(expr).solve
+    assert(res.equals(binomialSolve(-4, 3, 0)), binomialSolve(-4, 3, 0))
+  }
+
+  test("Binomial test - 19") {
+    val expr = "5 + 4 * X + X^2= 2 * X^2"
+    val res = Polynomial(expr).solve
+    assert(res.equals(binomialSolve(-1, 4, 5)), binomialSolve(-1, 4, 5))
+  }
+
+  test("Binomial test - 20") {
+    val expr = "2 + 3 * X - 4 * X^2 = 0 * X + 0 * X^2"
+    val res = Polynomial(expr).solve
+    assert(res.equals(binomialSolve(-4, 3, 2)), binomialSolve(-4, 3, 2))
+  }
+
+  test("Binomial test - 21") {
+    val expr =  "4 + 7 * X  = -2 * X^2"
+    val res = Polynomial(expr).solve
+    assert(res.equals(binomialSolve(2, 7, 4)), binomialSolve(2, 7, 4))
+  }
+
+  test("Binomial test - 22") {
+    val expr = "1 + 4 * X + 4 * X^2 = 0 * X^3"
+    val res = Polynomial(expr).solve
+    assert(res.equals(binomialSolve(4, 4, 1)), binomialSolve(4, 4, 1))
+  }
+
+
+  test("Monomial test - 23") {
+    val expr = "5 * X^0 = 4 * X^0 + 7 * X^1"
+    val res = Polynomial(expr).solve
+    assert(res.equals(monomialSolve(-7, 1)), monomialSolve(-7, 1))
+  }
+
+  test("Binomial test - 23") {
+    val expr = "5 * X^0 + 13 * X^1 + 3 * X^2 = 1 * X^0 + 1 * X^1"
+    val res = Polynomial(expr).solve
+    assert(res.equals(binomialSolve(3, 12, 4)), binomialSolve(3, 12, 4))
+  }
+
+  test("Binomial test - 24") {
+    val expr = "6 * X^0 + 11 * X^1 + 5 * X^2 = 1 * X^0 + 1 * X^1"
+    val res = Polynomial(expr).solve
+    assert(res.equals(binomialSolve(5, 10, 5)), binomialSolve(5, 10, 5))
+  }
+
+  test("Binomial test - 25") {
+    val expr = "5 + 3 * X^1 + 3 * X^2 = 1 + 0 * X^1"
+    val res = Polynomial(expr).solve
+    assert(res.equals(binomialSolve(3, 3, 4)), binomialSolve(3, 3, 4))
+  }
+
 }

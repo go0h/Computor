@@ -9,7 +9,7 @@
 
   <groupId>fr.fourtytwo</groupId>
   <artifactId>ComputorV</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>1</version>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -67,7 +67,7 @@
           <archive>
             <manifest>
               <addClasspath>true</addClasspath>
-              <mainClass>fr.fourtytwo.Main</mainClass>
+              <mainClass>fr.fourtytwo.polynomial.Polynomial</mainClass>
             </manifest>
           </archive>
         </configuration>
@@ -84,7 +84,7 @@
           </descriptorRefs>
           <archive>
             <manifest>
-              <mainClass>fr.fourtytwo.Main</mainClass>
+              <mainClass>fr.fourtytwo.polynomial.Polynomial</mainClass>
             </manifest>
           </archive>
         </configuration>

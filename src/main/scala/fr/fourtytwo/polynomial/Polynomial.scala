@@ -1,11 +1,11 @@
 package fr.fourtytwo.polynomial
 
-import scala.math.sqrt
+import scala.sys.exit
 import java.util.logging.{Level, Logger}
-import fr.fourtytwo.exception.EvaluateException
+import fr.fourtytwo.exception.{EvaluateException, ParseException}
+import fr.fourtytwo.math._
 import fr.fourtytwo.expression._
 import fr.fourtytwo.utils.ComputorLogger
-
 
 class Polynomial(expr: String, debug: Boolean = false) {
 
@@ -58,6 +58,7 @@ class Polynomial(expr: String, debug: Boolean = false) {
     LOGGER.fine(s"Discriminant = $b^2 - 4 * $a * $c = $discriminant")
 
     if (discriminant < 0) {
+      LOGGER.info("Discriminant is strictly negative, the two solutions are:")
       val compDisc = ComplexNumber(0, sqrt(-discriminant))
       val x1 = (RealNumber(-b) + compDisc).asInstanceOf[Operable] / RealNumber(2 * a)
       val x2 = (RealNumber(-b) - compDisc).asInstanceOf[Operable] / RealNumber(2 * a)
@@ -66,10 +67,12 @@ class Polynomial(expr: String, debug: Boolean = false) {
          |x2 = $x2""".stripMargin
     }
     else if (discriminant == 0) {
+      LOGGER.info("Discriminant is equal zero, the one solution is:")
       val res = (-b) / (2 * a)
       s"x = ${if (res == 0) 0.0 else res}"
     }
     else {
+      LOGGER.info("Discriminant is strictly positive, the two solutions are:")
       val x1 = ((-b) + sqrt(discriminant)) / (2 * a)
       val x2 = ((-b) - sqrt(discriminant)) / (2 * a)
 
@@ -93,7 +96,7 @@ class Polynomial(expr: String, debug: Boolean = false) {
   def noVars: String = {
     val a = exprArr.head.asInstanceOf[RealNumber].evaluate
     if (a != 0)
-      throw new EvaluateException(s"The polynomial $toString is wrong")
+      throw new EvaluateException(s"The polynomial $toString is wrong. There is no solution")
     "All real numbers"
   }
 
@@ -132,7 +135,38 @@ class Polynomial(expr: String, debug: Boolean = false) {
 }
 
 object Polynomial {
+
   def apply(expression: String, debug: Boolean = false): Polynomial = {
     new Polynomial(expression, debug)
+  }
+
+  def main(args: Array[String]): Unit = {
+
+    var debug: Boolean = false
+
+    if (args.contains("-h") || args.contains("--help") || args.isEmpty || args.length > 2) {
+      println(USAGE)
+      exit(0)
+    }
+    else if (args.length == 2 && (args(1).equals("-d") || args(1).equals("--debug"))) {
+      debug = true
+    }
+    else if (args.length == 2) {
+      println(USAGE)
+      exit(0)
+    }
+
+    val expr: String = args(0)
+
+    try {
+      val polynomial = Polynomial(expr, debug)
+      val solution = polynomial.solve
+      println(s"""The solutions is:
+                 |$solution""".stripMargin)
+    } catch {
+      case ex: ParseException => println(ex.getMessage)
+      case ex: EvaluateException => println(ex.getMessage)
+      case ex: Exception => println(ex.getClass + " " + ex.getMessage)
+    }
   }
 }

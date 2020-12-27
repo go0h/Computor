@@ -24,7 +24,6 @@ class Computor(infixTokens: Array[Token]) {
 
     val stack = ScalaStack[Expression]()
     var i = 0
-    println(tokens.mkString(" "))
 
     while (i < tokens.length) {
 

@@ -42,6 +42,10 @@ object PolynomialReducer {
 
     /* Reorder expression */
     val orderedExpression = exprToArray(allOnLeft)
+//      .map {
+//        case v: Variable => new Indeterminate(1, v.toString, 1)
+//        case x => x
+//      }
       .sorted
       .map(_.asInstanceOf[Expression])
       .reduce((x, y) => Operator(x, "+", y))
@@ -93,21 +97,27 @@ object PolynomialReducer {
 
     var curOp = preSimple.asInstanceOf[Operator]
 
-    while (curOp.getLeft.isInstanceOf[Operator] && curOp.getRight.isInstanceOf[Operable]) {
+    while (curOp.getLeft.isInstanceOf[Operator]) {
 
       val left = curOp.getLeft.asInstanceOf[Operator]
+
       if (left.getRight.isInstanceOf[Operable]) {
-        val newOp =
-          Operator(left.getLeft,
-                   left.getOp,
-                   Operator(left.getRight, curOp.getOp, curOp.getRight))
+
+        val newOp = curOp.getRight match {
+            case right: Operable =>
+              Operator(left.getLeft, "+", Operator(left.getRight, "+", right)).simplify
+            case right: Operator =>
+              val newRight = Operator(Operator(left.getRight, "+", right.getLeft), "+", right.getRight).simplify
+              Operator(left.getLeft, "+", newRight)
+          }
 
         if (newOp.isInstanceOf[Operable])
           return newOp
         curOp = newOp.asInstanceOf[Operator]
       }
-      else
+      else {
         return curOp.simplify
+      }
     }
     curOp.simplify
   }

@@ -89,4 +89,11 @@ class PolyBadTest extends AnyFunSuite{
       Polynomial("(5 * X^100) + 4 * , 25 = 0").solve
     }
   }
+
+  test("NoVars - 2") {
+    assertThrows[EvaluateException] {
+      Polynomial("4 * X^0 = 8 * X^0").solve
+    }
+  }
+
 }

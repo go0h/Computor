@@ -168,7 +168,7 @@ class Variable extends Operable {
 
   override def equals(other: Any): Boolean = {
       other match {
-        case _: Variable => toString.equals(other.toString)
+        case v: Variable => name.equals(v.getName)
         case _ => false
     }
   }

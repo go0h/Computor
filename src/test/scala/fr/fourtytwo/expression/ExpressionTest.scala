@@ -1,6 +1,7 @@
 package fr.fourtytwo.expression
 
 import fr.fourtytwo.computor.Computor
+import fr.fourtytwo.math._
 import fr.fourtytwo.polynomial.SIMPLE_TOKENIZER
 import org.scalatest.funsuite.AnyFunSuite
 
