@@ -166,7 +166,7 @@ object Polynomial {
     } catch {
       case ex: ParseException => println(ex.getMessage)
       case ex: EvaluateException => println(ex.getMessage)
-      case ex: Exception => println(ex.getClass + " " + ex.getMessage)
+      case ex: Exception => println(ex.getClass.toString + " " + ex.getMessage)
     }
   }
 }

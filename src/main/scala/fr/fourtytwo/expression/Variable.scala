@@ -8,7 +8,7 @@ class Variable extends Operable {
   private var sign: Int = 1
   private var name: String = _
 
-  def this(varName: String) {
+  def this(varName: String) = {
     this()
     if (varName.startsWith("-")) {
       sign = -1

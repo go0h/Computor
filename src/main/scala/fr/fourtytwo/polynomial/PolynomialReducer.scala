@@ -42,10 +42,6 @@ object PolynomialReducer {
 
     /* Reorder expression */
     val orderedExpression = exprToArray(allOnLeft)
-//      .map {
-//        case v: Variable => new Indeterminate(1, v.toString, 1)
-//        case x => x
-//      }
       .sorted
       .map(_.asInstanceOf[Expression])
       .reduce((x, y) => Operator(x, "+", y))

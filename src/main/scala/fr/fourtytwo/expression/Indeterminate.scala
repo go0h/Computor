@@ -8,7 +8,7 @@ case class Indeterminate(constant: RealNumber,
                          variable: Variable,
                          degree: RealNumber) extends Operable {
 
-  def this(c: Double, v: String, d: Double) {
+  def this(c: Double, v: String, d: Double) = {
     this(RealNumber(c), Variable(v), RealNumber(d))
   }
 

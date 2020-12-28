@@ -2,8 +2,8 @@ package fr.fourtytwo.computor
 
 import scala.collection.mutable.{ArrayBuffer, Map => MMap, Stack => ScalaStack}
 import fr.fourtytwo.exception.EvaluateException
-import fr.fourtytwo.expression.Operator.{leftAssoc, priority}
 import fr.fourtytwo.expression._
+import fr.fourtytwo.expression.Operator._
 import fr.fourtytwo.expression.function._
 import fr.fourtytwo.token.Token
 import fr.fourtytwo.token.TokenType._

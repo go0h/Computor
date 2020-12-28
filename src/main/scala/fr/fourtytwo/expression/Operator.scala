@@ -20,16 +20,9 @@ class Operator(left: Expression, op: String, right: Expression) extends Expressi
       return res
     }
 
-    val optR = r match {
-      case r: RealNumber => r
-      case v: Variable => v
-      case i: Indeterminate => i
-    }
-    val optL = l match {
-        case r: RealNumber => r
-        case v: Variable => v
-        case i: Indeterminate => i
-      }
+    import scala.language.reflectiveCalls
+    val optR = r.asInstanceOf[Operable]
+    val optL = l.asInstanceOf[Operable]
 
     op match {
       case "*" => optL * optR

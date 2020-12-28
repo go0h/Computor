@@ -1,5 +1,7 @@
 package fr.fourtytwo.expression
 
+import scala.language.implicitConversions
+
 object Implicit {
 
   implicit def doubleToRealNumber(a: Double): RealNumber = RealNumber(a)
