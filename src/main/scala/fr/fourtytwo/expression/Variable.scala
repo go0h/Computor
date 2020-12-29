@@ -34,13 +34,13 @@ class Variable extends Operable {
   ////////////////////////////////////////
   /////////// ADDITION METHODS ///////////
   ////////////////////////////////////////
-  def +(other: RealNumber): Expression = {
+  override def +(other: RealNumber): Expression = {
     if (other.evaluate == 0.0)
       return this
     Operator(this, "+", other)
   }
 
-  def +(other: Variable): Expression = {
+  override def +(other: Variable): Expression = {
     if (!name.equals(other.getName))
       throw new EvaluateException(s"Can't add different variables ($name, ${other.getName})")
     if (sign == other.getSign)
@@ -48,26 +48,26 @@ class Variable extends Operable {
     new RealNumber(0)
   }
 
-  def +(other: Indeterminate): Expression = {
+  override def +(other: Indeterminate): Expression = {
     if (!name.equals(other.variable.getName))
       throw new EvaluateException(s"Can't add different variables ($name, ${other.variable.getName})")
     if (other.degree.evaluate == 1.0)
       return new Indeterminate(other.constant.evaluate + sign, name, 1)
     Operator(this, "+", other)
   }
-  def +(other: ComplexNumber): Expression = Operator(this, "+", other)
+  override def +(other: ComplexNumber): Expression = Operator(this, "+", other)
 
 
   ////////////////////////////////////////
   ////////// SUBTRACTION METHODS /////////
   ////////////////////////////////////////
-  def -(other: RealNumber): Expression = {
+  override def -(other: RealNumber): Expression = {
     if (other.evaluate == 0)
       return this
     Operator(this, "-", other)
   }
 
-  def -(other: Variable): Expression = {
+  override def -(other: Variable): Expression = {
     if (!name.equals(other.getName))
       throw new EvaluateException(s"Can't sub different variables ($name, ${other.getName})")
     if (sign != other.sign)
@@ -75,7 +75,7 @@ class Variable extends Operable {
     RealNumber(0)
   }
 
-  def -(other: Indeterminate): Expression = {
+  override def -(other: Indeterminate): Expression = {
     if (!name.equals(other.variable.getName))
       throw new EvaluateException(s"Can't sub different variables ($name, ${other.variable.getName})")
     if (other.degree.evaluate == 1) {
@@ -85,42 +85,46 @@ class Variable extends Operable {
     }
     Operator(this, "-", other)
   }
-  def -(other: ComplexNumber): Expression = Operator(this, "-", other)
+  override def -(other: ComplexNumber): Expression = {
+    Operator(this, "-", other)
+  }
 
 
   ////////////////////////////////////////
   //////////// MULTIPLY METHODS //////////
   ////////////////////////////////////////
-  def *(other: RealNumber): Indeterminate = new Indeterminate(other.evaluate * sign, name, 1.0)
+  override def *(other: RealNumber): Indeterminate = {
+    new Indeterminate(other.evaluate * sign, name, 1.0)
+  }
 
-  def *(other: Variable): Indeterminate = {
+  override def *(other: Variable): Indeterminate = {
     if (!name.equals(other.getName))
       throw new EvaluateException(s"Can't multiply different variables ($name, ${other.getName})")
     new Indeterminate(sign * other.getSign, name, 2)
   }
 
-  def *(other: Indeterminate): Indeterminate = {
+  override def *(other: Indeterminate): Indeterminate = {
     if (!name.equals(other.variable.getName))
       throw new EvaluateException(s"Can't multiply different variables ($name, ${other.variable.getName})")
     new Indeterminate(other.constant.evaluate * sign, name, other.degree.evaluate + 1)
   }
-  def *(other: ComplexNumber): Expression = Operator(this, "*", other)
+  override def *(other: ComplexNumber): Expression = Operator(this, "*", other)
 
 
   ////////////////////////////////////////
   //////////// DIVISION METHODS //////////
   ////////////////////////////////////////
-  def /(other: RealNumber): Indeterminate = {
+  override def /(other: RealNumber): Indeterminate = {
     new Indeterminate(1 / other.evaluate * sign, name, 1)
   }
 
-  def /(other: Variable): Operable = {
+  override def /(other: Variable): Operable = {
     if (!name.equals(other.getName))
       throw new EvaluateException(s"Can't division different variables ($name, ${other.getName})")
     new RealNumber(sign / other.sign)
   }
 
-  def /(other: Indeterminate): Operable = {
+  override def /(other: Indeterminate): Operable = {
     if (!name.equals(other.variable.getName))
       throw new EvaluateException(s"Can't division different variables ($name, ${other.variable})")
     if (other.degree.evaluate == 1)
@@ -129,7 +133,7 @@ class Variable extends Operable {
                       name,
                       (other.degree.evaluate - 1) * -1)
   }
-  def /(other: ComplexNumber): Expression = Operator(this, "/", other)
+  override def /(other: ComplexNumber): Expression = Operator(this, "/", other)
 
 
   ////////////////////////////////////////
@@ -148,6 +152,7 @@ class Variable extends Operable {
   override def compare(other: Operable): Int = {
     other match {
       case _ : RealNumber => -1
+      case _ : ComplexNumber => -1
       case v : Variable => {
         if (!equals(v))
           throw new EvaluateException(s"Can't compare different variables ($name, $v)")
@@ -162,7 +167,8 @@ class Variable extends Operable {
           return -1
         1
       }
-      case _ : ComplexNumber => 1
+
+      case _ : Matrix => 1
     }
   }
 

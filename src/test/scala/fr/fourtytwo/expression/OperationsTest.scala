@@ -927,4 +927,90 @@ class OperationsTest extends AnyFunSuite {
     assert(res.toString.equals("(4.0 * X^-2.0)"), res)
   }
 
+
+  ////////////////////////////////////////
+  //////////////// MATRIX ////////////////
+  ////////////////////////////////////////
+  test("Matrix + Matrix - 1") {
+    val expr1 = "[ [1, 7]; [0, 2]]"
+    val expr2 = "[ [1, 0]; [2, 1.5]]"
+    val res =   "[ [2, 7]; [2, 3.5]]"
+
+    assert((Matrix(expr1) + Matrix(expr2)).equals(Matrix(res)))
+  }
+
+  test("Matrix + diff size Matrix") {
+    val expr1 = "[ [1, 7]; [0, 2]]"
+    val expr2 = "[ [1, 0]; [2, 1.5]; [4, 0.25]]"
+
+    assertThrows[EvaluateException]{
+      Matrix(expr1) + Matrix(expr2)
+    }
+  }
+
+  test("Matrix - Matrix - 1") {
+    val expr1 = "[ [1, 7]; [0, 2]]"
+    val expr2 = "[ [1, 0]; [2, 1.5]]"
+    val res =   "[ [0, 7]; [-2, 0.5]]"
+
+    assert((Matrix(expr1) - Matrix(expr2)).equals(Matrix(res)))
+  }
+
+  test("Matrix - diff size Matrix") {
+    val expr1 = "[ [1, 7]; [0, 2]]"
+    val expr2 = "[ [1, 0]; [2, 1.5]; [4, 0.25]]"
+
+    assertThrows[EvaluateException]{
+      Matrix(expr1) - Matrix(expr2)
+    }
+  }
+
+  test("Matrix * RealNumber") {
+
+    val expr1 = "[ [1, 7]; [0, 2.5]]"
+    val expr2 = "[ [2, 14]; [0, 5]]"
+
+    assert((Matrix(expr1) * RealNumber(2)).equals(Matrix(expr2)))
+  }
+
+  test("Matrix * Matrix - 1") {
+
+    val expr1 = "[ [1,2,3];[4,5,6] ]"
+    val expr2 = "[ [1,2,3,4]; [1,2,3,4]; [1,2,3,4] ]"
+    val res = """[ [6.0 , 12.0, 18.0, 24.0];
+                |  [15.0, 30.0, 45.0, 60.0] ]""".stripMargin
+
+    assert((Matrix(expr1) * Matrix(expr2)).equals(Matrix(res)))
+  }
+
+  test("Matrix * Matrix - 2") {
+
+    val expr1 = "[ [1, 2, 3]; [4, 5, 6] ]"
+    val expr2 = "[ [2.5]; [2.5]; [5] ]"
+    val res =   "[ [22.5]; [52.5] ]"
+
+    assert((Matrix(expr1) * Matrix(expr2)).equals(Matrix(res)))
+  }
+
+  test("Matrix * Matrix - 3") {
+
+    val expr1 = "[ [1]; [2]; [3]; [4]; [5]]"
+    val expr2 = "[ [1, 2,  3,  4,  5] ]"
+    val res = """[ [1, 2,  3,  4,  5];
+                 | [2, 4,  6,  8,  10];
+                 | [3, 6,  9,  12, 15];
+                 | [4, 8,  12, 16, 20];
+                 | [5, 10, 15, 20, 25]]""".stripMargin
+
+    assert((Matrix(expr1) * Matrix(expr2)).equals(Matrix(res)))
+  }
+
+  test("Matrix * Matrix - 4") {
+
+    val expr1 = "[ [2] ]"
+    val expr2 = "[ [1, 2,  3,  4,  5] ]"
+    val res =   "[ [2, 4,  6,  8,  10] ]"
+
+    assert((Matrix(expr1) * Matrix(expr2)).equals(Matrix(res)))
+  }
 }
