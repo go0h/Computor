@@ -1,16 +1,57 @@
 package fr.fourtytwo.computor
 
+import fr.fourtytwo.computor.Computor.basicCheck
+
+import scala.io.StdIn
 import scala.collection.mutable.{ArrayBuffer, Map => MMap, Stack => ScalaStack}
-import fr.fourtytwo.exception.EvaluateException
+import fr.fourtytwo.exception.{EvaluateException, ParseException}
 import fr.fourtytwo.expression._
 import fr.fourtytwo.expression.Operator._
 import fr.fourtytwo.expression.function._
 import fr.fourtytwo.token.Token
 import fr.fourtytwo.token.TokenType._
 
-class Computor(infixTokens: Array[Token]) {
+class Computor {
 
-  val tokens: Array[Token] = convertToRPN(infixTokens)
+  var infixTokens: Array[Token] = _
+  var tokens: Array[Token] = _
+
+  def this(infix: Array[Token]) = {
+    this()
+    infixTokens = infix
+    tokens = convertToRPN(infixTokens)
+  }
+
+  def run(): Unit = {
+
+    var line = StdIn.readLine()
+
+    while (line != null) {
+
+      try {
+
+        if (line.equals("q") || line.equals("quit")) {
+          System.exit(0)
+        }
+        else {
+          basicCheck(line)
+          line match {
+            case VAR_ASSIGN_R(varName, _, expr) => println(s"|$varName = $expr| is variable definition")
+            case VAR_COMP_R(varName, _) => println(s"|$varName| is variable computation")
+            case FUNC_ASSIGN_R(func, _, expr) => println(s"|$func = $expr| is function definition")
+            case FUNC_COMP_R(func, _, expr) => println(s"|$func = $expr| is function computation")
+            case COMMON_COMP(expr, _) => println(s"|$expr| is common computation")
+            case _ => throw new ParseException(s"Can't recognize expression type $line")
+          }
+        }
+      } catch {
+        case ex: ParseException => println(ex.getMessage)
+        case ex: EvaluateException => println(ex.getMessage)
+        case ex: Exception => println(s"${ex.getClass.getName} ${ex.getMessage}")
+      }
+      line = StdIn.readLine()
+    }
+  }
 
   def getTokens: Array[Token] = tokens
 
@@ -21,6 +62,12 @@ class Computor(infixTokens: Array[Token]) {
   val funcs: MMap[String, Function] = MMap[String, Function]() ++ getPredefFunctions
 
   def solve: Expression = {
+    if (tokens == null)
+      throw new EvaluateException("Expression is not defined")
+    solve(tokens)
+  }
+
+  def solve(tokens: Array[Token]): Expression = {
 
     val stack = ScalaStack[Expression]()
     var i = 0
@@ -137,5 +184,23 @@ class Computor(infixTokens: Array[Token]) {
 }
 
 object Computor {
+
   def apply(tokens: Array[Token]): Computor = new Computor(tokens)
+
+  def basicCheck(expr: String): Unit = {
+
+    if (expr.count(_ == '=') != 1)
+      throw new ParseException(s"Expression $expr has ${expr.count(_ == '=')} equal sign")
+
+    val exprSplit = expr.split("=", 2)
+
+    val (left, right) = (exprSplit(0), exprSplit(1))
+
+    if (left.trim.isEmpty)
+      throw new ParseException(s"Left expression is empty")
+
+    if (right.trim.isEmpty)
+      throw new ParseException(s"Right expression is empty")
+
+  }
 }

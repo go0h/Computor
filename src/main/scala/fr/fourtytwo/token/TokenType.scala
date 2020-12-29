@@ -7,6 +7,7 @@ object TokenType extends Enumeration {
 
   val LITERAL: Value = Value("[A-Za-z]+(?:[0-9]+)?")
   val REALNUMBER: Value = Value("\\d+(?:\\.\\d+)?")
+  val MATRIX: Value = Value("(\\[[\\[0-9,;.\\-\\s\\]]+])")
   val SPACE: Value = Value("\\s+")
   val SEPARATOR: Value = Value(",")
   val OPERATION: Value = Value("[-\\+\\*/\\(\\)=^%]")

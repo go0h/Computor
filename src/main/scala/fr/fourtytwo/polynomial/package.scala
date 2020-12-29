@@ -7,6 +7,8 @@ import fr.fourtytwo.token.{TokenType, Tokenizer}
 package object polynomial {
 
   val MATCHERS: Map[TokenType.Value, Regex] = TokenType.getMatchers
+    .filter(x => x._1 != TokenType.MATRIX)
+
   val SIMPLE_TOKENIZER: Tokenizer = Tokenizer(MATCHERS)
 
   val USAGE: String =

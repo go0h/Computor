@@ -8,14 +8,14 @@ trait Operable extends Expression with Ordered[Operable] {
   ////////////////////////////////////////
   //////////// ADDITION METHODS //////////
   ////////////////////////////////////////
-  def +(other: Operable): Expression = {
-    other match {
-      case rn : RealNumber => this + rn
-      case v : Variable => this + v
-      case i : Indeterminate => this + i
-      case cn : ComplexNumber => this + cn
+    def +(other: Operable): Expression = {
+      other match {
+        case rn : RealNumber => this + rn
+        case v : Variable => this + v
+        case i : Indeterminate => this + i
+        case cn : ComplexNumber => this + cn
+      }
     }
-  }
   def +(other: RealNumber): Expression
   def +(other: Variable): Expression
   def +(other: Indeterminate): Expression
