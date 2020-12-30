@@ -10,7 +10,7 @@ class Function1 private[expression](name: String, func: Double => Double)
     if (args.length != 1) {
       throw new EvaluateException(s"Wrong num of args in $name, need 1 but have ${args.length}")
     }
-    RealNumber(func(args.head.evaluate))
+    RealNumber(func(args.head.asInstanceOf[RealNumber].getNum))
   }
 
    def numVars: Int = 1

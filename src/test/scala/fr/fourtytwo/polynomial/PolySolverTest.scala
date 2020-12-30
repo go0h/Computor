@@ -45,7 +45,7 @@ class PolySolverTest extends AnyFunSuite {
   test("Subject test - 1") {
     val expr = "5 * X^0 + 4 * X^1 - 9.3 * X^2 = 1 * X^0"
     val res = Polynomial(expr).solve
-    assert(res.equals(binomialSolve(-9.3, 4, 4)))
+    assert(res.equals(binomialSolve(-9.3, 4, 4)), res)
   }
 
   test("Subject test - 2") {
@@ -246,6 +246,12 @@ class PolySolverTest extends AnyFunSuite {
 
   test("Binomial test - 25") {
     val expr = "5 + 3 * X^1 + 3 * X^2 = 1 + 0 * X^1"
+    val res = Polynomial(expr).solve
+    assert(res.equals(binomialSolve(3, 3, 4)), binomialSolve(3, 3, 4))
+  }
+
+  test("Binomial test - 26") {
+    val expr = "5 + 3X^1 + 3X^2 = 1 + 0 * X^1"
     val res = Polynomial(expr).solve
     assert(res.equals(binomialSolve(3, 3, 4)), binomialSolve(3, 3, 4))
   }

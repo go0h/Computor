@@ -1,11 +1,8 @@
 package fr.fourtytwo.expression
 
-import fr.fourtytwo.exception.EvaluateException
-
 class ComplexNumber(re: Double, im: Double) extends Operable {
 
-  def evaluate: Double = throw new EvaluateException(s"Can't evaluate ComplexNumber $toString")
-  def simplify: Expression = if (im != 0) this else RealNumber(re)
+  def evaluate: Expression = if (im != 0) this else RealNumber(re)
   def changeSign: Expression = ComplexNumber(-re, -im)
 
   def getRe: Double = re
@@ -14,7 +11,7 @@ class ComplexNumber(re: Double, im: Double) extends Operable {
   ////////////////////////////////////////
   /////////// ADDITION METHODS ///////////
   ////////////////////////////////////////
-  override def +(other: RealNumber): Expression = ComplexNumber(other.evaluate + re, im)
+  override def +(other: RealNumber): Expression = ComplexNumber(other.getNum + re, im)
   override def +(other: Variable): Expression = Operator(this, "+", other)
   override def +(other: Indeterminate): Expression = Operator(this, "+", other)
   override def +(other: ComplexNumber): Expression = ComplexNumber(re + other.getRe, im + other.getIm)
@@ -23,7 +20,7 @@ class ComplexNumber(re: Double, im: Double) extends Operable {
   ////////////////////////////////////////
   ////////// SUBTRACTION METHODS /////////
   ////////////////////////////////////////
-  override def -(other: RealNumber): Expression = ComplexNumber(re - other.evaluate, im)
+  override def -(other: RealNumber): Expression = ComplexNumber(re - other.getNum, im)
   override def -(other: Variable): Expression = Operator(this, "-", other)
   override def -(other: Indeterminate): Expression = Operator(this, "-", other)
   override def -(other: ComplexNumber): Expression = {
@@ -36,8 +33,8 @@ class ComplexNumber(re: Double, im: Double) extends Operable {
   //////////// MULTIPLY METHODS //////////
   ////////////////////////////////////////
   override def *(other: RealNumber): Expression = {
-    if (other.evaluate == 0) RealNumber(0)
-    else ComplexNumber(other.evaluate * re, other.evaluate * im)
+    if (other == 0) RealNumber(0)
+    else ComplexNumber(other.getNum * re, other.getNum * im)
   }
   override def *(other: Variable): Expression = Operator(this, "*", other)
   override def *(other: Indeterminate): Expression = Operator(this, "*", other)
@@ -54,16 +51,16 @@ class ComplexNumber(re: Double, im: Double) extends Operable {
   //////////// DIVISION METHODS //////////
   ////////////////////////////////////////
   override def /(other: RealNumber): Expression = {
-    if (other.evaluate == 0)
+    if (other == 0)
       throw new ArithmeticException("Division by zero")
-    this / ComplexNumber(other.evaluate, 0)
+    this / ComplexNumber(other.getNum, 0)
   }
   override def /(other: Variable): Expression = Operator(this, "/", other)
   override def /(other: Indeterminate): Expression = Operator(this, "/", other)
   override def /(other: ComplexNumber): Expression = {
     val newRe = ((re * other.getRe) + (im * other.getIm)) / (other.getRe * other.getRe + other.getIm * other.getIm)
     val newIm = ((im * other.getRe) - (re * other.getIm)) / (other.getRe * other.getRe + other.getIm * other.getIm)
-    ComplexNumber(newRe, newIm).simplify
+    ComplexNumber(newRe, newIm).evaluate
   }
 
   def compare(other: Operable): Int = {
@@ -79,7 +76,7 @@ class ComplexNumber(re: Double, im: Double) extends Operable {
   def contains(op: String): Boolean = false
 
   override def toString: String = {
-    s"(${if (re == 0) 0.0 else re} ${if (im < 0) "-" else "+"} ${math.abs(im)}i)"
+    s"${if (re == 0) 0.0 else re} ${if (im < 0) "-" else "+"} ${math.abs(im)}i"
   }
 
   override def equals(obj: Any): Boolean = {

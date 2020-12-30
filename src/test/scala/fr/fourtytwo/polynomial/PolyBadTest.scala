@@ -38,7 +38,7 @@ class PolyBadTest extends AnyFunSuite{
 
   test("Variable ^ Variable - 2") {
     assertThrows[EvaluateException] {
-      Polynomial("X ^ X + 4 + X = 3").evaluate
+      Polynomial("X ^ X + 4 + X = 3").solve
     }
   }
 

@@ -1,9 +1,8 @@
 package fr.fourtytwo.expression
 
+import scala.collection.mutable.ArrayBuffer
 import fr.fourtytwo.exception.{EvaluateException, ParseException}
 import fr.fourtytwo.expression.Matrix.validateMatrix
-
-import scala.collection.mutable.ArrayBuffer
 
 class Matrix(matrix: Array[Array[RealNumber]]) extends Operable {
 
@@ -18,7 +17,7 @@ class Matrix(matrix: Array[Array[RealNumber]]) extends Operable {
 
     val sum = for (i <- 0 until getHeight) yield {
       for (j <- 0 until getWidth) yield {
-        RealNumber(matrix(i)(j).evaluate + other.getMatrix(i)(j).evaluate)
+        matrix(i)(j) + other.getMatrix(i)(j)
       }
     }.toArray
 
@@ -32,7 +31,7 @@ class Matrix(matrix: Array[Array[RealNumber]]) extends Operable {
 
     val sub = for (i <- 0 until getHeight) yield {
       for (j <- 0 until getWidth) yield {
-        RealNumber(matrix(i)(j).evaluate - other.getMatrix(i)(j).evaluate)
+        matrix(i)(j) - other.getMatrix(i)(j)
       }
     }.toArray
 
@@ -43,7 +42,7 @@ class Matrix(matrix: Array[Array[RealNumber]]) extends Operable {
 
     val sum = for (i <- 0 until getHeight) yield {
       for (j <- 0 until getWidth) yield {
-        RealNumber(matrix(i)(j).evaluate * other.evaluate)
+        matrix(i)(j) * other
       }
     }.toArray
 
@@ -66,7 +65,7 @@ class Matrix(matrix: Array[Array[RealNumber]]) extends Operable {
 
           var res = 0.0
           for (k <- 0 until getWidth) {
-            res += matrix(i)(k).evaluate * otherMatrix(k)(j).evaluate
+            res += matrix(i)(k).getNum * otherMatrix(k)(j).getNum
           }
 
           newMatrix(i)(j) = RealNumber(res)
@@ -99,9 +98,7 @@ class Matrix(matrix: Array[Array[RealNumber]]) extends Operable {
     }
   }
 
-  def evaluate: Double = throw new EvaluateException(s"Can't evaluate matrix")
-
-  def simplify: Expression = this
+  def evaluate: Expression = this
 
   def changeSign: Expression = {
     val res = for (i <- 0 until getHeight) yield {

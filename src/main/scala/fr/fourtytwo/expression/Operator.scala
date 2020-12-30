@@ -9,12 +9,10 @@ class Operator(left: Expression, op: String, right: Expression) extends Expressi
   def getLeft: Expression = left
   def getRight: Expression = right
 
-  def evaluate: Double = OPERATORS(op)(left.evaluate, right.evaluate)
+  def evaluate: Expression = {
 
-  def simplify: Expression = {
-
-    val l = left.simplify
-    val r = right.simplify
+    val l = left.evaluate
+    val r = right.evaluate
     if (l.isInstanceOf[Operator] || r.isInstanceOf[Operator]) {
       val res = if (op.equals("-")) Operator(l, "+", r.changeSign) else Operator(l, op, r)
       return res

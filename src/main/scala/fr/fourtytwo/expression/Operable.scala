@@ -8,20 +8,20 @@ trait Operable extends Expression with Ordered[Operable] {
   ////////////////////////////////////////
   //////////// ADDITION METHODS //////////
   ////////////////////////////////////////
-    def +(other: Operable): Expression = {
-      other match {
-        case rn : RealNumber => this + rn
-        case v : Variable => this + v
-        case i : Indeterminate => this + i
-        case cn : ComplexNumber => this + cn
-        case m : Matrix => this + m
-      }
+  def +(other: Operable): Expression = {
+    other match {
+      case rn : RealNumber => this + rn
+      case v : Variable => this + v
+      case i : Indeterminate => this + i
+      case cn : ComplexNumber => this + cn
+      case m : Matrix => this + m
     }
-  def +(other: RealNumber): Expression = throwException("add", other.getType)
-  def +(other: Variable): Expression = throwException("add", other.getType)
-  def +(other: Indeterminate): Expression = throwException("add", other.getType)
-  def +(other: ComplexNumber): Expression = throwException("add", other.getType)
-  def +(other: Matrix): Expression = throwException("add", other.getType)
+  }
+  def +(other: RealNumber): Expression = Operator(this, "+", other)
+  def +(other: Variable): Expression = Operator(this, "+", other)
+  def +(other: Indeterminate): Expression = Operator(this, "+", other)
+  def +(other: ComplexNumber): Expression = Operator(this, "+", other)
+  def +(other: Matrix): Expression = Operator(this, "+", other)
 
 
   ////////////////////////////////////////
@@ -36,11 +36,11 @@ trait Operable extends Expression with Ordered[Operable] {
       case m : Matrix => this - m
     }
   }
-  def -(other: RealNumber): Expression = throwException("sub", other.getType)
-  def -(other: Variable): Expression = throwException("sub", other.getType)
-  def -(other: Indeterminate): Expression = throwException("sub", other.getType)
-  def -(other: ComplexNumber): Expression = throwException("sub", other.getType)
-  def -(other: Matrix): Expression = throwException("sub", other.getType)
+  def -(other: RealNumber): Expression = Operator(this, "-", other)
+  def -(other: Variable): Expression = Operator(this, "-", other)
+  def -(other: Indeterminate): Expression = Operator(this, "-", other)
+  def -(other: ComplexNumber): Expression = Operator(this, "-", other)
+  def -(other: Matrix): Expression = Operator(this, "-", other)
 
 
   ////////////////////////////////////////
@@ -55,11 +55,11 @@ trait Operable extends Expression with Ordered[Operable] {
       case m : Matrix => this * m
     }
   }
-  def *(other: RealNumber): Expression = throwException("mul", other.getType)
-  def *(other: Variable): Expression = throwException("mul", other.getType)
-  def *(other: Indeterminate): Expression = throwException("mul", other.getType)
-  def *(other: ComplexNumber): Expression = throwException("mul", other.getType)
-  def *(other: Matrix): Expression = throwException("mul", other.getType)
+  def *(other: RealNumber): Expression = Operator(this, "*", other)
+  def *(other: Variable): Expression = Operator(this, "*", other)
+  def *(other: Indeterminate): Expression = Operator(this, "*", other)
+  def *(other: ComplexNumber): Expression = Operator(this, "*", other)
+  def *(other: Matrix): Expression = Operator(this, "*", other)
 
 
   ////////////////////////////////////////
@@ -74,11 +74,11 @@ trait Operable extends Expression with Ordered[Operable] {
       case m : Matrix => this / m
     }
   }
-  def /(other: RealNumber): Expression = throwException("div", other.getType)
-  def /(other: Variable): Expression = throwException("div", other.getType)
-  def /(other: Indeterminate): Expression = throwException("div", other.getType)
-  def /(other: ComplexNumber): Expression = throwException("div", other.getType)
-  def /(other: Matrix): Expression = throwException("div", other.getType)
+  def /(other: RealNumber): Expression = Operator(this, "/", other)
+  def /(other: Variable): Expression = Operator(this, "/", other)
+  def /(other: Indeterminate): Expression = Operator(this, "/", other)
+  def /(other: ComplexNumber): Expression = Operator(this, "/", other)
+  def /(other: Matrix): Expression = Operator(this, "/", other)
 
   ////////////////////////////////////////
   ///////////// POWER METHODS ////////////
@@ -86,8 +86,7 @@ trait Operable extends Expression with Ordered[Operable] {
   def ^(other: Expression): Expression = {
     other match {
       case rn : RealNumber => this ^ rn
-      case _  : Matrix => throwException("power", other.getType)
-      case _ => Operator(this, "%", other)
+      case _ => Operator(this, "^", other)
     }
   }
   def ^(other: RealNumber): Expression = throwException("power", other.getType)
@@ -96,7 +95,7 @@ trait Operable extends Expression with Ordered[Operable] {
     other match {
       case rn : RealNumber => {
         this match {
-          case number: RealNumber => RealNumber(number.evaluate % rn.evaluate)
+          case number: RealNumber => RealNumber(number.getNum % rn.getNum)
           case _ => Operator(this, "%", other)
         }
       }
@@ -112,4 +111,5 @@ trait Operable extends Expression with Ordered[Operable] {
   def throwException(op: String, other: String): Expression = {
     throw new EvaluateException(s"Can't $op $other to $getType")
   }
+
 }

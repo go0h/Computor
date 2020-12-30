@@ -1,9 +1,8 @@
 package fr.fourtytwo
 
-import fr.fourtytwo.computor.Computor.basicCheck
-import fr.fourtytwo.computor._
+import fr.fourtytwo.computor.{Computor, MATCHERS, SIMPLE_TOKENIZER}
 import fr.fourtytwo.exception.{EvaluateException, ParseException}
-import fr.fourtytwo.expression.{Indeterminate, Matrix, RealNumber, Variable}
+import fr.fourtytwo.expression.Variable
 
 object Main {
 
@@ -11,15 +10,9 @@ object Main {
 
       try {
 
-        val expr1 = "[ [1, 2, 3]; [4, 5, 6] ]"
-        val expr2 = "[ [2.5]; [2.5]; [5] ]"
-        val res =   "[ [22.5]; [52.5] ]"
+        val res = Variable("X") + Variable("Y")
 
-        val m1 = Matrix(expr1)
-        val m2 = Matrix(expr2)
-
-
-        println(m1 * m2)
+        println(res, res.getType)
 
       } catch {
         case ex: ParseException => println(ex.getMessage)

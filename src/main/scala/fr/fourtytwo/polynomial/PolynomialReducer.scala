@@ -34,7 +34,7 @@ object PolynomialReducer {
     LOGGER.fine(s"Normalized: $leftExpr = $rightExpr")
 
     val allOnLeft = rightExpr match {
-      case r: RealNumber if r.evaluate == 0 => leftExpr
+      case r: RealNumber if r == 0 => leftExpr
       /* change the sign to all expressions before moving to the left */
       case _ => Operator(leftExpr, "+", rightExpr.changeSign)
     }
@@ -45,7 +45,7 @@ object PolynomialReducer {
       .sorted
       .map(_.asInstanceOf[Expression])
       .reduce((x, y) => Operator(x, "+", y))
-      .simplify
+      .evaluate
     LOGGER.fine(s"Ordered:    $orderedExpression = 0.0")
 
     val fullSimplified = simplifyExpression(orderedExpression)
@@ -67,12 +67,12 @@ object PolynomialReducer {
   /** Simplification of algebraic expression */
   def simplifyExpression(expr: Expression): Expression = {
 
-    var newExpr: Expression = expr.simplify
+    var newExpr: Expression = expr.evaluate
     var oldExpr: Expression = RealNumber(0)
 
     while (!oldExpr.equals(newExpr)) {
       oldExpr = newExpr
-      newExpr = newExpr.simplify match {
+      newExpr = newExpr.evaluate match {
         case operator: Operator => rotateAndSimplify(operator)
         case operable: Operable => operable
       }
@@ -87,7 +87,7 @@ object PolynomialReducer {
 
     /* Subtraction operators are replaced with addition operators,
      * while changing the sign of the right term. */
-    val preSimple: Expression = removeMinus(expr).simplify
+    val preSimple: Expression = removeMinus(expr).evaluate
     if (preSimple.isInstanceOf[Operable])
       return preSimple
 
@@ -101,9 +101,9 @@ object PolynomialReducer {
 
         val newOp = curOp.getRight match {
             case right: Operable =>
-              Operator(left.getLeft, "+", Operator(left.getRight, "+", right)).simplify
+              Operator(left.getLeft, "+", Operator(left.getRight, "+", right)).evaluate
             case right: Operator =>
-              val newRight = Operator(Operator(left.getRight, "+", right.getLeft), "+", right.getRight).simplify
+              val newRight = Operator(Operator(left.getRight, "+", right.getLeft), "+", right.getRight).evaluate
               Operator(left.getLeft, "+", newRight)
           }
 
@@ -112,10 +112,10 @@ object PolynomialReducer {
         curOp = newOp.asInstanceOf[Operator]
       }
       else {
-        return curOp.simplify
+        return curOp.evaluate
       }
     }
-    curOp.simplify
+    curOp.evaluate
   }
 
   def removeMinus(expr: Expression, prevSign: Int = 1): Expression = {

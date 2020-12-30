@@ -1,11 +1,12 @@
-package fr.fourtytwo
+package fr.fourtytwo.computor
+
+import fr.fourtytwo.exception._
+import fr.fourtytwo.expression.RealNumber
+import fr.fourtytwo.token.{TokenType, Tokenizer}
+import org.scalatest.funsuite.AnyFunSuite
 
 import scala.math.{abs, pow}
 import scala.util.matching.Regex
-import fr.fourtytwo.exception._
-import fr.fourtytwo.token.{TokenType, Tokenizer}
-import org.scalatest.funsuite.AnyFunSuite
-import fr.fourtytwo.computor.Computor
 
 
 class ComputorTest extends AnyFunSuite {
@@ -13,9 +14,9 @@ class ComputorTest extends AnyFunSuite {
   val matchers: Map[TokenType.Value, Regex] = TokenType.getMatchers
   val tokenizer = new Tokenizer(matchers)
 
-  def getResult(expr: String): Double = {
+  def getResult(expr: String): RealNumber = {
     val tokens = tokenizer.generateTokens(expr)
-    Computor(tokens).solve.evaluate
+    Computor(tokens).solve.asInstanceOf[RealNumber]
   }
 
   test("Empty expression") {
@@ -146,8 +147,8 @@ class ComputorTest extends AnyFunSuite {
 
   test("Double expression - 2") {
     val expr = "(3.23144 + 32 % 23 * 765.321)^(-3/(0.4)) / (-0.0321) + 16.308"
-    val res = getResult(expr).ceil
-    assert(res == (pow(3.23144 + 32 % 23 * 765.321, -3/0.4) / (-0.0321) + 16.308).ceil)
+    val res = getResult(expr)
+    assert(res.getNum.ceil == (pow(3.23144 + 32 % 23 * 765.321, -3/0.4) / (-0.0321) + 16.308).ceil)
   }
 
   test("Zero division") {

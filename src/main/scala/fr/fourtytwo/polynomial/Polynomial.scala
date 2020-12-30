@@ -38,19 +38,19 @@ class Polynomial(expr: String, name: String = "<poly>", debug: Boolean = false)
   }
 
   def binomialSolve: String = {
-    val a = exprArr.head.asInstanceOf[Indeterminate].constant.evaluate
+    val a = exprArr.head.asInstanceOf[Indeterminate].constant.getNum
     var b = 0.0
     var c = 0.0
 
     exprArr match {
       case Array(_, b1, c1) => {
-        b = b1.asInstanceOf[Indeterminate].constant.evaluate
-        c = c1.asInstanceOf[RealNumber].evaluate
+        b = b1.asInstanceOf[Indeterminate].constant.getNum
+        c = c1.asInstanceOf[RealNumber].getNum
       }
       case Array(_, b1) => {
         b1 match {
-          case i: Indeterminate => b = i.constant.evaluate
-          case r: RealNumber => c = r.evaluate
+          case i: Indeterminate => b = i.constant.getNum
+          case r: RealNumber => c = r.getNum
         }
       }
       case Array(_) =>
@@ -84,11 +84,11 @@ class Polynomial(expr: String, name: String = "<poly>", debug: Boolean = false)
   }
 
   def monomialSolve: String = {
-    val a = exprArr.head.asInstanceOf[Indeterminate].constant.evaluate
+    val a = exprArr.head.asInstanceOf[Indeterminate].constant.getNum
     var b = 0.0
 
     exprArr match {
-      case Array(_, b1) => b = b1.asInstanceOf[RealNumber].evaluate
+      case Array(_, b1) => b = b1.asInstanceOf[RealNumber].getNum
       case Array(_) =>
     }
     val res = (-b) / a
@@ -96,7 +96,7 @@ class Polynomial(expr: String, name: String = "<poly>", debug: Boolean = false)
   }
 
   def noVars: String = {
-    val a = exprArr.head.asInstanceOf[RealNumber].evaluate
+    val a = exprArr.head.asInstanceOf[RealNumber].getNum
     if (a != 0)
       throw new EvaluateException(s"The polynomial $toString is wrong. There is no solution")
     "All real numbers"
@@ -129,7 +129,7 @@ class Polynomial(expr: String, name: String = "<poly>", debug: Boolean = false)
     exprArr.map {
         case _: RealNumber => 0.0
         case _: Variable => 1.0
-        case i: Indeterminate => i.degree.evaluate
+        case i: Indeterminate => i.degree.getNum
       }.sortWith(_ > _)
   }
 

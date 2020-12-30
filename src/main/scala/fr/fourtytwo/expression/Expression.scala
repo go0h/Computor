@@ -1,9 +1,9 @@
 package fr.fourtytwo.expression
 
+
 trait Expression {
 
-  def evaluate: Double
-  def simplify: Expression
+  def evaluate: Expression
   def changeSign: Expression
   def contains(op: String): Boolean
 
@@ -27,7 +27,7 @@ trait Expression {
         else this
       case i: Indeterminate =>
         if (i.variable.getName.equals(varName)) {
-          Operator(i.constant, "*", Operator(value, "^", i.degree)).simplify
+          Operator(i.constant, "*", Operator(value, "^", i.degree)).evaluate
         }
         else this
       case _ => this

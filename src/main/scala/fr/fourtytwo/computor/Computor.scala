@@ -76,6 +76,7 @@ class Computor {
 
       tokens(i).tType match {
         case REALNUMBER => stack.push(RealNumber(tokens(i).expr.toDouble))
+        case MATRIX => stack.push(Matrix(tokens(i).expr))
         case LITERAL => {
           if (funcs.contains(tokens(i).expr)) {
             val (f, k) = setFuncParams(funcs(tokens(i).expr), i + 1)
@@ -97,7 +98,7 @@ class Computor {
     }
     if (stack.length != 1)
       throw new EvaluateException(s"Wrong stack length in the end: $infixString")
-    stack.pop()
+    stack.pop().evaluate
   }
 
   def convertToRPN(tokens: Array[Token]): Array[Token] = {
@@ -138,7 +139,7 @@ class Computor {
             stack.push(tempToken)
             mayUnary = if (prevToken.equals("-")) false else true
           }
-        case REALNUMBER | LITERAL =>
+        case REALNUMBER | LITERAL | MATRIX =>
           RPNTokens.append(token)
           if (stack.nonEmpty && stack.head.tType == UNARY)
             RPNTokens.append(stack.pop())

@@ -25,7 +25,7 @@ class Tokenizer(matchers: Map[TokenType.Value, Regex]) {
       i += token.expr.length
       tokens.append(token)
     }
-    tokens.toArray
+    removeImplicitsOperations(tokens.toArray)
   }
 
   private def getToken(expr: String, i: Int): Token = {
@@ -39,6 +39,20 @@ class Tokenizer(matchers: Map[TokenType.Value, Regex]) {
       }
     }
     Token("", NONE)
+  }
+
+  private def removeImplicitsOperations(tokens: Array[Token]): Array[Token] = {
+
+    val implicitTokens = new ArrayBuffer[Token]()
+    var prevType: TokenType.Value = NONE
+
+    for (token <- tokens) {
+      if (token.tType == LITERAL && prevType == REALNUMBER)
+        implicitTokens.append(Token("*", OPERATION))
+      implicitTokens.append(token)
+      prevType = token.tType
+    }
+    implicitTokens.toArray
   }
 }
 

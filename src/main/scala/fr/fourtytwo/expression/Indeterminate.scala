@@ -12,13 +12,10 @@ case class Indeterminate(constant: RealNumber,
     this(RealNumber(c), Variable(v), RealNumber(d))
   }
 
-  def evaluate: Double = {
-    Operator(constant, "*", Operator(variable, "^", degree)).evaluate
-  }
-  def simplify: Expression = {
-    if (constant.evaluate == 0)
+  def evaluate: Expression = {
+    if (constant == 0)
       return RealNumber(0)
-    if (degree.evaluate == 0)
+    if (degree == 0)
       return constant
     if (variable.getSign == -1)
       return Indeterminate(constant.changeSign, variable.changeSign, degree)
@@ -31,28 +28,22 @@ case class Indeterminate(constant: RealNumber,
   //////////// ADDITION METHODS //////////
   ////////////////////////////////////////
   override def +(other: RealNumber): Expression = {
-    if (other.evaluate == 0)
+    if (other == 0)
       return this
     Operator(this, "+", other)
   }
 
   override def +(other: Variable): Expression = {
     if (!variable.getName.equals(other.getName))
-      throw new EvaluateException(s"Can't add different variables (${variable.getName}, ${other.getName})")
-    if (degree.evaluate == 1)
-      return new Indeterminate(constant.evaluate + other.getSign,
-                              other.getName,
-                              degree.evaluate)
+      return Operator(this, "+", other)
+    if (degree == 1)
+      return Indeterminate(constant + other.getSign, Variable(other.getName), degree)
     Operator(this, "+", other)
   }
 
   override def +(other: Indeterminate): Expression = {
-    if (!variable.equals(other.variable))
-      throw new EvaluateException(s"Can't add different variables ($variable, ${other.variable})")
-    if (degree.evaluate == other.degree.evaluate)
-      return Indeterminate(RealNumber(constant.evaluate + other.constant.evaluate),
-                           variable,
-                           degree)
+    if (variable.equals(other.variable) && degree.equals(other.degree))
+      return Indeterminate(constant + other.constant, variable, degree)
     Operator(this, "+", other)
   }
   override def +(other: ComplexNumber): Expression = Operator(this, "+", other)
@@ -62,29 +53,27 @@ case class Indeterminate(constant: RealNumber,
   ////////// SUBTRACTION METHODS /////////
   ////////////////////////////////////////
   override def -(other: RealNumber): Expression = {
-    if (other.evaluate == 0)
+    if (other == 0)
       return this
     Operator(this, "-", other)
   }
 
   override def -(other: Variable): Expression = {
     if (!variable.getName.equals(other.getName))
-      throw new EvaluateException(s"Can't sub different variables (${variable.getName}, ${other.getName})")
-    if (degree.evaluate == 1) {
-      if (constant.evaluate == 1)
+      return Operator(this, "-", other)
+    if (degree == 1) {
+      if (constant == 1)
         return RealNumber(1 - other.getSign)
-      return new Indeterminate(constant.evaluate - other.getSign, variable.getName, degree.evaluate)
+      return Indeterminate(constant - other.getSign, variable, degree)
     }
     Operator(this, "-", other)
   }
 
   override def -(other: Indeterminate): Expression = {
     if (!variable.equals(other.variable))
-      throw new EvaluateException(s"Can't sub different variables ($variable, ${other.variable})")
-    if (degree.evaluate == other.degree.evaluate) {
-      return Indeterminate(RealNumber(constant.evaluate - other.constant.evaluate),
-                          variable,
-                          degree)
+      return Operator(this, "-", other)
+    if (degree.equals(other.degree)) {
+      return Indeterminate(constant - other.constant, variable, degree)
     }
     Operator(this, "-", other)
   }
@@ -95,22 +84,21 @@ case class Indeterminate(constant: RealNumber,
   //////////// MULTIPLY METHODS //////////
   ////////////////////////////////////////
   override def *(other: RealNumber): Expression = {
-    new Indeterminate(constant * other, variable, degree)
+    if (other == 0)
+      return RealNumber(0)
+    Indeterminate(constant * other, variable, degree)
   }
 
   override def *(other: Variable): Expression = {
     if (!variable.getName.equals(other.getName))
-      throw new EvaluateException(s"Can't multiply different variables (${variable.getName}, ${other.getName})")
-    new Indeterminate(constant.evaluate * other.getSign, other.getName, degree.evaluate + 1)
+      return Operator(this, "*", other)
+    Indeterminate(constant * other.getSign, Variable(other.getName), degree + 1)
   }
 
   override def *(other: Indeterminate): Expression = {
     if (!variable.equals(other.variable))
-      throw new EvaluateException(s"Can't multiply different variables ($variable, ${other.variable})")
-
-    Indeterminate(constant * other.constant,
-                  variable,
-                  RealNumber(degree.evaluate + other.degree.evaluate))
+      return Operator(this, "*", other)
+    Indeterminate(constant * other.constant, variable, degree + other.degree)
   }
   override def *(other: ComplexNumber): Expression = Operator(this, "*", other)
 
@@ -124,23 +112,21 @@ case class Indeterminate(constant: RealNumber,
 
   override def /(other: Variable): Expression = {
     if (!variable.getName.equals(other.getName))
-      throw new EvaluateException(s"Can't division different variables (${variable.getName}, ${other.getName})")
-    if (degree.evaluate == 1)
-      return RealNumber(constant.evaluate * other.getSign)
-    new Indeterminate(constant.evaluate * other.getSign, other.getName, degree.evaluate - 1)
+      return Operator(this, "/", other)
+    if (degree == 1)
+      return constant * other.getSign
+    Indeterminate(constant * other.getSign, Variable(other.getName), degree - 1)
   }
 
   override def /(other: Indeterminate): Expression = {
     if (!variable.equals(other.variable))
-      throw new EvaluateException(s"Can't division different variables ($variable, ${other.variable})")
+      return Operator(this, "/", other)
 
     if (equals(other))
       return RealNumber(1)
-    val res = new Indeterminate(constant / other.constant,
-                                variable,
-                                RealNumber(degree.evaluate - other.degree.evaluate))
+    val res = new Indeterminate(constant / other.constant, variable, degree - other.degree)
 
-    if (res.degree.equals(RealNumber(0)))
+    if (res.degree == 0)
       return res.constant
     res
   }
@@ -150,13 +136,11 @@ case class Indeterminate(constant: RealNumber,
   ///////////// POWER METHOD /////////////
   ////////////////////////////////////////
   override def ^(other: RealNumber): Expression = {
-    if (other.evaluate == 0)
+    if (other == 0)
       return constant
-    if (other.evaluate == 1)
+    if (other == 1)
       return this
-    Indeterminate(RealNumber(pow(constant.evaluate, other.evaluate)),
-                  variable,
-                  RealNumber(degree.evaluate * other.evaluate))
+    Indeterminate(RealNumber(pow(constant.getNum, other.getNum)), variable, degree * other)
   }
 
 
@@ -167,41 +151,46 @@ case class Indeterminate(constant: RealNumber,
     other match {
       case _ : RealNumber => -1
       case _ : ComplexNumber => -1
-      case v : Variable => {
-        if (!variable.equals(v))
-          throw new EvaluateException(s"Can't compare different variables ($variable, $v)")
-        if (constant.evaluate == 1 && degree.evaluate == 1)
+      case _ : Variable => {
+        if (constant == 1 && degree == 1)
           return 0
-        if (degree.evaluate < 1)
+        if (degree.getNum < 1)
           return 1
         -1
       }
       case i : Indeterminate => {
-        if (!variable.equals(i.variable))
-          throw new EvaluateException(s"Can't compare different variables ($variable, ${i.variable})")
-        if (degree.evaluate < i.degree.evaluate)
+        if (degree.getNum < i.degree.getNum)
           return 1
-        if (degree.evaluate == i.degree.evaluate)
-          return constant.evaluate.compare(i.constant.evaluate)
+        if (degree.equals(i.degree))
+          return constant.getNum.compare(i.constant.getNum)
         -1
       }
       case _ : Matrix => 1
     }
   }
 
-  override def toString: String = s"($constant * $variable^$degree)"
+  override def toString: String = {
+    if (constant == 1) {
+      if (degree == 1)
+        return variable.toString
+      return s"$variable^$degree"
+    }
+    if (degree == 1)
+      return s"$constant * $variable"
+    s"$constant * $variable^$degree"
+  }
 
   override def equals(other: Any): Boolean = {
 
     other match {
-      case temp: RealNumber =>
-        if (this.degree.evaluate == 0 && temp.evaluate == 0)
+      case r: RealNumber =>
+        if (degree == 0 && r == 0)
           return true
-      case temp: Variable =>
-        if (variable.equals(temp) && degree.evaluate == 1 && constant.evaluate == 1)
+      case v: Variable =>
+        if (variable.equals(v) && degree == 1 && constant == 1)
           return true
-      case temp: Indeterminate =>
-        if (variable.equals(temp.variable) && degree.equals(temp.degree) && constant.equals(temp.constant))
+      case ind: Indeterminate =>
+        if (variable.equals(ind.variable) && degree.equals(ind.degree) && constant.equals(ind.constant))
           return true
       case _ =>
     }

@@ -1,7 +1,6 @@
 package fr.fourtytwo.expression
 
 import fr.fourtytwo.computor.Computor
-import fr.fourtytwo.math._
 import fr.fourtytwo.polynomial.SIMPLE_TOKENIZER
 import org.scalatest.funsuite.AnyFunSuite
 
@@ -35,7 +34,7 @@ class ExpressionTest extends AnyFunSuite {
     val poly = getExpr(expr)
     val solvable = poly.setVar("X", RealNumber(3))
     assert(solvable.countVars == 0)
-    assert(solvable.evaluate == 12.0, solvable.evaluate)
+    assert(solvable.evaluate.asInstanceOf[RealNumber] == 12.0, solvable)
   }
 
   test("Set values - 2") {
@@ -48,16 +47,16 @@ class ExpressionTest extends AnyFunSuite {
       .setVar("B", RealNumber(3))
       .setVar("C", RealNumber(1))
     assert(solvable.countVars == 0)
-    assert(solvable.evaluate == 12.0, solvable.evaluate)
+    assert(solvable.evaluate.asInstanceOf[RealNumber] == 12.0, solvable)
   }
 
   test("Set values - 3") {
     val expr = "3 * 3 + 6 / 3 + 1"
     val poly = getExpr(expr)
     val solvable = poly
-      .setVar("X", RealNumber(3))
+      .setVar("X", RealNumber(3)).asInstanceOf[RealNumber]
     assert(solvable.countVars == 0)
-    assert(solvable.evaluate == 12.0, solvable.evaluate)
+    assert(solvable == 12.0, solvable)
   }
 
 }

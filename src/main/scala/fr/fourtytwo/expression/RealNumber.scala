@@ -5,17 +5,18 @@ import scala.math.pow
 
 class RealNumber(private val num: Double) extends Operable {
 
-  def evaluate: Double = num
-  def simplify: Expression = this
-  override def toString: String = num.toString
+  def evaluate: Expression = this
 
+  def getNum: Double = num
 
   def changeSign: RealNumber = RealNumber(num * -1)
 
+  override def toString: String = num.toString
   ////////////////////////////////////////
   ////////////// PLUS METHODS ////////////
   ////////////////////////////////////////
-  override def +(other: RealNumber): Expression = RealNumber(num + other.evaluate)
+  def +(other: Double): RealNumber = RealNumber(num + other)
+  override def +(other: RealNumber): RealNumber = RealNumber(num + other.getNum)
   override def +(other: Variable): Expression = if (num == 0) other else Operator(this, "+", other)
   override def +(other: Indeterminate): Expression = if (num == 0) other else Operator(this, "+", other)
   override def +(other: ComplexNumber): Expression = other + this
@@ -24,32 +25,23 @@ class RealNumber(private val num: Double) extends Operable {
   ////////////////////////////////////////
   ////////// SUBTRACTION METHODS /////////
   ////////////////////////////////////////
-  override def -(other: RealNumber): Expression = RealNumber(num - other.evaluate)
+  def -(other: Double): RealNumber = RealNumber(num - other)
+  override def -(other: RealNumber): RealNumber = RealNumber(num - other.getNum)
   override def -(other: Variable): Expression = if (num == 0) other.changeSign else Operator(this, "-", other)
-  override def -(other: Indeterminate): Expression = Operator(this, "-", other)
+  override def -(other: Indeterminate): Operator = Operator(this, "-", other)
   override def -(other: ComplexNumber): Expression = {
-    ComplexNumber(num - other.getRe, 0 - other.getIm).simplify
+    ComplexNumber(num - other.getRe, 0 - other.getIm).evaluate
   }
 
 
   ////////////////////////////////////////
   //////////// MULTIPLY METHODS //////////
   ////////////////////////////////////////
-  override def *(other: RealNumber): RealNumber = RealNumber(num * other.evaluate)
-
-  override def *(other: Variable): Expression = {
-    if (num == 0)
-      return RealNumber(0)
-    new Indeterminate(num * other.getSign, other.getName, 1)
-  }
-
-  override def *(other: Indeterminate): Expression = {
-    if (num == 0)
-      return RealNumber(0)
-    new Indeterminate(num.toDouble * other.constant.evaluate,
-      other.variable.toString,
-      other.degree.evaluate)
-  }
+  def *(other: Int): RealNumber = RealNumber(num * other)
+  def *(other: Double): RealNumber = RealNumber(num * other)
+  override def *(other: RealNumber): RealNumber = RealNumber(num * other.getNum)
+  override def *(other: Variable): Expression = other * this
+  override def *(other: Indeterminate): Expression = other * this
   override def *(other: ComplexNumber): Expression = other * this
   override def *(other: Matrix): Expression = other * this
 
@@ -57,12 +49,15 @@ class RealNumber(private val num: Double) extends Operable {
   ////////////////////////////////////////
   //////////// DIVISION METHODS //////////
   ////////////////////////////////////////
-  override def /(other: RealNumber): RealNumber = {
-    if (other.evaluate == 0)
+  def /(other: Double): RealNumber = {
+    if (other == 0)
       throw new ArithmeticException("Division by zero")
-    if (num == 0)
-      return RealNumber(0)
-    RealNumber(num / other.evaluate)
+    RealNumber(num / other)
+  }
+  override def /(other: RealNumber): RealNumber = {
+    if (other == 0)
+      throw new ArithmeticException("Division by zero")
+    RealNumber(num / other.getNum)
   }
 
   override def /(other: Variable): Operable = {
@@ -74,9 +69,9 @@ class RealNumber(private val num: Double) extends Operable {
   override def /(other: Indeterminate): Operable = {
     if (num == 0)
       return RealNumber(0)
-    new Indeterminate(RealNumber(num / other.constant.evaluate),
+    new Indeterminate(RealNumber(num / other.constant.getNum),
                       other.variable,
-                      RealNumber(other.degree.evaluate * -1))
+                      RealNumber(other.degree.getNum * -1))
   }
 
   override def /(other: ComplexNumber): Expression = ComplexNumber(num, 0) / other
@@ -84,8 +79,9 @@ class RealNumber(private val num: Double) extends Operable {
   ////////////////////////////////////////
   ///////////// POWER METHOD /////////////
   ////////////////////////////////////////
+  def ^(other: Double): RealNumber = RealNumber(pow(num, other))
   override def ^(other: RealNumber): Expression = {
-    RealNumber(pow(num, other.evaluate))
+    RealNumber(pow(num, other.getNum))
   }
 
 
@@ -95,7 +91,7 @@ class RealNumber(private val num: Double) extends Operable {
   ////////////////////////////////////////
   override def compare(other: Operable): Int = {
     other match {
-      case rn : RealNumber => num.compare(rn.evaluate)
+      case rn : RealNumber => num.compare(rn.getNum)
       case _ : Variable => 1
       case _ : Indeterminate => 1
       case _ : ComplexNumber => 1
