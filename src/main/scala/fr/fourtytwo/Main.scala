@@ -1,27 +1,21 @@
 package fr.fourtytwo
 
-import fr.fourtytwo.computor.{Computor, MATCHERS, SIMPLE_TOKENIZER}
+import fr.fourtytwo.computor.{Computor, MATCHERS, TOKENIZER}
 import fr.fourtytwo.exception.{EvaluateException, ParseException}
-import fr.fourtytwo.expression.Variable
+import fr.fourtytwo.expression.{ComplexNumber, Matrix, RealNumber, Variable}
 
 object Main {
 
   def main(args: Array[String]): Unit = {
 
-      try {
+    try {
 
-        val res = Variable("X") + Variable("Y")
+      val computor = new Computor
+      computor.run()
 
-        println(res, res.getType)
-
-      } catch {
-        case ex: ParseException => println(ex.getMessage)
-        case ex: EvaluateException => println(ex.getMessage)
-        case ex: Exception => println(s"${ex.getClass.getName} ${ex.getMessage}")
-      }
-
-//    val computor = new Computor
-//    computor.run()
+    } catch {
+      case ex: Exception => println(s"${ex.getClass.getName} ${ex.getMessage}")
+    }
   }
 
 }

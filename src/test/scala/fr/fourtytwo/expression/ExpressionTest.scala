@@ -54,9 +54,10 @@ class ExpressionTest extends AnyFunSuite {
     val expr = "3 * 3 + 6 / 3 + 1"
     val poly = getExpr(expr)
     val solvable = poly
-      .setVar("X", RealNumber(3)).asInstanceOf[RealNumber]
+      .setVar("X", RealNumber(3))
     assert(solvable.countVars == 0)
-    assert(solvable == 12.0, solvable)
+    val res = solvable.evaluate.asInstanceOf[RealNumber]
+    assert(res == 12.0, solvable)
   }
 
 }

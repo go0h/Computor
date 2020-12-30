@@ -11,10 +11,18 @@ import fr.fourtytwo.expression.function._
 import fr.fourtytwo.token.Token
 import fr.fourtytwo.token.TokenType._
 
+//TODO
+// Валидацию функций
+// Исполнение функций
+// Генерация исключений при неправильных операциях между типами
+// ** для матриц WTF??
 class Computor {
 
   var infixTokens: Array[Token] = _
   var tokens: Array[Token] = _
+
+  val vars: MMap[String, Expression] = MMap[String, Expression]()
+  val funcs: MMap[String, Function] = MMap[String, Function]() ++ getPredefFunctions
 
   def this(infix: Array[Token]) = {
     this()
@@ -22,10 +30,11 @@ class Computor {
     tokens = convertToRPN(infixTokens)
   }
 
+  override def toString: String = infixTokens.map(x => x.expr).mkString(" ")
+
   def run(): Unit = {
 
     var line = StdIn.readLine()
-
     while (line != null) {
 
       try {
@@ -36,11 +45,11 @@ class Computor {
         else {
           basicCheck(line)
           line match {
-            case VAR_ASSIGN_R(varName, _, expr) => println(s"|$varName = $expr| is variable definition")
-            case VAR_COMP_R(varName, _) => println(s"|$varName| is variable computation")
+            case VAR_ASSIGN_R(varName, _, expr) => variableAssignment(varName, expr)
+            case VAR_COMP_R(varName, _) => variableComputation(varName)
             case FUNC_ASSIGN_R(func, _, expr) => println(s"|$func = $expr| is function definition")
             case FUNC_COMP_R(func, _, expr) => println(s"|$func = $expr| is function computation")
-            case COMMON_COMP(expr, _) => println(s"|$expr| is common computation")
+            case COMMON_COMP(expr, _) => commonComputation(expr)
             case _ => throw new ParseException(s"Can't recognize expression type $line")
           }
         }
@@ -52,14 +61,6 @@ class Computor {
       line = StdIn.readLine()
     }
   }
-
-  def getTokens: Array[Token] = tokens
-
-  override def toString: String = tokens.map(x => x.expr).mkString(" ")
-  def infixString: String = infixTokens.map(x => x.expr).mkString("")
-
-  val vars: MMap[String, Expression] = MMap[String, Expression]()
-  val funcs: MMap[String, Function] = MMap[String, Function]() ++ getPredefFunctions
 
   def solve: Expression = {
     if (tokens == null)
@@ -88,7 +89,7 @@ class Computor {
         }
         case OPERATION =>
             if (stack.length < 2)
-              throw new EvaluateException(s"Wrong stack length: $infixString")
+              throw new EvaluateException(s"Wrong stack length: $toString")
             val first = stack.pop()
             stack.push(Operator(stack.pop(), tokens(i).expr, first))
         case UNARY => stack.push(Operator(RealNumber(0), "-", stack.pop()))
@@ -97,8 +98,8 @@ class Computor {
       i += 1
     }
     if (stack.length != 1)
-      throw new EvaluateException(s"Wrong stack length in the end: $infixString")
-    stack.pop().evaluate
+      throw new EvaluateException(s"Wrong stack length in the end: $toString")
+    stack.pop()
   }
 
   def convertToRPN(tokens: Array[Token]): Array[Token] = {
@@ -150,6 +151,65 @@ class Computor {
       prevToken = token
     }
     RPNTokens.appendAll(stack).toArray
+  }
+
+  def variableAssignment(varName: String, expression: String): Unit = {
+
+    println(s"|${varName.trim} = ${expression.trim}| is variable assignment")
+
+    var res = createExpression(expression)
+    if (res.countVars != 0) {
+      res = serVariablesToExpr(res)
+    }
+
+    res = res.evaluate
+    vars(varName.trim) = res
+
+    println(res)
+  }
+
+  def variableComputation(varName: String): Unit = {
+
+    println(s"|$varName| is variable computation")
+
+    val res = vars.getOrElse(varName.trim, throw new EvaluateException(s"Unknown variable '$varName'"))
+
+    println(res)
+  }
+
+  def commonComputation(expression: String): Unit = {
+
+    println(s"|${expression.trim}| is common computation")
+
+    var res = createExpression(expression)
+    if (res.countVars != 0) {
+      res = serVariablesToExpr(res)
+    }
+    res = res.evaluate
+
+    println(res)
+  }
+
+  def createExpression(expression: String): Expression = {
+
+    infixTokens = TOKENIZER.generateTokens(expression)
+    tokens = convertToRPN(infixTokens)
+
+    println(s"RPN: ${tokens.map(_.expr).mkString(" ")}")
+
+    solve(tokens)
+  }
+
+  def serVariablesToExpr(expression: Expression): Expression = {
+
+    var res = expression
+    for (variable <- res.distinctVars) {
+      if (!variable.equals("i")) {
+        val value = vars.getOrElse(variable, throw new EvaluateException(s"Unknown variable '$variable'"))
+        res = res.setVar(variable, value)
+      }
+    }
+    res
   }
 
   def setFuncParams(func: Function, i: Int): (Expression, Int) = {

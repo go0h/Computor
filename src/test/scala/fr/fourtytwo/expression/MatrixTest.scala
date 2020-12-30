@@ -194,4 +194,22 @@ class MatrixTest extends AnyFunSuite {
 
     assert((Matrix(expr1) * Matrix(expr2)).equals(Matrix(res)))
   }
+
+  test("Matrix * Matrix - 5") {
+
+    val expr1 = "[ [1, 2, 3]; [4, 5, 6] ]"
+    val expr2 = "[ [2.5]; [2.5]; [5] ]"
+    val res =   "[ [22.5]; [52.5] ]"
+
+    assert((Matrix(expr1) * Matrix(expr2)).equals(Matrix(res)))
+  }
+
+  test("Matrix * Matrix - 6") {
+
+    val expr1 = "[ [1,2,3]; [1,2,3] ]"
+    val expr2 = "[ [3,2,1]; [3,2,1]; [4,5,5] ]"
+    val res =   "[ [21, 21, 18]; [21, 21, 18] ]"
+
+    assert((Matrix(expr1) * Matrix(expr2)).equals(Matrix(res)))
+  }
 }

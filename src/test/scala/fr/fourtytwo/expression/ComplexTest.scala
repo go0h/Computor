@@ -1,6 +1,6 @@
 package fr.fourtytwo.expression
 
-import fr.fourtytwo.computor.{Computor, SIMPLE_TOKENIZER}
+import fr.fourtytwo.computor.{Computor, TOKENIZER}
 import org.scalatest.funsuite.AnyFunSuite
 
 
@@ -16,7 +16,7 @@ class ComplexTest extends AnyFunSuite {
 
     for (expr <- expressions) {
 
-      val tokens = SIMPLE_TOKENIZER.generateTokens(expr)
+      val tokens = TOKENIZER.generateTokens(expr)
       val complex = Computor(tokens).solve.evaluate
 
       assert(complex.getType.equals("ComplexNumber"), complex.getType )
