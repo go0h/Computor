@@ -78,20 +78,35 @@ trait Operable extends Expression with Ordered[Operable] {
   def /(other: Variable): Expression = Operator(this, "/", other)
   def /(other: Indeterminate): Expression = Operator(this, "/", other)
   def /(other: ComplexNumber): Expression = Operator(this, "/", other)
-  def /(other: Matrix): Expression = Operator(this, "/", other)
+  def /(other: Matrix): Expression = throwException("/", other)
 
   ////////////////////////////////////////
   ///////////// POWER METHODS ////////////
   ////////////////////////////////////////
   def ^(other: Expression): Expression = {
+
+    if (other.isInstanceOf[ComplexNumber] || other.isInstanceOf[Matrix])
+      throwException("^", other)
+
+    if (isInstanceOf[Matrix])
+      throwException("^", other)
+
     other match {
-      case rn : RealNumber => this ^ rn
-      case _ => Operator(this, "^", other)
+      case n : RealNumber => this ^ n
+      case _ : Variable => Operator(this, "^", other)
+      case _ : Indeterminate => Operator(this, "^", other)
     }
   }
-  def ^(other: RealNumber): Expression = throwException("power", other.getType)
+  def ^(other: RealNumber): Expression = throwException("^", other)
 
   def %(other: Expression): Expression = {
+
+    if (isInstanceOf[ComplexNumber] || isInstanceOf[Matrix])
+      throwException("%", other)
+
+    if (other.isInstanceOf[ComplexNumber] || other.isInstanceOf[Matrix])
+      throwException("%", other)
+
     other match {
       case rn : RealNumber => {
         this match {
@@ -106,10 +121,18 @@ trait Operable extends Expression with Ordered[Operable] {
     }
   }
 
+  def **(other: Expression): Expression = {
+
+    if (!isInstanceOf[Matrix] || !other.isInstanceOf[Matrix])
+      throwException("**", other)
+
+    asInstanceOf[Matrix] ** other.asInstanceOf[Matrix]
+  }
+
   override def compare(other: Operable): Int
 
-  def throwException(op: String, other: String): Expression = {
-    throw new EvaluateException(s"Can't $op $other to $getType")
+  def throwException(op: String, other: Expression): Expression = {
+    throw new EvaluateException(s"Can't execute operator $op between $getType and ${other.getType}")
   }
 
 }

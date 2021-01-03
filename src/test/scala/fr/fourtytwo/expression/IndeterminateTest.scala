@@ -1,7 +1,7 @@
 package fr.fourtytwo.expression
 
 import org.scalatest.funsuite.AnyFunSuite
-import fr.fourtytwo.exception.ParseException
+import fr.fourtytwo.exception.{EvaluateException, ParseException}
 
 
 class IndeterminateTest extends AnyFunSuite {
@@ -101,8 +101,9 @@ class IndeterminateTest extends AnyFunSuite {
 
 
   import fr.fourtytwo.expression.Implicit._
+
   ////////////////////////////////////////
-  /////////// INDETERMINATE //////////////
+  ///////////// PLUS METHODS /////////////
   ////////////////////////////////////////
   test("Indeterminate + RealNumber") {
     val res = Indeterminate(4, "X", 13) + RealNumber(0.5)
@@ -172,9 +173,9 @@ class IndeterminateTest extends AnyFunSuite {
   }
 
   test("Indeterminate + OtherIndeterminate") {
-
-    val res = Indeterminate(2, "X", 3) +
-        Indeterminate(5, "Y", 3)
+    val res = Indeterminate(2, "X", 3) + Indeterminate(5, "Y", 3)
+    assert(res.isInstanceOf[Operator])
+    assert(res.toString.equals("2.0 * X^3.0 + 5.0 * Y^3.0"), res)
   }
 
   test("Indeterminate + ComplexNumber") {
@@ -189,6 +190,16 @@ class IndeterminateTest extends AnyFunSuite {
     assert(res.toString.equals("2.0 * X^3.0 + 4.0"), res)
   }
 
+  test("Indeterminate + Matrix") {
+    assertThrows[EvaluateException] {
+      Indeterminate(2, "X", 3) + Matrix("[[1,2];[3,4]]")
+    }
+  }
+
+
+  ////////////////////////////////////////
+  ///////////// MINUS METHODS ////////////
+  ////////////////////////////////////////
   test("Indeterminate - RealNumber") {
     val res = Indeterminate(4, "X", 13) - RealNumber(0.5)
     assert(res.isInstanceOf[Operator])
@@ -261,6 +272,16 @@ class IndeterminateTest extends AnyFunSuite {
     assert(res.toString.equals("2.0 * X^3.0 - 4.0"), res)
   }
 
+  test("Indeterminate - Matrix") {
+    assertThrows[EvaluateException] {
+      Indeterminate(2, "X", 3) - Matrix("[[1,2];[3,4]]")
+    }
+  }
+
+
+  ////////////////////////////////////////
+  /////////// MULTIPLY METHODS ///////////
+  ////////////////////////////////////////
   test("Indeterminate * RealNumber") {
     val res = Indeterminate(4, "X", 13) * RealNumber(0.5)
     assert(res.isInstanceOf[Indeterminate])
@@ -300,6 +321,8 @@ class IndeterminateTest extends AnyFunSuite {
 
   test("Indeterminate * OtherIndeterminate") {
     val res = Indeterminate(4, "X", 3.5) * Indeterminate(5, "V", 3.5)
+    assert(res.isInstanceOf[Operator])
+    assert(res.toString.equals("4.0 * X^3.5 * 5.0 * V^3.5"), res.toString)
   }
 
   test("Indeterminate * ComplexNumber") {
@@ -314,6 +337,16 @@ class IndeterminateTest extends AnyFunSuite {
     assert(res.toString.equals("16.0 * X^3.5"), res)
   }
 
+  test("Indeterminate * Matrix") {
+    val res = Indeterminate(2, "X", 3) * Matrix("[[1,2];[3,4]]")
+    assert(res.isInstanceOf[Operator])
+    assert(res.toString.equals("2.0 * X^3.0 * [ 1.0, 2.0 ]\n[ 3.0, 4.0 ]"))
+  }
+
+
+  ////////////////////////////////////////
+  /////////// DIVISION METHODS ///////////
+  ////////////////////////////////////////
   test("Indeterminate / RealNumber") {
     val res = Indeterminate(4, "X", 13) / RealNumber(0.5)
     assert(res.isInstanceOf[Indeterminate])
@@ -372,6 +405,78 @@ class IndeterminateTest extends AnyFunSuite {
     val res = (Indeterminate(16, "X", 2) / ComplexNumber(4, 0)).evaluate
     assert(res.isInstanceOf[Indeterminate])
     assert(res.toString.equals("4.0 * X^2.0"), res)
+  }
+
+  test("Indeterminate / Matrix") {
+    assertThrows[EvaluateException] {
+      Indeterminate(2, "X", 3) / Matrix("[[1,2];[3,4]]")
+    }
+  }
+
+  ////////////////////////////////////////
+  ///////////// POWER METHODS ////////////
+  ////////////////////////////////////////
+  test("Indeterminate ^ RealNumber") {
+    val res = Indeterminate(2, "X", 3) ^ RealNumber(4)
+    assert(res.isInstanceOf[Indeterminate])
+    assert(res.toString.equals("16.0 * X^12.0"), res)
+  }
+
+  test("Indeterminate ^ Variable") {
+    val res = Indeterminate(2, "X", 3) ^ Variable("Y")
+    assert(res.isInstanceOf[Operator])
+    assert(res.toString.equals("2.0 * X^3.0 ^ Y"), res)
+  }
+
+  test("Indeterminate ^ Indeterminate") {
+    val res = Indeterminate(2, "X", 3) ^ Indeterminate(2, "Y", 3)
+    assert(res.isInstanceOf[Operator])
+    assert(res.toString.equals("2.0 * X^3.0 ^ 2.0 * Y^3.0"), res)
+  }
+
+  test("Indeterminate ^ ComplexNumber") {
+    assertThrows[EvaluateException]{
+      Indeterminate(2, "X", 3) ^ ComplexNumber(2, 3)
+    }
+  }
+
+  test("Indeterminate ^ Matrix") {
+    assertThrows[EvaluateException]{
+      Indeterminate(2, "X", 3) ^ Matrix("[[1,2];[3,4]]")
+    }
+  }
+
+  ////////////////////////////////////////
+  ///////////// MODULO METHODS ///////////
+  ////////////////////////////////////////
+  test("Indeterminate % RealNumber") {
+    val res = Indeterminate(2, "X", 3) % RealNumber(4)
+    assert(res.isInstanceOf[Operator])
+    assert(res.toString.equals("2.0 * X^3.0 % 4.0"), res)
+  }
+
+  test("Indeterminate % Variable") {
+    val res = Indeterminate(2, "X", 3) % Variable("Y")
+    assert(res.isInstanceOf[Operator])
+    assert(res.toString.equals("2.0 * X^3.0 % Y"), res)
+  }
+
+  test("Indeterminate % Indeterminate") {
+    val res = Indeterminate(2, "X", 3) % Indeterminate(2, "Y", 3)
+    assert(res.isInstanceOf[Operator])
+    assert(res.toString.equals("2.0 * X^3.0 % 2.0 * Y^3.0"), res)
+  }
+
+  test("Indeterminate % ComplexNumber") {
+    assertThrows[EvaluateException]{
+      Indeterminate(2, "X", 3) % ComplexNumber(2, 3)
+    }
+  }
+
+  test("Indeterminate % Matrix") {
+    assertThrows[EvaluateException]{
+      Indeterminate(2, "X", 3) % Matrix("[[1,2];[3,4]]")
+    }
   }
 
 }

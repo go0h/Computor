@@ -7,6 +7,6 @@ package object expression {
 
   val OPERATORS: Map[String, (Double, Double) => Double] =
     Map("+" -> (_ + _), "-" -> (_ - _), "*" -> (_ * _),
-      "/" -> division, "%" -> modulo, "^" -> scala.math.pow)
+      "/" -> division, "%" -> modulo, "^" -> pow)
 
 }

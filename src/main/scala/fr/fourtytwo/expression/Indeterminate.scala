@@ -1,6 +1,6 @@
 package fr.fourtytwo.expression
 
-import scala.math.pow
+import fr.fourtytwo.math.pow
 import fr.fourtytwo.exception._
 
 
@@ -47,6 +47,7 @@ case class Indeterminate(constant: RealNumber,
     Operator(this, "+", other)
   }
   override def +(other: ComplexNumber): Expression = Operator(this, "+", other)
+  override def +(other: Matrix): Expression = throwException("+", other)
 
 
   ////////////////////////////////////////
@@ -78,7 +79,7 @@ case class Indeterminate(constant: RealNumber,
     Operator(this, "-", other)
   }
   override def -(other: ComplexNumber): Expression = Operator(this, "-", other)
-
+  override def -(other: Matrix): Expression = throwException("-", other)
 
   ////////////////////////////////////////
   //////////// MULTIPLY METHODS //////////

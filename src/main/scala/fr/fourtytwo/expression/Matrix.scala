@@ -10,6 +10,14 @@ class Matrix(matrix: Array[Array[RealNumber]]) extends Operable {
     this(validateMatrix(expr))
   }
 
+  ////////////////////////////////////////
+  /////////// ADDITION METHODS ///////////
+  ////////////////////////////////////////
+  override def +(other: RealNumber): Expression = throwException("+", other)
+  override def +(other: Variable): Expression = Operator(this, "+", other)
+  override def +(other: Indeterminate): Expression = throwException("+", other)
+  override def +(other: ComplexNumber): Expression = throwException("+", other)
+
   override def +(other: Matrix): Expression = {
 
     if (getWidth != other.getWidth || getHeight != other.getHeight)
@@ -23,6 +31,14 @@ class Matrix(matrix: Array[Array[RealNumber]]) extends Operable {
 
     Matrix(sum.toArray)
   }
+
+  ////////////////////////////////////////
+  ////////// SUBTRACTION METHODS /////////
+  ////////////////////////////////////////
+  override def -(other: RealNumber): Expression = throwException("-", other)
+  override def -(other: Variable): Expression = Operator(this, "-", other)
+  override def -(other: Indeterminate): Expression = throwException("-", other)
+  override def -(other: ComplexNumber): Expression = throwException("-", other)
 
   override def -(other: Matrix): Matrix = {
 
@@ -38,6 +54,10 @@ class Matrix(matrix: Array[Array[RealNumber]]) extends Operable {
     Matrix(sub.toArray)
   }
 
+
+  ////////////////////////////////////////
+  //////////// MULTIPLY METHODS //////////
+  ////////////////////////////////////////
   override def *(other: RealNumber): Expression = {
 
     val sum = for (i <- 0 until getHeight) yield {
@@ -48,8 +68,41 @@ class Matrix(matrix: Array[Array[RealNumber]]) extends Operable {
 
     Matrix(sum.toArray)
   }
+  override def *(other: Indeterminate): Expression = throwException("-", other)
+  override def *(other: ComplexNumber): Expression = throwException("-", other)
 
+
+  /** Term-by-term multiplication */
   override def *(other: Matrix): Expression = {
+
+    if (getWidth != other.getWidth || getHeight != other.getHeight) {
+      throw new EvaluateException("Can't multiply term-by-term matrices with different sizes")
+    }
+
+    val otherMatrix = other.getMatrix
+
+    val sum = for (i <- 0 until getHeight) yield {
+      for (j <- 0 until getWidth) yield {
+        matrix(i)(j) * otherMatrix(i)(j)
+      }
+    }.toArray
+
+    Matrix(sum.toArray)
+  }
+
+
+  ////////////////////////////////////////
+  //////////// DIVISION METHODS //////////
+  ////////////////////////////////////////
+  override def /(other: RealNumber): Expression = throwException("/", other)
+  override def /(other: Variable): Expression = throwException("/", other)
+  override def /(other: Indeterminate): Expression = throwException("/", other)
+  override def /(other: ComplexNumber): Expression = throwException("/", other)
+  override def /(other: Matrix): Expression = throwException("/", other)
+
+
+  /** True matrix multiplication */
+  def **(other: Matrix): Expression = {
 
     if (getWidth != other.getHeight) {
       throw new EvaluateException("Can't multiply matrices with different sizes")

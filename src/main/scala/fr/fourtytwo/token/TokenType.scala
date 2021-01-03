@@ -10,7 +10,7 @@ object TokenType extends Enumeration {
   val MATRIX: Value = Value("\\[[\\[0-9,;.\\-\\s\\]]+]")
   val SPACE: Value = Value("\\s+")
   val SEPARATOR: Value = Value(",")
-  val OPERATION: Value = Value("[-\\+\\*/\\(\\)=^%]")
+  val OPERATION: Value = Value("[-]|[+]|\\*{2}|[*]|/|[(]|[)]|[=]|[%]|[\\^]") //Value("[-\\+\\*/\\(\\)=^%]")
   val UNARY: Value = Value
   val NONE: Value = Value
 

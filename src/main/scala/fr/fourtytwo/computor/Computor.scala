@@ -14,8 +14,6 @@ import fr.fourtytwo.token.TokenType._
 //TODO
 // Валидацию функций
 // Исполнение функций
-// Генерация исключений при неправильных операциях между типами
-// ** для матриц WTF??
 class Computor {
 
   var infixTokens: Array[Token] = _
@@ -182,6 +180,8 @@ class Computor {
     println(s"|${expression.trim}| is common computation")
 
     var res = createExpression(expression)
+    println(tokens.map(_.expr).mkString(" "))
+
     if (res.countVars != 0) {
       res = serVariablesToExpr(res)
     }

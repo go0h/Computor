@@ -1,6 +1,6 @@
 package fr.fourtytwo.expression
 
-import scala.math.pow
+import fr.fourtytwo.math.pow
 
 
 class RealNumber(private val num: Double) extends Operable {
@@ -20,6 +20,7 @@ class RealNumber(private val num: Double) extends Operable {
   override def +(other: Variable): Expression = if (num == 0) other else Operator(this, "+", other)
   override def +(other: Indeterminate): Expression = if (num == 0) other else Operator(this, "+", other)
   override def +(other: ComplexNumber): Expression = other + this
+  override def +(other: Matrix): Expression = throwException("+", other)
 
 
   ////////////////////////////////////////
@@ -32,6 +33,7 @@ class RealNumber(private val num: Double) extends Operable {
   override def -(other: ComplexNumber): Expression = {
     ComplexNumber(num - other.getRe, 0 - other.getIm).evaluate
   }
+  override def -(other: Matrix): Expression = throwException("-", other)
 
 
   ////////////////////////////////////////
@@ -75,6 +77,7 @@ class RealNumber(private val num: Double) extends Operable {
   }
 
   override def /(other: ComplexNumber): Expression = ComplexNumber(num, 0) / other
+  override def /(other: Matrix): Expression = throwException("/", other)
 
   ////////////////////////////////////////
   ///////////// POWER METHOD /////////////

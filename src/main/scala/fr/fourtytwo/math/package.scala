@@ -1,5 +1,7 @@
 package fr.fourtytwo
 
+import fr.fourtytwo.exception.EvaluateException
+
 
 package object math {
 
@@ -33,6 +35,25 @@ package object math {
       root = 0.5 * (prevRoot + d / prevRoot)
     }
     root
+  }
+
+  def pow(d: Double, n: Double): Double = {
+
+    if (n.ceil != n)
+      throw new EvaluateException("Can't power to non-Integer number")
+
+    if (n == 0)
+      return 1
+
+    val m: Int = abs(n.toInt).toInt
+
+    var res = d
+    for (_ <- 1 until m) {
+      res *= d
+    }
+
+    if (n < 0) 1.0 / res
+    else res
   }
 
 }

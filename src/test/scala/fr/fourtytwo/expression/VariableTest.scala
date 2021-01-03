@@ -1,11 +1,16 @@
 package fr.fourtytwo.expression
 
+import fr.fourtytwo.exception.EvaluateException
 import org.scalatest.funsuite.AnyFunSuite
 
 class VariableTest extends AnyFunSuite {
 
   import fr.fourtytwo.expression.Implicit._
 
+
+  ////////////////////////////////////////
+  ///////////// PLUS METHODS /////////////
+  ////////////////////////////////////////
   test("Variable + RealNumber") {
     val res = Variable("X") + RealNumber(0.5)
     assert(res.isInstanceOf[Operator])
@@ -100,6 +105,15 @@ class VariableTest extends AnyFunSuite {
     assert(res.toString.equals("X + 3.0"), res)
   }
 
+  test("Variable + Matrix") {
+    val res = Variable("X") + Matrix("[[1,2];[3,4]]")
+    assert(res.isInstanceOf[Operator])
+    assert(res.toString.equals("X + [ 1.0, 2.0 ]\n[ 3.0, 4.0 ]"), res)
+  }
+
+  ////////////////////////////////////////
+  ///////////// MINUS METHODS ////////////
+  ////////////////////////////////////////
   test("Variable - RealNumber") {
     val res = Variable("X") - RealNumber(0.5)
     assert(res.isInstanceOf[Operator])
@@ -201,6 +215,16 @@ class VariableTest extends AnyFunSuite {
     assert(res.toString.equals("X - 4.0"), res)
   }
 
+  test("Variable - Matrix") {
+    val res = Variable("X") - Matrix("[[1,2];[3,4]]")
+    assert(res.isInstanceOf[Operator])
+    assert(res.toString.equals("X - [ 1.0, 2.0 ]\n[ 3.0, 4.0 ]"), res)
+  }
+
+
+  ////////////////////////////////////////
+  /////////// MULTIPLY METHODS ///////////
+  ////////////////////////////////////////
   test("Variable * RealNumber") {
     val res = Variable("X") * RealNumber(0.5)
     assert(res.isInstanceOf[Indeterminate])
@@ -272,6 +296,15 @@ class VariableTest extends AnyFunSuite {
     assert(res.toString.equals("4.0 * X"), res)
   }
 
+  test("Variable * Matrix") {
+    val res = Variable("X") * Matrix("[[1,2];[3,4]]")
+    assert(res.isInstanceOf[Operator])
+    assert(res.toString.equals("X * [ 1.0, 2.0 ]\n[ 3.0, 4.0 ]"), res)
+  }
+
+  ////////////////////////////////////////
+  /////////// DIVISION METHODS ///////////
+  ////////////////////////////////////////
   test("Variable / RealNumber") {
     val res = Variable("X") / RealNumber(4)
     assert(res.isInstanceOf[Indeterminate])
@@ -283,7 +316,6 @@ class VariableTest extends AnyFunSuite {
     assert(res.isInstanceOf[Indeterminate])
     assert(res.toString.equals("-0.25 * X"))
   }
-
 
   test("Variable / Variable") {
     val res = (Variable("X") / Variable("X")).asInstanceOf[RealNumber]
@@ -343,4 +375,75 @@ class VariableTest extends AnyFunSuite {
     assert(res.toString.equals("X / 4.0 + 23.0i"), res)
   }
 
+  test("Variable / Matrix") {
+    assertThrows[EvaluateException] {
+      Variable("X") / Matrix("[[1,2];[3,4]]")
+    }
+  }
+
+  ////////////////////////////////////////
+  ///////////// POWER METHODS ////////////
+  ////////////////////////////////////////
+  test("Variable ^ RealNumber") {
+    val res = Variable("X") ^ RealNumber(4)
+    assert(res.isInstanceOf[Indeterminate])
+    assert(res.toString.equals("X^4.0"), res)
+  }
+
+  test("Variable ^ Variable") {
+    val res = Variable("X") ^ Variable("A")
+    assert(res.isInstanceOf[Operator])
+    assert(res.toString.equals("X ^ A"), res)
+  }
+
+  test("Variable ^ Indeterminate") {
+    val res = Variable("X") ^ new Indeterminate(1, "Y", 3)
+    assert(res.isInstanceOf[Operator])
+    assert(res.toString.equals("X ^ Y^3.0"), res)
+  }
+
+  test("Variable ^ ComplexNumber") {
+    assertThrows[EvaluateException] {
+      Variable("X") ^ ComplexNumber(3, 2)
+    }
+  }
+
+  test("Variable ^ Matrix") {
+    assertThrows[EvaluateException] {
+      Variable("X") ^ Matrix("[[1,2];[3,4]]")
+    }
+  }
+
+  ////////////////////////////////////////
+  ///////////// MODULO METHODS ///////////
+  ////////////////////////////////////////
+  test("Variable % RealNumber") {
+    val res = Variable("X") % RealNumber(4)
+    assert(res.isInstanceOf[Operator])
+    assert(res.toString.equals("X % 4.0"), res)
+  }
+
+  test("Variable % Variable") {
+    val res = Variable("X") % Variable("A")
+    assert(res.isInstanceOf[Operator])
+    assert(res.toString.equals("X % A"), res)
+  }
+
+  test("Variable % Indeterminate") {
+    val res = Variable("X") % new Indeterminate(1, "Y", 3)
+    assert(res.isInstanceOf[Operator])
+    assert(res.toString.equals("X % Y^3.0"), res)
+  }
+
+  test("Variable % ComplexNumber") {
+    assertThrows[EvaluateException] {
+      Variable("X") % ComplexNumber(3, 2)
+    }
+  }
+
+  test("Variable % Matrix") {
+    assertThrows[EvaluateException] {
+      Variable("X") % Matrix("[[1,2];[3,4]]")
+    }
+  }
 }

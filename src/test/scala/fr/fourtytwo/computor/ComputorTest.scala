@@ -1,13 +1,12 @@
 package fr.fourtytwo.computor
 
+
+import scala.util.matching.Regex
+import org.scalatest.funsuite.AnyFunSuite
 import fr.fourtytwo.exception._
+import fr.fourtytwo.math.pow
 import fr.fourtytwo.expression.RealNumber
 import fr.fourtytwo.token.{TokenType, Tokenizer}
-import org.scalatest.funsuite.AnyFunSuite
-
-import scala.math.{abs, pow}
-import scala.util.matching.Regex
-
 
 class ComputorTest extends AnyFunSuite {
 
@@ -146,9 +145,9 @@ class ComputorTest extends AnyFunSuite {
   }
 
   test("Double expression - 2") {
-    val expr = "(3.23144 + 32 % 23 * 765.321)^(-3/(0.4)) / (-0.0321) + 16.308"
+    val expr = "(3.23144 + 32 % 23 * 765.321)^(-4/(0.25)) / (-0.0321) + 16.308"
     val res = getResult(expr)
-    assert(res.getNum.ceil == (pow(3.23144 + 32 % 23 * 765.321, -3/0.4) / (-0.0321) + 16.308).ceil)
+    assert(res.getNum.ceil == (pow(3.23144 + 32 % 23 * 765.321, -4/0.25) / (-0.0321) + 16.308).ceil)
   }
 
   test("Zero division") {
@@ -223,15 +222,15 @@ class ComputorTest extends AnyFunSuite {
   }
 
   test("Extra test - 1") {
-    val expr = "1.0 / (4.0 * 4.0^0.112)"
+    val expr = "1.0 / (4.0 * 4.0^3)"
     val res = getResult(expr)
-    assert(res == (1.0 / (4.0 * pow(4, 0.112))))
+    assert(res == (1.0 / (4.0 * pow(4, 3))))
   }
 
   test("Extra test - 2") {
-    val expr = "0.25 * 4.0 * 4.0^0.112"
+    val expr = "0.25 * 4.0 * 4.0^3"
     val res = getResult(expr)
-    assert(res == (0.25 * 4.0 * pow(4, 0.112)))
+    assert(res == (0.25 * 4.0 * pow(4, 3)))
   }
 
 //  test("Basic function test - 1") {

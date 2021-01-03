@@ -1,6 +1,7 @@
 package fr.fourtytwo.expression
 
 import fr.fourtytwo.computor.Computor
+import fr.fourtytwo.math.pow
 import fr.fourtytwo.polynomial.SIMPLE_TOKENIZER
 import org.scalatest.funsuite.AnyFunSuite
 
@@ -58,6 +59,12 @@ class ExpressionTest extends AnyFunSuite {
     assert(solvable.countVars == 0)
     val res = solvable.evaluate.asInstanceOf[RealNumber]
     assert(res == 12.0, solvable)
+  }
+
+  test("Power test") {
+    for (i <- -10 to 10) {
+      assert(pow(2, i) == scala.math.pow(2, i))
+    }
   }
 
 }

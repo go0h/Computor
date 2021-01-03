@@ -1,8 +1,10 @@
 package fr.fourtytwo.expression
 
+import fr.fourtytwo.math._
+
 class ComplexNumber(re: Double, im: Double) extends Operable {
 
-  def evaluate: Expression = if (im != 0) this else RealNumber(re)
+  def evaluate: Expression = if (abs(im) > 0.000001) this else RealNumber(re)
   def changeSign: Expression = ComplexNumber(-re, -im)
 
   def getRe: Double = re
@@ -15,7 +17,7 @@ class ComplexNumber(re: Double, im: Double) extends Operable {
   override def +(other: Variable): Expression = Operator(this, "+", other)
   override def +(other: Indeterminate): Expression = Operator(this, "+", other)
   override def +(other: ComplexNumber): Expression = ComplexNumber(re + other.getRe, im + other.getIm)
-
+  override def +(other: Matrix): Expression = throwException("+", other)
 
   ////////////////////////////////////////
   ////////// SUBTRACTION METHODS /////////
@@ -27,6 +29,7 @@ class ComplexNumber(re: Double, im: Double) extends Operable {
     if (equals(other)) RealNumber(0)
     else ComplexNumber(re - other.getRe, im - other.getIm)
   }
+  override def -(other: Matrix): Expression = throwException("-", other)
 
 
   ////////////////////////////////////////
@@ -45,6 +48,7 @@ class ComplexNumber(re: Double, im: Double) extends Operable {
     val newIm = im * other.getRe + re * other.getIm
     ComplexNumber(newRe, newIm)
   }
+  override def *(other: Matrix): Expression = throwException("*", other)
 
 
   ////////////////////////////////////////
@@ -63,6 +67,19 @@ class ComplexNumber(re: Double, im: Double) extends Operable {
     ComplexNumber(newRe, newIm).evaluate
   }
 
+  ////////////////////////////////////////
+  ////////////// POWER METHODS ///////////
+  ////////////////////////////////////////
+  override def ^(other: RealNumber): Expression = {
+
+    val n = other.getNum
+    val fi = math.atan(im / re)
+    val zPow = pow(sqrt(re * re + im * im), n)
+
+    ComplexNumber(zPow * math.cos(n * fi), zPow * math.sin(n * fi)).evaluate
+  }
+
+
   def compare(other: Operable): Int = {
     other match {
       case _ : RealNumber => -1
@@ -76,7 +93,7 @@ class ComplexNumber(re: Double, im: Double) extends Operable {
   def contains(op: String): Boolean = false
 
   override def toString: String = {
-    s"${if (re == 0) 0.0 else re} ${if (im < 0) "-" else "+"} ${math.abs(im)}i"
+    s"${if (re == 0) 0.0 else re} ${if (im < 0) "-" else "+"} ${abs(im)}i"
   }
 
   override def equals(obj: Any): Boolean = {
