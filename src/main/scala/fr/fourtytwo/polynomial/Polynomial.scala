@@ -5,11 +5,9 @@ import java.util.logging.{Level, Logger}
 import fr.fourtytwo.exception.{EvaluateException, ParseException}
 import fr.fourtytwo.math._
 import fr.fourtytwo.expression._
-import fr.fourtytwo.expression.function.Function
 import fr.fourtytwo.utils.ComputorLogger
 
-class Polynomial(expr: String, name: String = "<poly>", debug: Boolean = false)
-  extends Function(name) {
+class Polynomial(expr: String, debug: Boolean = false) {
 
   val LOGGER: Logger = ComputorLogger.LOGGER
   LOGGER.setLevel(if (debug) Level.FINE else Level.INFO)

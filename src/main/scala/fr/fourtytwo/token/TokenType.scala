@@ -4,7 +4,7 @@ import scala.util.matching.Regex
 
 
 object TokenType extends Enumeration {
-  val FUNCTION: Value = Value("([A-Za-z]+(?:\\s+)?[(][A-Za-z0-9,\\s]+[)])")
+  val FUNCTION: Value = Value("([A-Za-z]+(?:\\s+)?[(][A-Za-z0-9,\\s-]+[)])")
   val LITERAL: Value = Value("[A-Za-z]+(?:[0-9]+)?")
   val REALNUMBER: Value = Value("\\d+(?:\\.\\d+)?")
   val MATRIX: Value = Value("\\[[\\[0-9,;.\\-\\s\\]]+]")

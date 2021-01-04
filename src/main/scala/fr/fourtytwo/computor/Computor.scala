@@ -14,6 +14,7 @@ import fr.fourtytwo.token.TokenType._
 //TODO
 // Валидацию функций
 // Исполнение функций
+// Вычисление полиномиальных функций
 class Computor {
 
   var infixTokens: Array[Token] = _
@@ -45,8 +46,8 @@ class Computor {
           line match {
             case VAR_ASSIGN_R(varName, _, expr) => variableAssignment(varName, expr)
             case VAR_COMP_R(varName, _) => variableComputation(varName)
-            case FUNC_ASSIGN_R(func, _, expr) => println(s"|$func = $expr| is function definition")
-            case FUNC_COMP_R(func, _, expr) => println(s"|$func = $expr| is function computation")
+            case FUNC_ASSIGN_R(func, _, expr) => functionAssignment(func, expr)
+            case FUNC_COMP_R(func, _, expr) => functionComputation(func, expr)
             case COMMON_COMP(expr, _) => commonComputation(expr)
             case _ => throw new ParseException(s"Can't recognize expression type $line")
           }
@@ -76,15 +77,8 @@ class Computor {
       tokens(i).tType match {
         case REALNUMBER => stack.push(RealNumber(tokens(i).expr.toDouble))
         case MATRIX => stack.push(Matrix(tokens(i).expr))
-        case LITERAL => {
-          if (funcs.contains(tokens(i).expr)) {
-            val (f, k) = setFuncParams(funcs(tokens(i).expr), i + 1)
-            i = k
-            stack.push(f)
-          }
-          else
-            stack.push(Variable(tokens(i).expr))
-        }
+        case LITERAL => stack.push(Variable(tokens(i).expr))
+        case FUNCTION => stack.push(setFunction(tokens(i).expr))
         case OPERATION =>
             if (stack.length < 2)
               throw new EvaluateException(s"Wrong stack length: $toString")
@@ -138,7 +132,7 @@ class Computor {
             stack.push(tempToken)
             mayUnary = if (prevToken.equals("-")) false else true
           }
-        case REALNUMBER | LITERAL | MATRIX =>
+        case REALNUMBER | LITERAL | MATRIX | FUNCTION =>
           RPNTokens.append(token)
           if (stack.nonEmpty && stack.head.tType == UNARY)
             RPNTokens.append(stack.pop())
@@ -175,6 +169,45 @@ class Computor {
     println(res)
   }
 
+  def functionAssignment(funcWithParams: String, expression: String): Unit = {
+
+    println(s"|$funcWithParams = $expression| is function assignment")
+
+    val expr = createExpression(expression)
+
+    val funcName = funcWithParams
+      .substring(0, funcWithParams.indexOf("(")).trim
+
+    val argString = funcWithParams
+      .substring(funcWithParams.indexOf("(") + 1, funcWithParams.lastIndexOf(")"))
+
+    val arguments = TOKENIZER.generateTokens(argString).filter(_.tType != SPACE)
+
+    validateFuncParams(funcName, arguments, expr.countVars)
+
+    val funcArgs = arguments.filter(x => x.tType != SEPARATOR).map(_.expr)
+
+    if ((expr.distinctVars -- funcArgs).nonEmpty)
+      throw new ParseException(s"Function '$funcName' expected params '${funcArgs.mkString(", ")}', " +
+        s"but have '${expr.distinctVars.mkString(", ")}'")
+
+    val func = UserDefinedFunction(funcName, funcArgs, expr)
+
+    funcs(funcName) = func
+
+    println(func)
+  }
+
+
+  def functionComputation(funcWithParams: String, expr: String): Unit = {
+
+    if (!expr.trim.equals("?"))
+      throw new EvaluateException("Polynomial")
+
+    val res = setFunction(funcWithParams).evaluate
+    println(res)
+  }
+
   def commonComputation(expression: String): Unit = {
 
     println(s"|${expression.trim}| is common computation")
@@ -189,6 +222,8 @@ class Computor {
 
     println(res)
   }
+
+
 
   def createExpression(expression: String): Expression = {
 
@@ -212,36 +247,64 @@ class Computor {
     res
   }
 
-  def setFuncParams(func: Function, i: Int): (Expression, Int) = {
 
-    if (i == tokens.length)
-      throw new EvaluateException(s"Function ${func.getName} has no arguments")
+  def setFunction(expr: String): Expression = {
 
-    var j = 0
-    var k = i
-    var args = Seq[Expression]()
+    if (expr.count(_ == '(') != 1 || expr.count(_ == ')') != 1)
+      throw new ParseException(s"Function execution have invalid params: $expr")
 
-    while (j < func.numVars && k < tokens.length) {
-      tokens(k).tType match {
-        case REALNUMBER =>
-          args +:= RealNumber(tokens(k).expr.toDouble)
-          j += 1
-        case LITERAL if vars.contains(tokens(k).expr) =>
-          args +:= vars(tokens(k).expr)
-          j += 1
-        case UNARY if args.nonEmpty =>
-          args = Seq(args.head.changeSign) ++ args.tail
-        case _ =>
-          throw new EvaluateException(s"Wrong argument ${tokens(k)} in function ${func.getName}")
-      }
-      k += 1
-    }
-    if (tokens(k).tType == UNARY) {
-      args = Seq(args.head.changeSign) ++ args.tail
-      k += 1
-    }
-    (func(args.reverse:_*), k - 1)
+    val funcName = expr.substring(0, expr.indexOf("(")).trim
+    val func = funcs.getOrElse(funcName, throw new EvaluateException(s"Unknown function '$funcName'"))
+
+    val argString = expr.substring(expr.indexOf("(") + 1, expr.lastIndexOf(")"))
+    val arguments = TOKENIZER.generateTokens(argString).filter(_.tType != SPACE)
+
+    setFuncParams(func, arguments)
   }
+
+  def setFuncParams(func: Function, arguments: Array[Token]): Expression = {
+
+    validateFuncParams(func.getName, arguments, func.numVars)
+
+    val args: ArrayBuffer[Expression] = new ArrayBuffer[Expression]()
+    var unary = false
+
+    for (arg <- arguments if arg.tType != SEPARATOR) {
+      arg.tType match {
+        case REALNUMBER =>
+          if (unary) args.append(RealNumber(arg.expr.toDouble).changeSign)
+          else args.append(RealNumber(arg.expr.toDouble))
+          unary = false
+        case LITERAL if vars.contains(arg.expr) =>
+          if (unary) args.append(vars(arg.expr).changeSign)
+          else args.append(vars(arg.expr))
+        case OPERATION => unary = true
+        case _ => throw new EvaluateException(s"Wrong argument ${arg.expr} in function ${func.getName}")
+      }
+    }
+    func(args.toArray:_*)
+  }
+
+  def validateFuncParams(funcName: String, arguments: Array[Token], numVars: Int): Unit = {
+
+    if (numVars != arguments.count(x => x.tType != SEPARATOR && x.tType != OPERATION))
+      throw new EvaluateException(
+        s"""Wrong number of arguments in function '$funcName'.
+           |Need $numVars, have ${arguments.count(_.tType != SEPARATOR)}""".stripMargin)
+
+    var maySep = false
+    for (arg <- arguments) {
+      arg.tType match {
+        case REALNUMBER | LITERAL if !maySep => maySep = true
+        case OPERATION if arg.expr.equals("-") && !maySep => maySep = false
+        case SEPARATOR if !maySep =>
+            throw new ParseException(s"Wrong arguments in function '$funcName': ${arguments.mkString(" ")}")
+        case SEPARATOR => maySep = false
+        case _ => throw new EvaluateException(s"Wrong argument ${arg.expr} in function '$funcName''")
+      }
+    }
+  }
+
 }
 
 object Computor {

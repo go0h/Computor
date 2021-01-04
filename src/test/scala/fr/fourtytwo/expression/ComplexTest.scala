@@ -73,6 +73,12 @@ class ComplexTest extends AnyFunSuite {
     assert(res.toString.equals("8.0 + 9.0i"), res)
   }
 
+  test("ComplexNumber + ComplexNumber = RealNumber") {
+    val res = (ComplexNumber(4, 3) + ComplexNumber(4, -3)).evaluate
+    assert(res.isInstanceOf[RealNumber])
+    assert(res.toString.equals("8.0"), res)
+  }
+
   test("ComplexNumber + Matrix") {
     assertThrows[EvaluateException] {
       ComplexNumber(4, 3) + Matrix("[[1,2];[3,4]]")
@@ -123,6 +129,12 @@ class ComplexTest extends AnyFunSuite {
     val res = ComplexNumber(4, 3) - ComplexNumber(3, 1)
     assert(res.isInstanceOf[ComplexNumber])
     assert(res.toString.equals("1.0 + 2.0i"), res)
+  }
+
+  test("ComplexNumber - ComplexNumber = RealNumber") {
+    val res = (ComplexNumber(4, 3) - ComplexNumber(-4, 3)).evaluate
+    assert(res.isInstanceOf[RealNumber])
+    assert(res.toString.equals("8.0"), res)
   }
 
   test("ComplexNumber - Matrix") {

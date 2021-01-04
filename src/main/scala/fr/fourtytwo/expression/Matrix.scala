@@ -68,8 +68,8 @@ class Matrix(matrix: Array[Array[RealNumber]]) extends Operable {
 
     Matrix(sum.toArray)
   }
-  override def *(other: Indeterminate): Expression = throwException("-", other)
-  override def *(other: ComplexNumber): Expression = throwException("-", other)
+  override def *(other: Indeterminate): Expression = throwException("*", other)
+  override def *(other: ComplexNumber): Expression = throwException("*", other)
 
 
   /** Term-by-term multiplication */

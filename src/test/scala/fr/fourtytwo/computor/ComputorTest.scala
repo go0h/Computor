@@ -4,8 +4,8 @@ package fr.fourtytwo.computor
 import scala.util.matching.Regex
 import org.scalatest.funsuite.AnyFunSuite
 import fr.fourtytwo.exception._
-import fr.fourtytwo.math.pow
-import fr.fourtytwo.expression.RealNumber
+import fr.fourtytwo.math._
+import fr.fourtytwo.expression.{Expression, RealNumber}
 import fr.fourtytwo.token.{TokenType, Tokenizer}
 
 class ComputorTest extends AnyFunSuite {
@@ -16,6 +16,11 @@ class ComputorTest extends AnyFunSuite {
   def getResult(expr: String): RealNumber = {
     val tokens = tokenizer.generateTokens(expr)
     Computor(tokens).solve.evaluate.asInstanceOf[RealNumber]
+  }
+
+  def compute(expr: String): Expression = {
+    val tokens = tokenizer.generateTokens(expr)
+    Computor(tokens).solve.evaluate
   }
 
   test("Empty expression") {
@@ -233,23 +238,23 @@ class ComputorTest extends AnyFunSuite {
     assert(res == (0.25 * 4.0 * pow(4, 3)))
   }
 
-//  test("Basic function test - 1") {
-//    val expr = "3 * pow(-2, 3) + abs(-3)"
-//    val res = getResult(expr)
-//    assert(res == 3 * pow(-2, 3) + abs(-3))
-//  }
-//
-//  test("Basic function test - 2") {
-//    val expr = "3 * pow(2, 3) + abs(3)"
-//    val res = getResult(expr)
-//    assert(res == 3 * pow(2, 3) + abs(3))
-//  }
-//
-//  test("Basic function test - 3") {
-//    val expr = "3 * pow(-2, -3) + abs(-3)"
-//    val res = getResult(expr)
-//    assert(res == 3 * pow(-2, -3) + abs(-3))
-//  }
+  test("Basic function test - 1") {
+    val expr = "3 * pow(-2, 3) + abs(-3)"
+    val res = compute(expr).asInstanceOf[RealNumber]
+    assert(res == 3 * pow(-2, 3) + abs(-3))
+  }
+
+  test("Basic function test - 2") {
+    val expr = "3 * pow(2, 3) + abs(3)"
+    val res = compute(expr).asInstanceOf[RealNumber]
+    assert(res == 3 * pow(2, 3) + abs(3))
+  }
+
+  test("Basic function test - 3") {
+    val expr = "3 * pow(-2, -3) + abs(-3)"
+    val res = compute(expr).asInstanceOf[RealNumber]
+    assert(res == 3 * pow(-2, -3) + abs(-3))
+  }
 
 
 }

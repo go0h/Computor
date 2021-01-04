@@ -7,6 +7,8 @@ class ComplexNumber(re: Double, im: Double) extends Operable {
   def evaluate: Expression = if (abs(im) > 0.000001) this else RealNumber(re)
   def changeSign: Expression = ComplexNumber(-re, -im)
 
+  def simplify: Expression = if (im == 0) RealNumber(re) else this
+
   def getRe: Double = re
   def getIm: Double = im
 
@@ -16,7 +18,9 @@ class ComplexNumber(re: Double, im: Double) extends Operable {
   override def +(other: RealNumber): Expression = ComplexNumber(other.getNum + re, im)
   override def +(other: Variable): Expression = Operator(this, "+", other)
   override def +(other: Indeterminate): Expression = Operator(this, "+", other)
-  override def +(other: ComplexNumber): Expression = ComplexNumber(re + other.getRe, im + other.getIm)
+  override def +(other: ComplexNumber): Expression = {
+    ComplexNumber(re + other.getRe, im + other.getIm).simplify
+  }
   override def +(other: Matrix): Expression = throwException("+", other)
 
   ////////////////////////////////////////
@@ -26,8 +30,7 @@ class ComplexNumber(re: Double, im: Double) extends Operable {
   override def -(other: Variable): Expression = Operator(this, "-", other)
   override def -(other: Indeterminate): Expression = Operator(this, "-", other)
   override def -(other: ComplexNumber): Expression = {
-    if (equals(other)) RealNumber(0)
-    else ComplexNumber(re - other.getRe, im - other.getIm)
+    ComplexNumber(re - other.getRe, im - other.getIm).simplify
   }
   override def -(other: Matrix): Expression = throwException("-", other)
 
@@ -36,8 +39,7 @@ class ComplexNumber(re: Double, im: Double) extends Operable {
   //////////// MULTIPLY METHODS //////////
   ////////////////////////////////////////
   override def *(other: RealNumber): Expression = {
-    if (other == 0) RealNumber(0)
-    else ComplexNumber(other.getNum * re, other.getNum * im)
+    ComplexNumber(other.getNum * re, other.getNum * im).simplify
   }
   override def *(other: Variable): Expression = Operator(this, "*", other)
   override def *(other: Indeterminate): Expression = Operator(this, "*", other)
@@ -46,7 +48,7 @@ class ComplexNumber(re: Double, im: Double) extends Operable {
       return RealNumber(re * other.getRe + im * (-other.getIm))
     val newRe = re * other.getRe - im * other.getIm
     val newIm = im * other.getRe + re * other.getIm
-    ComplexNumber(newRe, newIm)
+    ComplexNumber(newRe, newIm).simplify
   }
   override def *(other: Matrix): Expression = throwException("*", other)
 
@@ -64,7 +66,7 @@ class ComplexNumber(re: Double, im: Double) extends Operable {
   override def /(other: ComplexNumber): Expression = {
     val newRe = ((re * other.getRe) + (im * other.getIm)) / (other.getRe * other.getRe + other.getIm * other.getIm)
     val newIm = ((im * other.getRe) - (re * other.getIm)) / (other.getRe * other.getRe + other.getIm * other.getIm)
-    ComplexNumber(newRe, newIm).evaluate
+    ComplexNumber(newRe, newIm).simplify
   }
 
   ////////////////////////////////////////
