@@ -54,7 +54,10 @@ class Operator(left: Expression, op: String, right: Expression) extends Expressi
       case _ => false
     }
   }
+
   def contains(other: String): Boolean = other.contains(op) || left.contains(other) || right.contains(other)
+
+  override def toStringWithOrder: String = s"($left $op $right)"
 }
 
 object Operator {

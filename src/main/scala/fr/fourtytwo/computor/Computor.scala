@@ -8,13 +8,11 @@ import fr.fourtytwo.exception.{EvaluateException, ParseException}
 import fr.fourtytwo.expression._
 import fr.fourtytwo.expression.Operator._
 import fr.fourtytwo.expression.function._
+import fr.fourtytwo.polynomial.Polynomial
 import fr.fourtytwo.token.Token
 import fr.fourtytwo.token.TokenType._
 
-//TODO
-// Валидацию функций
-// Исполнение функций
-// Вычисление полиномиальных функций
+// TODO ТЕСТЫ
 class Computor {
 
   var infixTokens: Array[Token] = _
@@ -198,14 +196,57 @@ class Computor {
     println(func)
   }
 
-
   def functionComputation(funcWithParams: String, expr: String): Unit = {
 
-    if (!expr.trim.equals("?"))
-      throw new EvaluateException("Polynomial")
+    println(s"|$funcWithParams = $expr| is function computation")
 
-    val res = setFunction(funcWithParams).evaluate
-    println(res)
+    if (!expr.trim.equals("?")) {
+
+      polynomialComputation(funcWithParams, expr)
+
+    } else {
+
+      val res = setFunction(funcWithParams).evaluate
+      println(res)
+    }
+  }
+
+  def polynomialComputation(funcWithParams: String, expr: String): Unit = {
+
+    val y = TOKENIZER.generateTokens(expr.replaceAll("\\?", "").trim)
+    if (y.length != 1)
+      throw new ParseException(s"Polynomial must equal only one variable")
+
+    val right = y.head.tType match {
+      case REALNUMBER => RealNumber(y.head.expr.toDouble)
+      case LITERAL => vars.getOrElse(y.head.expr, throw new EvaluateException(s"Unknown function '${y.head.expr}'"))
+      case _ => throw new EvaluateException(s"Invalid token type in polynomial equality: ${y.head.expr}")
+    }
+
+    val funcName = funcWithParams.substring(0, funcWithParams.indexOf("(")).trim
+
+    val func = funcs.getOrElse(funcName, throw new EvaluateException(s"Unknown function '$funcName'"))
+    if (!func.isInstanceOf[UserDefinedFunction])
+      throw new EvaluateException(s"Function '${func.getName}' is not UserDefinedFunction type")
+
+    val funcUDF = func.asInstanceOf[UserDefinedFunction]
+
+    val argString = funcWithParams
+      .substring(funcWithParams.indexOf("(") + 1, funcWithParams.lastIndexOf(")"))
+    val funcArgs = TOKENIZER.generateTokens(argString).filter(_.tType != SPACE).map(_.expr)
+
+    if (funcArgs.length != 1)
+      throw new ParseException(s"Polynomial function must have only one argument, but have ${funcArgs.length}")
+
+    val funcVars = funcUDF.distinctVars
+    if ((funcVars -- funcArgs).nonEmpty) {
+      throw new ParseException(s"Function '$funcName' expected params '${funcArgs.mkString(", ")}', " +
+        s"but have '${funcVars.mkString(", ")}'")
+    }
+
+    val newExpr = s"${funcUDF.getExpr.toStringWithOrder} + ${right.changeSign} = 0"
+
+    println(Polynomial(newExpr).solve)
   }
 
   def commonComputation(expression: String): Unit = {
@@ -224,13 +265,10 @@ class Computor {
   }
 
 
-
   def createExpression(expression: String): Expression = {
 
     infixTokens = TOKENIZER.generateTokens(expression)
     tokens = convertToRPN(infixTokens)
-
-    println(s"RPN: ${tokens.map(_.expr).mkString(" ")}")
 
     solve(tokens)
   }
@@ -238,6 +276,7 @@ class Computor {
   def serVariablesToExpr(expression: Expression): Expression = {
 
     var res = expression
+
     for (variable <- res.distinctVars) {
       if (!variable.equals("i")) {
         val value = vars.getOrElse(variable, throw new EvaluateException(s"Unknown variable '$variable'"))
@@ -249,9 +288,6 @@ class Computor {
 
 
   def setFunction(expr: String): Expression = {
-
-    if (expr.count(_ == '(') != 1 || expr.count(_ == ')') != 1)
-      throw new ParseException(s"Function execution have invalid params: $expr")
 
     val funcName = expr.substring(0, expr.indexOf("(")).trim
     val func = funcs.getOrElse(funcName, throw new EvaluateException(s"Unknown function '$funcName'"))

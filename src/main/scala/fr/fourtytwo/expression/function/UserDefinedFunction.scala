@@ -26,6 +26,8 @@ class UserDefinedFunction(name: String, varNames: Array[String], expr: Expressio
     res
   }
 
+  def getExpr: Expression = expr
+
   override def numVars: Int = varNames.length
 
   override def toString: String = s"$name(${varNames.mkString(", ")}) = $expr"
