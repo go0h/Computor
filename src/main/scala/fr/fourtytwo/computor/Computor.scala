@@ -35,7 +35,6 @@ class Computor {
     while (line != null) {
 
       try {
-
         if (line.equals("q") || line.equals("quit")) {
           System.exit(0)
         }
@@ -45,7 +44,8 @@ class Computor {
             case VAR_ASSIGN_R(varName, _, expr) => variableAssignment(varName, expr)
             case VAR_COMP_R(varName, _) => variableComputation(varName)
             case FUNC_ASSIGN_R(func, _, expr) => functionAssignment(func, expr)
-            case FUNC_COMP_R(func, _, expr) => functionComputation(func, expr)
+            case FUNC_COMP_R(func, _) => functionComputation(func)
+            case POLY_FUNC_COMP_R(func, _, expr) => polynomialComputation(func, expr)
             case COMMON_COMP(expr, _) => commonComputation(expr)
             case _ => throw new ParseException(s"Can't recognize expression type $line")
           }
@@ -67,8 +67,8 @@ class Computor {
 
   def solve(tokens: Array[Token]): Expression = {
 
-    val stack = ScalaStack[Expression]()
     var i = 0
+    val stack = ScalaStack[Expression]()
 
     while (i < tokens.length) {
 
@@ -145,70 +145,58 @@ class Computor {
 
   def variableAssignment(varName: String, expression: String): Unit = {
 
-    println(s"|${varName.trim} = ${expression.trim}| is variable assignment")
-
     var res = createExpression(expression)
     if (res.countVars != 0) {
-      res = serVariablesToExpr(res)
+      res = serVariablesToExpr(res, res.distinctVars.toArray)
     }
 
     res = res.evaluate
-    vars(varName.trim) = res
+    vars(varName.trim.toLowerCase) = res
 
     println(res)
   }
 
+
+  ////////////////////////////////////////
+  ///// COMMON COMPUTATION METHODS ///////
+  ////////////////////////////////////////
   def variableComputation(varName: String): Unit = {
-
-    println(s"|$varName| is variable computation")
-
-    val res = vars.getOrElse(varName.trim, throw new EvaluateException(s"Unknown variable '$varName'"))
-
+    val name = varName.trim.toLowerCase
+    val res = vars.getOrElse(name, throw new EvaluateException(s"Unknown variable '$varName'"))
     println(res)
   }
 
   def functionAssignment(funcWithParams: String, expression: String): Unit = {
 
-    println(s"|$funcWithParams = $expression| is function assignment")
+    var expr = createExpression(expression)
 
-    val expr = createExpression(expression)
-
-    val funcName = funcWithParams
-      .substring(0, funcWithParams.indexOf("(")).trim
+    val funcName = funcWithParams.substring(0, funcWithParams.indexOf("(")).trim
 
     val argString = funcWithParams
       .substring(funcWithParams.indexOf("(") + 1, funcWithParams.lastIndexOf(")"))
 
     val arguments = TOKENIZER.generateTokens(argString).filter(_.tType != SPACE)
 
+    val funcArgs = arguments.filter(x => x.tType != SEPARATOR)
+      .map(_.expr).distinct
+
+    expr = serVariablesToExpr(expr, (expr.distinctVars -- funcArgs).toArray)
+
     validateFuncParams(funcName, arguments, expr.countVars)
 
-    val funcArgs = arguments.filter(x => x.tType != SEPARATOR).map(_.expr)
-
-    if ((expr.distinctVars -- funcArgs).nonEmpty)
+    if ((expr.distinctVars -- funcArgs.map(_.toLowerCase)).nonEmpty)
       throw new ParseException(s"Function '$funcName' expected params '${funcArgs.mkString(", ")}', " +
         s"but have '${expr.distinctVars.mkString(", ")}'")
 
     val func = UserDefinedFunction(funcName, funcArgs, expr)
 
-    funcs(funcName) = func
+    funcs(funcName.toLowerCase) = func
 
-    println(func)
+    println(func.getExpr)
   }
 
-  def functionComputation(funcWithParams: String, expr: String): Unit = {
-
-    println(s"|$funcWithParams = $expr| is function computation")
-
-    if (!expr.trim.equals("?")) {
-
-      polynomialComputation(funcWithParams, expr)
-
-    } else {
-
-      val res = setFunction(funcWithParams).evaluate
-      println(res)
-    }
+  def functionComputation(funcWithParams: String): Unit = {
+    println(setFunction(funcWithParams).evaluate)
   }
 
   def polynomialComputation(funcWithParams: String, expr: String): Unit = {
@@ -225,7 +213,7 @@ class Computor {
 
     val funcName = funcWithParams.substring(0, funcWithParams.indexOf("(")).trim
 
-    val func = funcs.getOrElse(funcName, throw new EvaluateException(s"Unknown function '$funcName'"))
+    val func = funcs.getOrElse(funcName.toLowerCase, throw new EvaluateException(s"Unknown function '$funcName'"))
     if (!func.isInstanceOf[UserDefinedFunction])
       throw new EvaluateException(s"Function '${func.getName}' is not UserDefinedFunction type")
 
@@ -233,7 +221,9 @@ class Computor {
 
     val argString = funcWithParams
       .substring(funcWithParams.indexOf("(") + 1, funcWithParams.lastIndexOf(")"))
-    val funcArgs = TOKENIZER.generateTokens(argString).filter(_.tType != SPACE).map(_.expr)
+    val funcArgs = TOKENIZER.generateTokens(argString)
+      .filter(x => x.tType != SPACE && x.tType != SEPARATOR)
+      .map(_.expr.toLowerCase)
 
     if (funcArgs.length != 1)
       throw new ParseException(s"Polynomial function must have only one argument, but have ${funcArgs.length}")
@@ -251,21 +241,20 @@ class Computor {
 
   def commonComputation(expression: String): Unit = {
 
-    println(s"|${expression.trim}| is common computation")
-
     var res = createExpression(expression)
-    println(tokens.map(_.expr).mkString(" "))
 
     if (res.countVars != 0) {
-      res = serVariablesToExpr(res)
+      res = serVariablesToExpr(res, res.distinctVars.toArray)
     }
-    res = res.evaluate
 
-    println(res)
+    println(res.evaluate)
   }
 
 
-  def createExpression(expression: String): Expression = {
+  ////////////////////////////////////////
+  ///////// AUXILIARY METHODS ////////////
+  ////////////////////////////////////////
+  private def createExpression(expression: String): Expression = {
 
     infixTokens = TOKENIZER.generateTokens(expression)
     tokens = convertToRPN(infixTokens)
@@ -273,11 +262,11 @@ class Computor {
     solve(tokens)
   }
 
-  def serVariablesToExpr(expression: Expression): Expression = {
+  private def serVariablesToExpr(expression: Expression, varNames: Array[String]): Expression = {
 
     var res = expression
 
-    for (variable <- res.distinctVars) {
+    for (variable <- varNames) {
       if (!variable.equals("i")) {
         val value = vars.getOrElse(variable, throw new EvaluateException(s"Unknown variable '$variable'"))
         res = res.setVar(variable, value)
@@ -286,11 +275,10 @@ class Computor {
     res
   }
 
-
-  def setFunction(expr: String): Expression = {
+  private def setFunction(expr: String): Expression = {
 
     val funcName = expr.substring(0, expr.indexOf("(")).trim
-    val func = funcs.getOrElse(funcName, throw new EvaluateException(s"Unknown function '$funcName'"))
+    val func = funcs.getOrElse(funcName.toLowerCase, throw new EvaluateException(s"Unknown function '$funcName'"))
 
     val argString = expr.substring(expr.indexOf("(") + 1, expr.lastIndexOf(")"))
     val arguments = TOKENIZER.generateTokens(argString).filter(_.tType != SPACE)
@@ -298,7 +286,7 @@ class Computor {
     setFuncParams(func, arguments)
   }
 
-  def setFuncParams(func: Function, arguments: Array[Token]): Expression = {
+  private def setFuncParams(func: Function, arguments: Array[Token]): Expression = {
 
     validateFuncParams(func.getName, arguments, func.numVars)
 
@@ -311,30 +299,30 @@ class Computor {
           if (unary) args.append(RealNumber(arg.expr.toDouble).changeSign)
           else args.append(RealNumber(arg.expr.toDouble))
           unary = false
-        case LITERAL if vars.contains(arg.expr) =>
-          if (unary) args.append(vars(arg.expr).changeSign)
-          else args.append(vars(arg.expr))
+        case LITERAL if vars.contains(arg.expr.toLowerCase) =>
+          if (unary) args.append(vars(arg.expr.toLowerCase).changeSign)
+          else args.append(vars(arg.expr.toLowerCase))
         case OPERATION => unary = true
-        case _ => throw new EvaluateException(s"Wrong argument ${arg.expr} in function ${func.getName}")
+        case _ => throw new EvaluateException(s"Wrong argument '${arg.expr}' in function '${func.getName}'")
       }
     }
     func(args.toArray:_*)
   }
 
-  def validateFuncParams(funcName: String, arguments: Array[Token], numVars: Int): Unit = {
+  private def validateFuncParams(funcName: String, args: Array[Token], numVars: Int): Unit = {
 
-    if (numVars != arguments.count(x => x.tType != SEPARATOR && x.tType != OPERATION))
+    if (numVars != args.count(x => x.tType != SEPARATOR && x.tType != OPERATION))
       throw new EvaluateException(
         s"""Wrong number of arguments in function '$funcName'.
-           |Need $numVars, have ${arguments.count(_.tType != SEPARATOR)}""".stripMargin)
+           |Need $numVars, have ${args.count(_.tType != SEPARATOR)}""".stripMargin)
 
     var maySep = false
-    for (arg <- arguments) {
+    for (arg <- args) {
       arg.tType match {
         case REALNUMBER | LITERAL if !maySep => maySep = true
         case OPERATION if arg.expr.equals("-") && !maySep => maySep = false
         case SEPARATOR if !maySep =>
-            throw new ParseException(s"Wrong arguments in function '$funcName': ${arguments.mkString(" ")}")
+            throw new ParseException(s"Wrong arguments in function '$funcName': ${args.mkString(" ")}")
         case SEPARATOR => maySep = false
         case _ => throw new EvaluateException(s"Wrong argument ${arg.expr} in function '$funcName''")
       }

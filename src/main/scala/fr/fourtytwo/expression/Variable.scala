@@ -1,7 +1,5 @@
 package fr.fourtytwo.expression
 
-import fr.fourtytwo.exception.EvaluateException
-
 
 class Variable extends Operable {
 
@@ -39,7 +37,7 @@ class Variable extends Operable {
   }
 
   override def +(other: Variable): Expression = {
-    if (!name.equals(other.getName))
+    if (!name.equalsIgnoreCase(other.getName))
       return Operator(this, "+", other)
     if (sign == other.getSign)
       return new Indeterminate(2 * sign, name, 1)
@@ -47,7 +45,7 @@ class Variable extends Operable {
   }
 
   override def +(other: Indeterminate): Expression = {
-    if (!name.equals(other.variable.getName))
+    if (!name.equalsIgnoreCase(other.variable.getName))
       return Operator(this, "+", other)
     if (other.degree == 1.0)
       return new Indeterminate(other.constant + sign, Variable(name), RealNumber(1))
@@ -66,7 +64,7 @@ class Variable extends Operable {
   }
 
   override def -(other: Variable): Expression = {
-    if (!name.equals(other.getName))
+    if (!name.equalsIgnoreCase(other.getName))
       return Operator(this, "-", other)
     if (sign != other.sign)
       return new Indeterminate(sign * 2, name, 1)
@@ -74,7 +72,7 @@ class Variable extends Operable {
   }
 
   override def -(other: Indeterminate): Expression = {
-    if (!name.equals(other.variable.getName))
+    if (!name.equalsIgnoreCase(other.variable.getName))
       return Operator(this, "-", other)
     if (other.degree == 1) {
       if (other.constant == 1)
@@ -94,13 +92,13 @@ class Variable extends Operable {
   override def *(other: RealNumber): Expression = {
     if (other == 0)
       return RealNumber(0)
-    if (name.equals("i"))
+    if (name.equalsIgnoreCase("i"))
       return ComplexNumber(0, other.getNum * sign)
     Indeterminate(other * sign, Variable(name), RealNumber(1))
   }
 
   override def *(other: Variable): Expression = {
-    if (!name.equals(other.getName))
+    if (!name.equalsIgnoreCase(other.getName))
       return Operator(this, "*", other)
     new Indeterminate(sign * other.getSign, name, 2)
   }
@@ -117,13 +115,13 @@ class Variable extends Operable {
   }
 
   override def /(other: Variable): Expression = {
-    if (!name.equals(other.getName))
+    if (!name.equalsIgnoreCase(other.getName))
       return Operator(this, "/", other)
     new RealNumber(sign / other.sign)
   }
 
   override def /(other: Indeterminate): Expression = {
-    if (!name.equals(other.variable.getName))
+    if (!name.equalsIgnoreCase(other.variable.getName))
       return Operator(this, "/", other)
     if (other.degree == 1)
       return other.constant
@@ -165,7 +163,7 @@ class Variable extends Operable {
 
   override def equals(other: Any): Boolean = {
     other match {
-      case v: Variable => name.equals(v.getName)
+      case v: Variable => name.equalsIgnoreCase(v.getName)
       case _ => false
     }
   }

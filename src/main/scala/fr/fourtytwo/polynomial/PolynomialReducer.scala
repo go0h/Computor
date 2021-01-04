@@ -15,7 +15,7 @@ object PolynomialReducer {
       throw new ParseException(s"No equal sign in expression $expression")
 
     val tokens = SIMPLE_TOKENIZER.generateTokens(expression).filter(_.tType == LITERAL)
-    val vars = tokens.map(_.expr).distinct
+    val vars = tokens.map(_.expr.toLowerCase).distinct
 
     if (vars.length != 1)
       throw new EvaluateException(s"There is ${vars.length} variables: ${vars.mkString(", ")}. I can't solve")

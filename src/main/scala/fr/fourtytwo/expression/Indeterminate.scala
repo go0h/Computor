@@ -34,7 +34,7 @@ case class Indeterminate(constant: RealNumber,
   }
 
   override def +(other: Variable): Expression = {
-    if (!variable.getName.equals(other.getName))
+    if (!variable.getName.equalsIgnoreCase(other.getName))
       return Operator(this, "+", other)
     if (degree == 1)
       return Indeterminate(constant + other.getSign, Variable(other.getName), degree)
@@ -60,7 +60,7 @@ case class Indeterminate(constant: RealNumber,
   }
 
   override def -(other: Variable): Expression = {
-    if (!variable.getName.equals(other.getName))
+    if (!variable.getName.equalsIgnoreCase(other.getName))
       return Operator(this, "-", other)
     if (degree == 1) {
       if (constant == 1)
@@ -91,7 +91,7 @@ case class Indeterminate(constant: RealNumber,
   }
 
   override def *(other: Variable): Expression = {
-    if (!variable.getName.equals(other.getName))
+    if (!variable.getName.equalsIgnoreCase(other.getName))
       return Operator(this, "*", other)
     Indeterminate(constant * other.getSign, Variable(other.getName), degree + 1)
   }
@@ -112,7 +112,7 @@ case class Indeterminate(constant: RealNumber,
   }
 
   override def /(other: Variable): Expression = {
-    if (!variable.getName.equals(other.getName))
+    if (!variable.getName.equalsIgnoreCase(other.getName))
       return Operator(this, "/", other)
     if (degree == 1)
       return constant * other.getSign
