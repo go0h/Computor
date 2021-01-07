@@ -95,7 +95,7 @@ class ComplexNumber(re: Double, im: Double) extends Operable {
   def contains(op: String): Boolean = false
 
   override def toString: String = {
-    s"${if (re == 0) 0.0 else re} ${if (im < 0) "-" else "+"} ${abs(im)}i"
+    s"${if (re.round == re) re.round else re} ${if (im < 0) "-" else "+"} ${if (im.round == im) abs(im).round else abs(im)}i"
   }
 
   override def equals(obj: Any): Boolean = {

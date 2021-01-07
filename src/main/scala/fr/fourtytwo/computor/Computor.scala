@@ -2,7 +2,7 @@ package fr.fourtytwo.computor
 
 import fr.fourtytwo.computor.Computor.basicCheck
 
-import scala.io.StdIn
+import scala.io.{Source, StdIn}
 import scala.collection.mutable.{ArrayBuffer, Map => MMap, Stack => ScalaStack}
 import fr.fourtytwo.exception.{EvaluateException, ParseException}
 import fr.fourtytwo.expression._
@@ -11,6 +11,8 @@ import fr.fourtytwo.expression.function._
 import fr.fourtytwo.polynomial.Polynomial
 import fr.fourtytwo.token.Token
 import fr.fourtytwo.token.TokenType._
+
+import java.io.{BufferedReader, PrintStream}
 
 // TODO ТЕСТЫ
 class Computor {
@@ -21,6 +23,9 @@ class Computor {
   val vars: MMap[String, Expression] = MMap[String, Expression]()
   val funcs: MMap[String, Function] = MMap[String, Function]() ++ getPredefFunctions
 
+  /* for tests */
+  var out: PrintStream = System.out
+
   def this(infix: Array[Token]) = {
     this()
     infixTokens = infix
@@ -29,9 +34,12 @@ class Computor {
 
   override def toString: String = infixTokens.map(x => x.expr).mkString(" ")
 
-  def run(): Unit = {
+  def run(): Unit = run(new BufferedReader(Source.stdin.reader()), System.out)
 
-    var line = StdIn.readLine()
+  def run(in: BufferedReader, output: PrintStream): Unit = {
+
+    out = output
+    var line = in.readLine()
     while (line != null) {
 
       try {
@@ -51,11 +59,11 @@ class Computor {
           }
         }
       } catch {
-        case ex: ParseException => println(ex.getMessage)
-        case ex: EvaluateException => println(ex.getMessage)
-        case ex: Exception => println(s"${ex.getClass.getName} ${ex.getMessage}")
+        case ex: ParseException => out.println(ex.getMessage)
+        case ex: EvaluateException => out.println(ex.getMessage)
+        case ex: Exception => out.println(s"${ex.getClass.getName} ${ex.getMessage}")
       }
-      line = StdIn.readLine()
+      line = in.readLine()
     }
   }
 
@@ -81,8 +89,8 @@ class Computor {
             if (stack.length < 2)
               throw new EvaluateException(s"Wrong stack length: $toString")
             val first = stack.pop()
-            stack.push(Operator(stack.pop(), tokens(i).expr, first))
-        case UNARY => stack.push(Operator(RealNumber(0), "-", stack.pop()))
+            stack.push(Operator(stack.pop(), tokens(i).expr, first).evaluate)
+        case UNARY => stack.push(stack.pop().changeSign)
         case _ => throw new EvaluateException(s"Can't solve token: ${tokens(i).expr}")
       }
       i += 1
@@ -153,7 +161,7 @@ class Computor {
     res = res.evaluate
     vars(varName.trim.toLowerCase) = res
 
-    println(res)
+    out.println(res)
   }
 
 
@@ -163,7 +171,7 @@ class Computor {
   def variableComputation(varName: String): Unit = {
     val name = varName.trim.toLowerCase
     val res = vars.getOrElse(name, throw new EvaluateException(s"Unknown variable '$varName'"))
-    println(res)
+    out.println(res)
   }
 
   def functionAssignment(funcWithParams: String, expression: String): Unit = {
@@ -192,11 +200,11 @@ class Computor {
 
     funcs(funcName.toLowerCase) = func
 
-    println(func.getExpr)
+    out.println(func.getExpr)
   }
 
   def functionComputation(funcWithParams: String): Unit = {
-    println(setFunction(funcWithParams).evaluate)
+    out.println(setFunction(funcWithParams).evaluate)
   }
 
   def polynomialComputation(funcWithParams: String, expr: String): Unit = {
@@ -236,7 +244,7 @@ class Computor {
 
     val newExpr = s"${funcUDF.getExpr.toStringWithOrder} + ${right.changeSign} = 0"
 
-    println(Polynomial(newExpr).solve)
+    out.println(Polynomial(newExpr).solve)
   }
 
   def commonComputation(expression: String): Unit = {
@@ -247,7 +255,7 @@ class Computor {
       res = serVariablesToExpr(res, res.distinctVars.toArray)
     }
 
-    println(res.evaluate)
+    out.println(res.evaluate)
   }
 
 
@@ -306,7 +314,7 @@ class Computor {
         case _ => throw new EvaluateException(s"Wrong argument '${arg.expr}' in function '${func.getName}'")
       }
     }
-    func(args.toArray:_*)
+    func(args.toSeq:_*)
   }
 
   private def validateFuncParams(funcName: String, args: Array[Token], numVars: Int): Unit = {

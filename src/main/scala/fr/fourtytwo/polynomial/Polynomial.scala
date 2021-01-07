@@ -69,7 +69,7 @@ class Polynomial(expr: String, debug: Boolean = false) {
     else if (discriminant == 0) {
       LOGGER.info("Discriminant is equal zero, the one solution is:")
       val res = (-b) / (2 * a)
-      s"x = ${if (res == 0) 0.0 else res}"
+      s"x = ${if (res == res.round) res.round else res}"
     }
     else {
       LOGGER.info("Discriminant is strictly positive, the two solutions are:")
@@ -90,7 +90,7 @@ class Polynomial(expr: String, debug: Boolean = false) {
       case Array(_) =>
     }
     val res = (-b) / a
-    s"x = ${if (res == 0) 0.0 else res}"
+    s"x = ${if (res.round == res) res.round else res}"
   }
 
   def noVars: String = {
@@ -131,10 +131,9 @@ class Polynomial(expr: String, debug: Boolean = false) {
       }.sortWith(_ > _)
   }
 
-  override def toString: String = s"$expression = 0.0"
+  override def toString: String = s"$expression = 0"
 
   def numVars: Int = 1
-  def apply(args: Expression*): Expression = ???
 }
 
 object Polynomial {

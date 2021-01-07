@@ -124,7 +124,7 @@ class MatrixTest extends AnyFunSuite {
   test("Matrix + Variable") {
     val res = Matrix("[[1,2];[3,4]]") + Variable("X")
     assert(res.isInstanceOf[Operator])
-    assert(res.toString.equals("[ 1.0, 2.0 ]\n[ 3.0, 4.0 ] + X"))
+    assert(res.toString.equals("[ 1, 2 ]\n[ 3, 4 ] + X"))
   }
 
   test("Matrix + Indeterminate") {
@@ -169,7 +169,7 @@ class MatrixTest extends AnyFunSuite {
   test("Matrix - Variable") {
     val res = Matrix("[[1,2];[3,4]]") - Variable("X")
     assert(res.isInstanceOf[Operator])
-    assert(res.toString.equals("[ 1.0, 2.0 ]\n[ 3.0, 4.0 ] - X"))
+    assert(res.toString.equals("[ 1, 2 ]\n[ 3, 4 ] - X"))
   }
 
   test("Matrix - Indeterminate") {
@@ -215,7 +215,7 @@ class MatrixTest extends AnyFunSuite {
 
   test("Matrix * Variable") {
     val res = Matrix("[[1,2]; [3,4]]") * Variable("X")
-    assert(res.toString.equals("[ 1.0, 2.0 ]\n[ 3.0, 4.0 ] * X"))
+    assert(res.toString.equals("[ 1, 2 ]\n[ 3, 4 ] * X"))
   }
 
   test("Matrix * Indeterminate") {

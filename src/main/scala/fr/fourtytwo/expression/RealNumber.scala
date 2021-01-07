@@ -11,7 +11,10 @@ class RealNumber(private val num: Double) extends Operable {
 
   def changeSign: RealNumber = RealNumber(num * -1)
 
-  override def toString: String = num.toString
+  override def toString: String = {
+    if (num == num.round) num.round.toString
+    else num.toString
+  }
   ////////////////////////////////////////
   ////////////// PLUS METHODS ////////////
   ////////////////////////////////////////

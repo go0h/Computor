@@ -255,6 +255,4 @@ class ComputorTest extends AnyFunSuite {
     val res = compute(expr).asInstanceOf[RealNumber]
     assert(res == 3 * pow(-2, -3) + abs(-3))
   }
-
-
 }

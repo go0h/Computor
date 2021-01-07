@@ -15,12 +15,12 @@ class PolySolverTest extends AnyFunSuite {
       val x1 = (RealNumber(-b) + compDisc).asInstanceOf[Operable] / RealNumber(2 * a)
       val x2 = (RealNumber(-b) - compDisc).asInstanceOf[Operable] / RealNumber(2 * a)
 
-      s"""x1 = $x1
+      s"""x1 = ${x1}
          |x2 = $x2""".stripMargin
     }
     else if (discriminant == 0) {
       val res = (-b) / (2 * a)
-      s"x = ${if (res == 0) 0.0 else res}"
+      s"x = ${if (res.round == res) res.round else res}"
     }
     else {
       val x1 = ((-b) + sqrt(discriminant)) / (2 * a)
@@ -33,7 +33,7 @@ class PolySolverTest extends AnyFunSuite {
 
   def monomialSolve(a: Double, b: Double): String = {
     val res = (-b) / a
-    s"x = ${if (res == 0) 0.0 else res}"
+    s"x = ${if (res == res.round) res.round else res}"
   }
 
   def noVars(a: Double): String = {
@@ -60,8 +60,20 @@ class PolySolverTest extends AnyFunSuite {
     }
   }
 
+  test("Subject test - 3.1") {
+    assertThrows[EvaluateException] {
+      Polynomial("8X^0 - 6X^1 + 0X^2 - 5.6X^3 = 3X^0").solve
+    }
+  }
+
   test("Subject test - 4") {
     val expr = "5 + 4 * X + X^2 = X^2"
+    val res = Polynomial(expr).solve
+    assert(res.equals(monomialSolve(4, 5)))
+  }
+
+  test("Subject test - 4.1") {
+    val expr = "5 + 4X + X^2 = X^2"
     val res = Polynomial(expr).solve
     assert(res.equals(monomialSolve(4, 5)))
   }
@@ -93,7 +105,7 @@ class PolySolverTest extends AnyFunSuite {
   test("Binomial test - 3") {
     val expr = "23 * X^2 = 0"
     val res = Polynomial(expr).solve
-    assert(res.equals(binomialSolve(23, 0, 0)), binomialSolve(23, 0, 0))
+    assert(res.equals(binomialSolve(23, 0, 0)), res)
   }
 
   test("Binomial test - 4") {
