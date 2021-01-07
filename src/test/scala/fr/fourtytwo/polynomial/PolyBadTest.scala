@@ -85,7 +85,7 @@ class PolyBadTest extends AnyFunSuite{
   }
 
   test("With separator") {
-    assertThrows[EvaluateException] {
+    assertThrows[ParseException] {
       Polynomial("(5 * X^100) + 4 * , 25 = 0").solve
     }
   }

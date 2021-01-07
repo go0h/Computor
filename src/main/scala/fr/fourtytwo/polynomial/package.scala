@@ -1,13 +1,14 @@
 package fr.fourtytwo
 
 import scala.util.matching.Regex
-import fr.fourtytwo.token.{TokenType, Tokenizer}
+import fr.fourtytwo.token.TokenType._
+import fr.fourtytwo.token.Tokenizer
 
 
 package object polynomial {
 
-  val MATCHERS: Map[TokenType.Value, Regex] = TokenType.getMatchers
-    .filter(x => x._1 != TokenType.MATRIX)
+  val MATCHERS: Map[Value, Regex] = getMatchers
+    .filter(x => x._1 != MATRIX && x._1 != SEPARATOR)
 
   val SIMPLE_TOKENIZER: Tokenizer = Tokenizer(MATCHERS)
 

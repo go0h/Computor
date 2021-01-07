@@ -72,14 +72,7 @@ class ComplexNumber(re: Double, im: Double) extends Operable {
   ////////////////////////////////////////
   ////////////// POWER METHODS ///////////
   ////////////////////////////////////////
-  override def ^(other: RealNumber): Expression = {
-
-    val n = other.getNum
-    val fi = math.atan(im / re)
-    val zPow = pow(sqrt(re * re + im * im), n)
-
-    ComplexNumber(zPow * math.cos(n * fi), zPow * math.sin(n * fi)).evaluate
-  }
+  override def ^(other: RealNumber): Expression = throwException("^", other)
 
 
   def compare(other: Operable): Int = {

@@ -249,19 +249,6 @@ class ComplexTest extends AnyFunSuite {
   ////////////////////////////////////////
   ///////////// POWER METHODS ////////////
   ////////////////////////////////////////
-  test("ComplexNumber ^ RealNumber") {
-    val res = ComplexNumber(1, sqrt(3)) ^ RealNumber(3)
-    assert(res.isInstanceOf[RealNumber])
-    assert(res.asInstanceOf[RealNumber].getNum.ceil == -8)
-  }
-
-  test("ComplexNumber ^ RealNumber - 1") {
-    val res = ComplexNumber(4, 3.5) ^ RealNumber(5)
-    assert(res.isInstanceOf[ComplexNumber])
-    assert(res.asInstanceOf[ComplexNumber]
-      .toString.equals("-3814.7500000000005 - 1854.7812500000007i"), res)
-  }
-
   test("ComplexNumber ^ Variable") {
     val res = ComplexNumber(2, 4) ^ Variable("X")
     assert(res.isInstanceOf[Operator])
