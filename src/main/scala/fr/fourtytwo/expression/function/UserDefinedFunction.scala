@@ -1,7 +1,8 @@
 package fr.fourtytwo.expression.function
 
-import fr.fourtytwo.exception.{EvaluateException, ParseException}
+import fr.fourtytwo.exception.EvaluateException
 import fr.fourtytwo.expression.Expression
+
 
 class UserDefinedFunction(name: String, varNames: Array[String], expr: Expression)
   extends Function(name) {

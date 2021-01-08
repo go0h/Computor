@@ -1,6 +1,6 @@
 package fr.fourtytwo.computor
 
-import java.io.{BufferedReader, ByteArrayInputStream, ByteArrayOutputStream, PrintStream, StringReader}
+import java.io.{BufferedReader, ByteArrayOutputStream, PrintStream, StringReader}
 import org.scalatest.funsuite.AnyFunSuite
 
 
@@ -204,6 +204,79 @@ class ComputorRunTest extends AnyFunSuite {
          |18
          |36
          |289.3333333333333
+         |""".stripMargin
+
+    val stream = new ByteArrayOutputStream()
+    createComputer(expr9, stream)
+    assert(stream.toString.equals(res8), stream.toString)
+
+    stream.close()
+  }
+
+  test("Imaginary in power - 1") {
+
+    val expr9: String =
+      s"""a = 3*(i^-3)  + 3
+         |a = 3*(i^-2) + 3
+         |a = 3*(i^-1) + 3
+         |a = 3*i^0 + 3
+         |a = 3*i^1 + 3
+         |a = 3*i^2 + 3
+         |a = 3*i^3 + 3
+         |a = 3*i^4 + 3
+         |a = 3*i^5 + 3
+         |a = 3*i^6 + 3
+         |a = 3*i^7 + 3
+         |""".stripMargin
+
+    val res8: String =
+      s"""3 + 3i
+         |0
+         |3 - 3i
+         |6
+         |3 + 3i
+         |0
+         |3 - 3i
+         |6
+         |3 + 3i
+         |0
+         |3 - 3i
+         |""".stripMargin
+
+    val stream = new ByteArrayOutputStream()
+    createComputer(expr9, stream)
+    assert(stream.toString.equals(res8), stream.toString)
+    stream.close()
+  }
+
+  test("Imaginary in power - 2") {
+
+    val expr9: String =
+      s"""a = 3 + 3*(i^-3)
+         |a = 3 + 3*(i^-2)
+         |a = 3 + 3*(i^-1)
+         |a = 3 + 3*i^0
+         |a = 3 + 3*i^1
+         |a = 3 + 3*i^2
+         |a = 3 + 3*i^3
+         |a = 3 + 3*i^4
+         |a = 3 + 3*i^5
+         |a = 3 + 3*i^6
+         |a = 3 + 3*i^7
+         |""".stripMargin
+
+    val res8: String =
+      s"""3 + 3i
+         |0
+         |3 - 3i
+         |6
+         |3 + 3i
+         |0
+         |3 - 3i
+         |6
+         |3 + 3i
+         |0
+         |3 - 3i
          |""".stripMargin
 
     val stream = new ByteArrayOutputStream()

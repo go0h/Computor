@@ -3,7 +3,8 @@ package fr.fourtytwo.expression.function
 import fr.fourtytwo.exception.EvaluateException
 import fr.fourtytwo.expression.{Expression, RealNumber}
 
-class Function1 private[expression](name: String, func: Double => Double)
+
+class Function1 private[expression](name: String, func: Expression => Expression)
   extends Function(name) {
 
   def apply(args: Expression*): Expression = {
@@ -16,14 +17,16 @@ class Function1 private[expression](name: String, func: Double => Double)
     if (!arg.isInstanceOf[RealNumber])
       throw new EvaluateException(s"Wrong argument in function '$name' need 'RealNumber'," +
         s" but have '${arg.getType}'")
-    RealNumber(func(arg.asInstanceOf[RealNumber].getNum))
+    func(arg)
   }
 
    def numVars: Int = 1
+
+  override def toString: String = s"$name(a) = math.$name(a)"
 }
 
 object Function1 {
-  private[expression] def apply(name: String, func: Double => Double): Function1 = {
+  private[expression] def apply(name: String, func: Expression => Expression): Function1 = {
     new Function1(name, func)
   }
 }

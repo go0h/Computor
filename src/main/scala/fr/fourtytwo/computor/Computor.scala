@@ -1,30 +1,29 @@
 package fr.fourtytwo.computor
 
-import fr.fourtytwo.computor.Computor.basicCheck
-
-import scala.io.{Source, StdIn}
 import scala.collection.mutable.{ArrayBuffer, Map => MMap, Stack => ScalaStack}
-import fr.fourtytwo.exception.{EvaluateException, ParseException}
-import fr.fourtytwo.expression._
+import scala.io.Source
+import java.io.{BufferedReader, PrintStream}
+import fr.fourtytwo.exception._
 import fr.fourtytwo.expression.Operator._
+import fr.fourtytwo.expression._
 import fr.fourtytwo.expression.function._
 import fr.fourtytwo.polynomial.Polynomial
 import fr.fourtytwo.token.Token
 import fr.fourtytwo.token.TokenType._
 
-import java.io.{BufferedReader, PrintStream}
 
-// TODO ТЕСТЫ
 class Computor {
 
   var infixTokens: Array[Token] = _
   var tokens: Array[Token] = _
 
-  val vars: MMap[String, Expression] = MMap[String, Expression]()
+  val vars: MMap[String, Expression] = MMap[String, Expression]() ++ getPredefVariables
   val funcs: MMap[String, Function] = MMap[String, Function]() ++ getPredefFunctions
 
   /* for tests */
   var out: PrintStream = System.out
+
+  val history: ArrayBuffer[String] = ArrayBuffer[String]()
 
   def this(infix: Array[Token]) = {
     this()
@@ -43,12 +42,12 @@ class Computor {
     while (line != null) {
 
       try {
-        if (line.equals("q") || line.equals("quit")) {
-          System.exit(0)
+        if (line.isEmpty || line.startsWith("/")) {
+          options(line)
         }
         else {
-          basicCheck(line)
-          line match {
+          Computor.basicCheck(line)
+          line.replaceAll("//s+", " ") match {
             case VAR_ASSIGN_R(varName, _, expr) => variableAssignment(varName, expr)
             case VAR_COMP_R(varName, _) => variableComputation(varName)
             case FUNC_ASSIGN_R(func, _, expr) => functionAssignment(func, expr)
@@ -64,6 +63,8 @@ class Computor {
         case ex: Exception => out.println(s"${ex.getClass.getName} ${ex.getMessage}")
       }
       line = in.readLine()
+      if (history.length > 5)
+        history.remove(0)
     }
   }
 
@@ -162,6 +163,7 @@ class Computor {
     vars(varName.trim.toLowerCase) = res
 
     out.println(res)
+    history.append(s"${varName.trim} = ${expression.trim}")
   }
 
 
@@ -172,6 +174,7 @@ class Computor {
     val name = varName.trim.toLowerCase
     val res = vars.getOrElse(name, throw new EvaluateException(s"Unknown variable '$varName'"))
     out.println(res)
+    history.append(s"${varName.trim} = ?")
   }
 
   def functionAssignment(funcWithParams: String, expression: String): Unit = {
@@ -201,10 +204,12 @@ class Computor {
     funcs(funcName.toLowerCase) = func
 
     out.println(func.getExpr)
+    history.append(s"${funcWithParams.trim} = ${expression.trim}")
   }
 
   def functionComputation(funcWithParams: String): Unit = {
     out.println(setFunction(funcWithParams).evaluate)
+    history.append(s"${funcWithParams.trim} = ?")
   }
 
   def polynomialComputation(funcWithParams: String, expr: String): Unit = {
@@ -245,6 +250,7 @@ class Computor {
     val newExpr = s"${funcUDF.getExpr.toStringWithOrder} + ${right.changeSign} = 0"
 
     out.println(Polynomial(newExpr).solve)
+    history.append(s"${funcWithParams.trim} = ${expr.trim}")
   }
 
   def commonComputation(expression: String): Unit = {
@@ -256,6 +262,7 @@ class Computor {
     }
 
     out.println(res.evaluate)
+    history.append(s"${expression.trim} = ?")
   }
 
 
@@ -337,6 +344,19 @@ class Computor {
     }
   }
 
+
+  private def options(line: String): Unit = {
+
+    line match {
+      case "" => println()
+      case "/q" | "/quit" => System.exit(0)
+      case "/h" | "/help" => println(HELP)
+      case "/hist" |"/history" => println(history.mkString("\n"))
+      case "/v" | "/vars" => println(vars.map(x => s"${x._1}: ${x._2.getType} = ${x._2}").mkString("\n"))
+      case "/f" | "/funcs" => println(funcs.map(x => s"${x._2}").mkString("\n"))
+      case _ => throw new ParseException(s"Can't recognize command $line")
+    }
+  }
 }
 
 object Computor {
@@ -357,6 +377,10 @@ object Computor {
 
     if (right.trim.isEmpty)
       throw new ParseException(s"Right expression is empty")
+  }
 
+  def main(args: Array[String]): Unit = {
+    val computor = new Computor
+    computor.run()
   }
 }

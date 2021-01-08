@@ -3,6 +3,7 @@ package fr.fourtytwo
 import scala.util.matching.Regex
 import fr.fourtytwo.token.{TokenType, Tokenizer}
 
+
 package object computor {
 
   val MATCHERS: Map[TokenType.Value, Regex] = TokenType.getMatchers
@@ -19,5 +20,12 @@ package object computor {
 
 
   val COMMON_COMP: Regex = s"(.*[^?=])([=]$sp[?]$sp)".r
+
+  val HELP: String =
+    s"""- /h or /help for print help
+       |- /q or /quit for exit from program
+       |- /history for print program history
+       |- /v or /vars print all variables
+       |- /f or /funcs print all functions""".stripMargin
 
 }

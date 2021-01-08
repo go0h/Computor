@@ -2,10 +2,11 @@ package fr.fourtytwo.polynomial
 
 import scala.sys.exit
 import java.util.logging.{Level, Logger}
-import fr.fourtytwo.exception.{EvaluateException, ParseException}
-import fr.fourtytwo.math._
+import fr.fourtytwo.exception._
 import fr.fourtytwo.expression._
+import fr.fourtytwo.math._
 import fr.fourtytwo.utils.ComputorLogger
+
 
 class Polynomial(expr: String, debug: Boolean = false) {
 

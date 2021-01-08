@@ -69,11 +69,11 @@ object Operator {
   def priority: String => Int = {
     case "(" | ")" => 1
     case "-" | "+" => 2
-    case "/" | "*" | "%" => 3
+    case "/" | "*" | "%" | "**" => 3
     case "^" => 4
-    case "--" => 5 //UNARY MINUS
+    case "--" => 5
   }
 
-  def leftAssoc(op: String): Boolean = "()-+/*".contains(op)
+  def leftAssoc(op: String): Boolean = "()-+/**".contains(op)
 
 }

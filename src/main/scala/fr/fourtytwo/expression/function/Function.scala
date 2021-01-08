@@ -2,6 +2,7 @@ package fr.fourtytwo.expression.function
 
 import fr.fourtytwo.expression.Expression
 
+
 abstract class Function(name: String) extends Expression {
 
   def apply(args: Expression*): Expression

@@ -4,6 +4,7 @@ import scala.collection.mutable.ArrayBuffer
 import fr.fourtytwo.exception.{EvaluateException, ParseException}
 import fr.fourtytwo.expression.Matrix.validateMatrix
 
+
 class Matrix(matrix: Array[Array[RealNumber]]) extends Operable {
 
   def this(expr: String) = {

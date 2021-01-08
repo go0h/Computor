@@ -1,5 +1,7 @@
 package fr.fourtytwo.expression
 
+import fr.fourtytwo.exception.EvaluateException
+
 
 class Variable extends Operable {
 
@@ -135,9 +137,21 @@ class Variable extends Operable {
   ////////////////////////////////////////
   ///////////// POWER METHOD /////////////
   ////////////////////////////////////////
+  // i^4n = 1 i^(4n + 1) = i  i^(4n + 2) = -1   i^(4n + 3) = -i
   override def ^(other: RealNumber): Expression = {
     if (other == 0)
       return RealNumber(1)
+    if (name.equalsIgnoreCase("i")) {
+      if (other.getNum != other.getNum.round)
+        throw new EvaluateException("Can't power to non-Integer number")
+      val pow = other.getNum.toInt
+      pow % 4 match {
+        case 0 => return RealNumber(1 * sign)
+        case 1 | -3 => return this
+        case 2 | -2 => return RealNumber(1 * sign).changeSign
+        case 3 | -1 => return this.changeSign
+      }
+    }
     Indeterminate(RealNumber(1), this, other)
   }
 

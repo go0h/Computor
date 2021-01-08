@@ -1,7 +1,7 @@
 package fr.fourtytwo.expression
 
-import fr.fourtytwo.math.pow
 import fr.fourtytwo.exception._
+import fr.fourtytwo.math.pow
 
 
 case class Indeterminate(constant: RealNumber,
