@@ -2,9 +2,6 @@
 
 `bc` like calculator, and Polynomial equations of degrees less than or equal to 2
 
-### Make
-```bash make.sh```
-
 ### Usage
 ```
 Usage: java -jar ./ComputorV2
