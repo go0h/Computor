@@ -123,10 +123,19 @@ trait Operable extends Expression with Ordered[Operable] {
 
   def **(other: Expression): Expression = {
 
-    if (!isInstanceOf[Matrix] || !other.isInstanceOf[Matrix])
-      throwException("**", other)
-
-    asInstanceOf[Matrix] ** other.asInstanceOf[Matrix]
+    this match {
+      case m1: Matrix =>
+        other match {
+          case m2: Matrix => m1 ** m2
+          case _: Variable => Operator(this, "**", other)
+        }
+      case _: Variable =>
+        other match {
+          case _: Matrix => Operator(this, "**", other)
+          case _: Variable => Operator(this, "**", other)
+        }
+      case _ => throwException("**", other)
+    }
   }
 
   override def compare(other: Operable): Int

@@ -31,6 +31,8 @@ class UserDefinedFunction(name: String, varNames: Array[String], expr: Expressio
 
   override def numVars: Int = varNames.length
 
+  override def distinctVars: Set[String] = expr.distinctVars
+
   override def toString: String = s"$name(${varNames.mkString(", ")}) = $expr"
 }
 

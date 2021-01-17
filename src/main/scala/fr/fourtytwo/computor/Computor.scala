@@ -31,7 +31,7 @@ class Computor {
     tokens = convertToRPN(infixTokens)
   }
 
-  override def toString: String = infixTokens.map(x => x.expr).mkString(" ")
+  override def toString: String = infixTokens.map(x => x.expr).mkString("")
 
   def run(): Unit = run(new BufferedReader(Source.stdin.reader()), System.out)
 
@@ -60,6 +60,7 @@ class Computor {
       } catch {
         case ex: ParseException => out.println(ex.getMessage)
         case ex: EvaluateException => out.println(ex.getMessage)
+        case ex: ArithmeticException => out.println(ex.getMessage)
         case ex: Exception => out.println(s"${ex.getClass.getName} ${ex.getMessage}")
       }
       line = in.readLine()
@@ -88,16 +89,20 @@ class Computor {
         case FUNCTION => stack.push(setFunction(tokens(i).expr))
         case OPERATION =>
             if (stack.length < 2)
-              throw new EvaluateException(s"Wrong stack length: $toString")
+              throw new EvaluateException(s"Wrong expression: $toString")
             val first = stack.pop()
             stack.push(Operator(stack.pop(), tokens(i).expr, first).evaluate)
-        case UNARY => stack.push(stack.pop().changeSign)
+        case UNARY => {
+          if (stack.isEmpty)
+            throw new EvaluateException(s"Wrong expression: $toString")
+          stack.push(stack.pop().changeSign)
+        }
         case _ => throw new EvaluateException(s"Can't solve token: ${tokens(i).expr}")
       }
       i += 1
     }
     if (stack.length != 1)
-      throw new EvaluateException(s"Wrong stack length in the end: $toString")
+      throw new EvaluateException(s"Wrong expression: $toString")
     stack.pop()
   }
 
@@ -154,6 +159,9 @@ class Computor {
 
   def variableAssignment(varName: String, expression: String): Unit = {
 
+    if (varName.trim.equalsIgnoreCase("i"))
+      throw new EvaluateException(s"Can't assign variable 'i', because it reserved for ComplexNumber")
+
     var res = createExpression(expression)
     if (res.countVars != 0) {
       res = serVariablesToExpr(res, res.distinctVars.toArray)
@@ -172,7 +180,7 @@ class Computor {
   ////////////////////////////////////////
   def variableComputation(varName: String): Unit = {
     val name = varName.trim.toLowerCase
-    val res = vars.getOrElse(name, throw new EvaluateException(s"Unknown variable '$varName'"))
+    val res = vars.getOrElse(name, throw new EvaluateException(s"Unknown variable '${varName.trim}'"))
     out.println(res)
     history.append(s"${varName.trim} = ?")
   }
@@ -189,6 +197,7 @@ class Computor {
     val arguments = TOKENIZER.generateTokens(argString).filter(_.tType != SPACE)
 
     val funcArgs = arguments.filter(x => x.tType != SEPARATOR)
+      .filter(!_.expr.equalsIgnoreCase("i"))
       .map(_.expr).distinct
 
     expr = serVariablesToExpr(expr, (expr.distinctVars -- funcArgs).toArray)
@@ -207,9 +216,30 @@ class Computor {
     history.append(s"${funcWithParams.trim} = ${expression.trim}")
   }
 
-  def functionComputation(funcWithParams: String): Unit = {
-    out.println(setFunction(funcWithParams).evaluate)
-    history.append(s"${funcWithParams.trim} = ?")
+  def functionComputation(expr: String): Unit = {
+
+    val funcName = expr.substring(0, expr.indexOf("(")).trim
+    val func = funcs.getOrElse(funcName.toLowerCase, throw new EvaluateException(s"Unknown function '$funcName'"))
+
+    val argString = expr.substring(expr.indexOf("(") + 1, expr.lastIndexOf(")"))
+    val arguments = TOKENIZER.generateTokens(argString).filter(_.tType != SPACE)
+
+    validateFuncParams(funcName, arguments, func.numVars)
+
+    history.append(s"${expr.trim} = ?")
+
+    for (arg <- arguments) {
+      if (arg.expr.equalsIgnoreCase("i"))
+        throw new EvaluateException(s"You can't pass variable 'i' into function, " +
+          "because it reserved for ComplexNumber")
+
+      if (arg.tType == LITERAL && !vars.contains(arg.expr)
+        && func.distinctVars.contains(arg.expr)) {
+        out.println(func)
+        return
+      }
+    }
+    out.println(setFunction(expr).evaluate)
   }
 
   def polynomialComputation(funcWithParams: String, expr: String): Unit = {
@@ -380,6 +410,12 @@ object Computor {
   }
 
   def main(args: Array[String]): Unit = {
+
+    if (args.nonEmpty) {
+      println("Usage ./ComputorV2.jar")
+      System.exit(0)
+    }
+
     val computor = new Computor
     computor.run()
   }

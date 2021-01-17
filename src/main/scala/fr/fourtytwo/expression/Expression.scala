@@ -12,7 +12,10 @@ trait Expression {
     this match {
       case operator : Operator =>
         operator.getLeft.distinctVars ++ operator.getRight.distinctVars
-      case v: Variable => Set(v.getName.toLowerCase)
+      case v: Variable => {
+        if (v.getName.equals("i")) Set()
+        else Set(v.getName.toLowerCase)
+      }
       case i: Indeterminate => Set(i.variable.getName.toLowerCase)
       case _ => Set()
     }

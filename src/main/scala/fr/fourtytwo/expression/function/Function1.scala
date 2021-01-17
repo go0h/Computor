@@ -22,6 +22,8 @@ class Function1 private[expression](name: String, func: Expression => Expression
 
    def numVars: Int = 1
 
+  override def distinctVars: Set[String] = Set("a")
+
   override def toString: String = s"$name(a) = math.$name(a)"
 }
 

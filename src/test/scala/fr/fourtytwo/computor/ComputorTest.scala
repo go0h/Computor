@@ -195,6 +195,12 @@ class ComputorTest extends AnyFunSuite {
     assertThrows[EvaluateException] {
       getResult("96--(-30)")
     }
+    assertThrows[EvaluateException] {
+      getResult("--30")
+    }
+    assertThrows[EvaluateException] {
+      getResult("--(-30)")
+    }
   }
 
   test("Plus-minus in a row") {

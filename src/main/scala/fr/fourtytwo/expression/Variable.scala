@@ -137,7 +137,6 @@ class Variable extends Operable {
   ////////////////////////////////////////
   ///////////// POWER METHOD /////////////
   ////////////////////////////////////////
-  // i^4n = 1 i^(4n + 1) = i  i^(4n + 2) = -1   i^(4n + 3) = -i
   override def ^(other: RealNumber): Expression = {
     if (other == 0)
       return RealNumber(1)

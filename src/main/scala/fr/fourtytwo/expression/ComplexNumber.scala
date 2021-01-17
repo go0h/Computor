@@ -4,7 +4,15 @@ import fr.fourtytwo.math._
 
 class ComplexNumber(re: Double, im: Double) extends Operable {
 
-  def evaluate: Expression = if (abs(im) > 0.000001) this else RealNumber(re)
+  def evaluate: Expression = {
+    if (abs(im) > 0.000001) {
+      if (abs(re) > 0.000001) this
+      else ComplexNumber(0, im)
+    } else {
+      RealNumber(re)
+    }
+  }
+
   def changeSign: Expression = ComplexNumber(-re, -im)
 
   def simplify: Expression = if (im == 0) RealNumber(re) else this

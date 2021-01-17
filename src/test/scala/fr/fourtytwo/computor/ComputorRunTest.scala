@@ -6,7 +6,6 @@ import org.scalatest.funsuite.AnyFunSuite
 
 class ComputorRunTest extends AnyFunSuite {
 
-
   def createComputer(expr: String, stream: ByteArrayOutputStream): Unit = {
 
     val computor = new Computor()
@@ -265,7 +264,7 @@ class ComputorRunTest extends AnyFunSuite {
          |a = 3 + 3*i^7
          |""".stripMargin
 
-    val res8: String =
+    val res9: String =
       s"""3 + 3i
          |0
          |3 - 3i
@@ -281,9 +280,241 @@ class ComputorRunTest extends AnyFunSuite {
 
     val stream = new ByteArrayOutputStream()
     createComputer(expr9, stream)
-    assert(stream.toString.equals(res8), stream.toString)
+    assert(stream.toString.equals(res9), stream.toString)
 
     stream.close()
   }
 
+  test("Matrix multiplication - 1") {
+
+    val expr: String =
+      s"""ma = [[1,1];[1,1]]
+         |mb = [[2,2];[2,2]]
+         |ma * mb = ?
+         |""".stripMargin
+
+    val res: String =
+      s"""[ 1, 1 ]
+         |[ 1, 1 ]
+         |[ 2, 2 ]
+         |[ 2, 2 ]
+         |[ 2, 2 ]
+         |[ 2, 2 ]
+         |""".stripMargin
+
+    val stream = new ByteArrayOutputStream()
+    createComputer(expr, stream)
+    assert(stream.toString.equals(res), stream.toString)
+
+    stream.close()
+  }
+
+  test("Matrix multiplication - 2") {
+
+    val expr: String =
+      s"""ma = [[1,1];[1,1]]
+         |mb = [[2,2];[2,2]]
+         |ma ** mb = ?
+         |""".stripMargin
+
+    val res: String =
+      s"""[ 1, 1 ]
+         |[ 1, 1 ]
+         |[ 2, 2 ]
+         |[ 2, 2 ]
+         |[ 4, 4 ]
+         |[ 4, 4 ]
+         |""".stripMargin
+
+    val stream = new ByteArrayOutputStream()
+    createComputer(expr, stream)
+    assert(stream.toString.equals(res), stream.toString)
+
+    stream.close()
+  }
+
+
+  test("Function printing - 1") {
+
+    val expr: String =
+      s"""x = 2
+         |y = x * [[4,2]]
+         |f(z) = z * y
+         |f(z) = ?
+         |""".stripMargin
+
+    val res: String =
+      s"""2
+         |[ 8, 4 ]
+         |z * [ 8, 4 ]
+         |f(z) = z * [ 8, 4 ]
+         |""".stripMargin
+
+    val stream = new ByteArrayOutputStream()
+    createComputer(expr, stream)
+    assert(stream.toString.equals(res), stream.toString)
+
+    stream.close()
+  }
+
+  test("Bad expression - 1") {
+
+    val expr: String = "x == 2"
+    val res: String = s"Expression $expr has 2 equal sign\n"
+
+    val stream = new ByteArrayOutputStream()
+    createComputer(expr, stream)
+    assert(stream.toString.equals(res), stream.toString)
+    stream.close()
+  }
+
+  test("Bad expression - 2") {
+
+    val expr: String = "x = 23edd23-+-+"
+    val res: String = s"Wrong expression:  23*edd23-+-+\n"
+
+    val stream = new ByteArrayOutputStream()
+    createComputer(expr, stream)
+    assert(stream.toString.equals(res), stream.toString)
+    stream.close()
+  }
+
+  test("Bad expression - 3") {
+
+    val expr: String =
+      """= 2
+        |=
+        |f(x = 2
+        |3 = 4
+        |x = [[4,2]
+        |x = --2
+        |""".stripMargin
+
+    val res: String =
+      s"""Left expression is empty
+         |Left expression is empty
+         |Can't recognize expression type f(x = 2
+         |Can't recognize expression type 3 = 4
+         |Matrix [[4,2] not well formatted
+         |Wrong expression:  --2
+         |""".stripMargin
+
+    val stream = new ByteArrayOutputStream()
+    createComputer(expr, stream)
+    assert(stream.toString.equals(res), stream.toString)
+    stream.close()
+  }
+
+  test("Bad expression - 4") {
+
+    val expr: String =
+      """f(x) = x * 2
+        |t = f(x)
+        |t = ?
+        |i = 2
+        |""".stripMargin
+
+    val res: String =
+      s"""2 * x
+         |Wrong argument 'x' in function 'f'
+         |Unknown variable 't'
+         |Can't assign variable 'i', because it reserved for ComplexNumber
+         |""".stripMargin
+
+    val stream = new ByteArrayOutputStream()
+    createComputer(expr, stream)
+    assert(stream.toString.equals(res), stream.toString)
+    stream.close()
+  }
+
+  test("Correction - 1") {
+
+    val expr: String =
+      """2 + 2 = ?
+        |3 * 4 =?
+        |X = 2
+        |x + 2 = ?
+        |1.5 + 1 = ?
+        |2 / 0 = ?
+        |""".stripMargin
+
+    val res: String =
+      s"""4
+         |12
+         |2
+         |4
+         |2.5
+         |Division by zero
+         |""".stripMargin
+
+    val stream = new ByteArrayOutputStream()
+    createComputer(expr, stream)
+    assert(stream.toString.equals(res), stream.toString)
+    stream.close()
+  }
+
+  test("Correction - 2") {
+
+    val expr: String =
+      """x = 2 * i
+        |x ^ 2 = ?
+        |x ^ 3 = ?
+        |A = [[2,3];[3,4]]
+        |B = [[1,0];[0,1]]
+        |A ** B = ?
+        |f(x) = x + 2
+        |p = 4
+        |f(p) = ?
+        |""".stripMargin
+
+    val res: String =
+      s"""0 + 2i
+         |-4
+         |0 - 8i
+         |[ 2, 3 ]
+         |[ 3, 4 ]
+         |[ 1, 0 ]
+         |[ 0, 1 ]
+         |[ 2, 3 ]
+         |[ 3, 4 ]
+         |x + 2
+         |4
+         |6
+         |""".stripMargin
+
+    val stream = new ByteArrayOutputStream()
+    createComputer(expr, stream)
+    assert(stream.toString.equals(res), stream.toString)
+    stream.close()
+  }
+
+  test("Correction - 3") {
+
+    val expr: String =
+      """4 - 3 - ( 2 * 3 ) ^ 2 * ( 2 - 4 ) + 4 = ?
+        |f(x) = 2*(x + 3*(x - 4))
+        |p = 2
+        |f(3) - f(p) + 2= ?
+        |f(x) = 2 *x * i
+        |f(2) = ?
+        |f(i) = ?
+        |f(abs) =?
+        |""".stripMargin
+
+    val res: String =
+      s"""77
+         |2 * (x + 3 * (x - 4))
+         |2
+         |10
+         |2 * x * i
+         |0 + 4i
+         |You can't pass variable 'i' into function, because it reserved for ComplexNumber
+         |Wrong argument 'abs' in function 'f'
+         |""".stripMargin
+
+    val stream = new ByteArrayOutputStream()
+    createComputer(expr, stream)
+    assert(stream.toString.equals(res), stream.toString)
+    stream.close()
+  }
 }
